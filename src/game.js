@@ -224,7 +224,7 @@ const NODES = {
   ]},
   merchant_help:{bg:"forest", show:["merchant"], fx:{xp:30, gold:10, flag:"discount"}, lines:["끄응! 수레바퀴가 진흙에서 쑥 빠져나온다.", ["merchant","허허, 장사꾼은 빚을 오래 두지 않소. 수고비요. 그리고 물건값은 깎아 드리리다!"]], next:"shop", nextLabel:"물건을 둘러본다"},
   merchant_fail:{bg:"forest", show:["merchant"], lines:["수레는 꿈쩍도 하지 않는다. 오히려 진흙이 튀어 온몸이 엉망이 됐다.", ["merchant","허허, 마음만은 고맙소. 구경이나 하고 가시오."]], next:"shop", nextLabel:"물건을 둘러본다"},
-  shop:{bg:"forest", show:["merchant"], lines:[["merchant","자자, 골라 보시오! 잿빛 탑 근처에선 구할 수 없는 물건들이오."]], again:[["merchant","또 뭐 필요한 거 있소?"]], prompt:"모로의 상점", choices:[
+  shop:{bg:"forest", show:["merchant"], noVote:true, lines:[["merchant","자자, 골라 보시오! 잿빛 탑 근처에선 구할 수 없는 물건들이오."]], again:[["merchant","또 뭐 필요한 거 있소?"]], prompt:"모로의 상점", choices:[
     {t:"go", label:"회복 물약", cost:10, to:"shop_potion"},
     {t:"go", label:"행운의 부적 (행운 토큰 +1)", cost:20, to:"shop_luck"},
     {t:"go", label:"[고급] 질긴 가죽 갑옷 (방어도 +1)", cost:24, to:"shop_leather", hide:"boughtLeather"},
@@ -271,7 +271,7 @@ const NODES = {
   leech_burn:{bg:"swamp", fx:{xp:50}, art:{bg:"swamp", u:[["leech",190],["leech",210]], o:"fire", c:[100,50,200,112], cap:"물 위로 번지는 불길"}, lines:["화르륵! 불길이 물 위로 번지자 거머리들이 쉭쉭 소리를 내며 물러난다."], next:"witch", nextLabel:"오두막으로"},
   leech_fight:{bg:"swamp", show:["leech","leech","leech"], lines:["기름이 젖어서 불이 붙지 않는다! 거머리들이 달려든다."], choices:[{t:"battle", label:"싸운다", foe:"leeches", win:"leech_win"}]},
   leech_win:{bg:"swamp", fx:{gold:6}, lines:["마지막 거머리를 떼어내고 숨을 고른다. 오두막의 등불이 일행을 부르는 것 같다."], next:"witch", nextLabel:"오두막으로"},
-  witch:{bg:"swamp", show:["witch"], art:{bg:"swamp", u:[["witch",250]], o:"cauldron", c:[150,50,200,112], cap:"늪의 마녀 그레타"}, lines:[
+  witch:{bg:"swamp", show:["witch"], noVote:true, art:{bg:"swamp", u:[["witch",250]], o:"cauldron", c:[150,50,200,112], cap:"늪의 마녀 그레타"}, lines:[
     "오두막 문이 끼익 열리고, 녹색 두건을 쓴 노파가 지팡이를 짚고 나온다.",
     ["witch","오호호, 오르나가 보낸 아이들이로구나. 그 노친네랑은 오래된 사이지."],
     ["witch","바르쿠스를 잡으러 간다고? 이 늪의 마녀 그레타가 도와줄 수도 있지. 물론... 공짜는 없단다."]
@@ -427,7 +427,7 @@ const NODES = {
   gameover:{lines:["일행이 모두 쓰러졌다.", "눈앞이 재처럼 흐려진다..."], choices:[{t:"retry", label:"이 전투 다시 하기"}, {t:"restart", label:"처음부터"}]}
 };
 NODES.gate_retry.choices = NODES.gate.choices.filter(c => c.to !== "gate_wrong").concat([{t:"go", label:"「그림자」라고 다시 답한다", to:"gate_wrong"}]);
-const SPEAKERS = {narr:{name:"해설", spr:"book"}, sys:{name:"알림", spr:"coin"}, orna:{name:"오르나", spr:"orna"}, troll:{name:"그룸", spr:"troll"},
+const SPEAKERS = {narr:{name:"DM", spr:"book"}, sys:{name:"알림", spr:"coin"}, orna:{name:"오르나", spr:"orna"}, troll:{name:"그룸", spr:"troll"},
   goblin:{name:"고블린 사제", spr:"goblin"}, drake:{name:"잿날개 바르쿠스", spr:"drake"}, knight:{name:"기사 엘다인", spr:"knight"},
   fairy:{name:"요정 피피", spr:"fairy"}, merchant:{name:"떠돌이 상인 모로", spr:"merchant"}, witch:{name:"늪의 마녀 그레타", spr:"witch"},
   dwarf:{name:"드워프 광부 브론", spr:"dwarf"}, gargoyle:{name:"돌 가고일", spr:"gargoyle"}, shadow:{name:"그림자 분신", spr:"shadow"}};

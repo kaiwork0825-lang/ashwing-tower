@@ -520,7 +520,7 @@ button:focus-visible,input:focus-visible{outline:3px dashed var(--gold); outline
     <div class="toast win" id="toast" hidden></div>
 
     <div class="win" id="dlgBox" tabindex="0" aria-label="대화창. 누르거나 스페이스로 다음">
-      <div class="nameplate win" id="speaker">해설</div>
+      <div class="nameplate win" id="speaker">DM</div>
       <div class="dlg-por"><canvas id="portrait" class="px"></canvas></div>
       <div class="dlg-main"><p class="dlg-text" id="dlgText" aria-live="polite"></p></div>
       <div class="choices" id="choices"></div>
@@ -638,7 +638,7 @@ button:focus-visible,input:focus-visible{outline:3px dashed var(--gold); outline
       <h2 id="howtoTitle">조작법</h2>
       <div class="howto-grid">
         <section><span class="n">STEP 1</span><h3>파티 만들기</h3><p>1~4명이 클래스를 고르고, 3D 주사위 네 개(4d6)를 직접 던져 능력치 여섯 개를 정합니다.</p></section>
-        <section><span class="n">STEP 2</span><h3>함께 듣고 정하기</h3><p>해설과 마법사 오르나가 이야기를 이끕니다. 선택지는 다 같이 상의해서 고르세요.</p></section>
+        <section><span class="n">STEP 2</span><h3>함께 듣고 정하기</h3><p>DM(던전 마스터)과 마법사 오르나가 이야기를 이끕니다. 선택지는 다 같이 상의해서 고르세요.</p></section>
         <section><span class="n">STEP 3</span><h3>주사위 던지기</h3><p>마우스를 누른 채 흔들어 섞고, 트레이 쪽으로 휙 던지세요. 너무 세게 던지면 주사위가 볼 밖으로 넘어가 장외 — 판정은 실패예요. 창 위쪽 숫자 띠에 몇 이상이면 성공인지 나와요.</p></section>
       </div>
       <div class="keys">
@@ -2740,7 +2740,7 @@ const NODES = {
   ]},
   merchant_help:{bg:"forest", show:["merchant"], fx:{xp:30, gold:10, flag:"discount"}, lines:["끄응! 수레바퀴가 진흙에서 쑥 빠져나온다.", ["merchant","허허, 장사꾼은 빚을 오래 두지 않소. 수고비요. 그리고 물건값은 깎아 드리리다!"]], next:"shop", nextLabel:"물건을 둘러본다"},
   merchant_fail:{bg:"forest", show:["merchant"], lines:["수레는 꿈쩍도 하지 않는다. 오히려 진흙이 튀어 온몸이 엉망이 됐다.", ["merchant","허허, 마음만은 고맙소. 구경이나 하고 가시오."]], next:"shop", nextLabel:"물건을 둘러본다"},
-  shop:{bg:"forest", show:["merchant"], lines:[["merchant","자자, 골라 보시오! 잿빛 탑 근처에선 구할 수 없는 물건들이오."]], again:[["merchant","또 뭐 필요한 거 있소?"]], prompt:"모로의 상점", choices:[
+  shop:{bg:"forest", show:["merchant"], noVote:true, lines:[["merchant","자자, 골라 보시오! 잿빛 탑 근처에선 구할 수 없는 물건들이오."]], again:[["merchant","또 뭐 필요한 거 있소?"]], prompt:"모로의 상점", choices:[
     {t:"go", label:"회복 물약", cost:10, to:"shop_potion"},
     {t:"go", label:"행운의 부적 (행운 토큰 +1)", cost:20, to:"shop_luck"},
     {t:"go", label:"[고급] 질긴 가죽 갑옷 (방어도 +1)", cost:24, to:"shop_leather", hide:"boughtLeather"},
@@ -2787,7 +2787,7 @@ const NODES = {
   leech_burn:{bg:"swamp", fx:{xp:50}, art:{bg:"swamp", u:[["leech",190],["leech",210]], o:"fire", c:[100,50,200,112], cap:"물 위로 번지는 불길"}, lines:["화르륵! 불길이 물 위로 번지자 거머리들이 쉭쉭 소리를 내며 물러난다."], next:"witch", nextLabel:"오두막으로"},
   leech_fight:{bg:"swamp", show:["leech","leech","leech"], lines:["기름이 젖어서 불이 붙지 않는다! 거머리들이 달려든다."], choices:[{t:"battle", label:"싸운다", foe:"leeches", win:"leech_win"}]},
   leech_win:{bg:"swamp", fx:{gold:6}, lines:["마지막 거머리를 떼어내고 숨을 고른다. 오두막의 등불이 일행을 부르는 것 같다."], next:"witch", nextLabel:"오두막으로"},
-  witch:{bg:"swamp", show:["witch"], art:{bg:"swamp", u:[["witch",250]], o:"cauldron", c:[150,50,200,112], cap:"늪의 마녀 그레타"}, lines:[
+  witch:{bg:"swamp", show:["witch"], noVote:true, art:{bg:"swamp", u:[["witch",250]], o:"cauldron", c:[150,50,200,112], cap:"늪의 마녀 그레타"}, lines:[
     "오두막 문이 끼익 열리고, 녹색 두건을 쓴 노파가 지팡이를 짚고 나온다.",
     ["witch","오호호, 오르나가 보낸 아이들이로구나. 그 노친네랑은 오래된 사이지."],
     ["witch","바르쿠스를 잡으러 간다고? 이 늪의 마녀 그레타가 도와줄 수도 있지. 물론... 공짜는 없단다."]
@@ -2943,7 +2943,7 @@ const NODES = {
   gameover:{lines:["일행이 모두 쓰러졌다.", "눈앞이 재처럼 흐려진다..."], choices:[{t:"retry", label:"이 전투 다시 하기"}, {t:"restart", label:"처음부터"}]}
 };
 NODES.gate_retry.choices = NODES.gate.choices.filter(c => c.to !== "gate_wrong").concat([{t:"go", label:"「그림자」라고 다시 답한다", to:"gate_wrong"}]);
-const SPEAKERS = {narr:{name:"해설", spr:"book"}, sys:{name:"알림", spr:"coin"}, orna:{name:"오르나", spr:"orna"}, troll:{name:"그룸", spr:"troll"},
+const SPEAKERS = {narr:{name:"DM", spr:"book"}, sys:{name:"알림", spr:"coin"}, orna:{name:"오르나", spr:"orna"}, troll:{name:"그룸", spr:"troll"},
   goblin:{name:"고블린 사제", spr:"goblin"}, drake:{name:"잿날개 바르쿠스", spr:"drake"}, knight:{name:"기사 엘다인", spr:"knight"},
   fairy:{name:"요정 피피", spr:"fairy"}, merchant:{name:"떠돌이 상인 모로", spr:"merchant"}, witch:{name:"늪의 마녀 그레타", spr:"witch"},
   dwarf:{name:"드워프 광부 브론", spr:"dwarf"}, gargoyle:{name:"돌 가고일", spr:"gargoyle"}, shadow:{name:"그림자 분신", spr:"shadow"}};
@@ -5176,15 +5176,18 @@ async function openRoom(code, host){
   if (!NET.p2p) return NET.api.join(roomName(code));
   return NET.api.join(roomName(code), {host});
 }
+// while hosting, keep the reload window open
+setInterval(() => { if (isHost() && NET.p2p && NET.code) try { localStorage.setItem("ashwing-hostcode", JSON.stringify({c:NET.code, t:Date.now()})); } catch (e){} }, 20000);
 async function netHost(){
   if (!NET.api || online()) return; const nick = readNick();
   let code = newCode();
   // public build: keep the same code across reloads so friends reconnect on their own
-  if (NET.p2p) try { const c = localStorage.getItem("ashwing-hostcode"); if (/^[A-Z0-9]{4}$/.test(c || "")) code = c; } catch (e){}
+  // a fresh random code every time — except when the host just reloaded mid-game (friends then reconnect to the same room)
+  if (NET.p2p) try { const o = JSON.parse(localStorage.getItem("ashwing-hostcode") || "null"); if (o && /^[A-Z0-9]{4}$/.test(o.c || "") && Date.now() - o.t < 120000) code = o.c; } catch (e){}
   setNetStatus("방을 여는 중…");
   try {
     let r; try { r = await openRoom(code, true); } catch (e){ if (!e || e.code !== "taken") throw e; code = newCode(); r = await openRoom(code, true); }
-    if (NET.p2p) try { localStorage.setItem("ashwing-hostcode", code); } catch (e){}
+    if (NET.p2p) try { localStorage.setItem("ashwing-hostcode", JSON.stringify({c:code, t:Date.now()})); } catch (e){}
     resetNet(); Object.assign(NET, {room:r, role:"host", code, nick});
     bindRoom(r); await r.presence({role:"host", nick, code});
     setNetStatus(""); renderNetPanel(); renderNetHud(); fullSoon(); sfx("good");
@@ -5204,7 +5207,8 @@ async function netJoin(){
   } catch (e){ netFail(e && e.code === "not_permitted" ? "이 화면에서는 온라인 방에 들어갈 수 없어요." : "방에 들어가지 못했어요. 잠시 후 다시 시도해 주세요."); }
 }
 async function netLeave(){
-  const r = NET.room, wasGuest = isGuest(); resetNet();
+  const r = NET.room, wasGuest = isGuest(); if (!wasGuest) try { localStorage.removeItem("ashwing-hostcode"); } catch (e){}
+  resetNet();
   if (r) try { await r.leave(); } catch (e){}
   ["#trayLayer", "#loot", "#inv", "#modal", "#cards", "#artWin"].forEach(s => $(s).hidden = true); tray.stop(); busy = false; vote = null;
   if (wasGuest){ S.setup = blankSetup(); S.party = []; S.battle = null; show("title"); }

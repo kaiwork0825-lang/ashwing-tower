@@ -317,15 +317,18 @@ async function openRoom(code, host){
   if (!NET.p2p) return NET.api.join(roomName(code));
   return NET.api.join(roomName(code), {host});
 }
+// while hosting, keep the reload window open
+setInterval(() => { if (isHost() && NET.p2p && NET.code) try { localStorage.setItem("ashwing-hostcode", JSON.stringify({c:NET.code, t:Date.now()})); } catch (e){} }, 20000);
 async function netHost(){
   if (!NET.api || online()) return; const nick = readNick();
   let code = newCode();
   // public build: keep the same code across reloads so friends reconnect on their own
-  if (NET.p2p) try { const c = localStorage.getItem("ashwing-hostcode"); if (/^[A-Z0-9]{4}$/.test(c || "")) code = c; } catch (e){}
+  // a fresh random code every time — except when the host just reloaded mid-game (friends then reconnect to the same room)
+  if (NET.p2p) try { const o = JSON.parse(localStorage.getItem("ashwing-hostcode") || "null"); if (o && /^[A-Z0-9]{4}$/.test(o.c || "") && Date.now() - o.t < 120000) code = o.c; } catch (e){}
   setNetStatus("방을 여는 중…");
   try {
     let r; try { r = await openRoom(code, true); } catch (e){ if (!e || e.code !== "taken") throw e; code = newCode(); r = await openRoom(code, true); }
-    if (NET.p2p) try { localStorage.setItem("ashwing-hostcode", code); } catch (e){}
+    if (NET.p2p) try { localStorage.setItem("ashwing-hostcode", JSON.stringify({c:code, t:Date.now()})); } catch (e){}
     resetNet(); Object.assign(NET, {room:r, role:"host", code, nick});
     bindRoom(r); await r.presence({role:"host", nick, code});
     setNetStatus(""); renderNetPanel(); renderNetHud(); fullSoon(); sfx("good");
@@ -345,7 +348,8 @@ async function netJoin(){
   } catch (e){ netFail(e && e.code === "not_permitted" ? "이 화면에서는 온라인 방에 들어갈 수 없어요." : "방에 들어가지 못했어요. 잠시 후 다시 시도해 주세요."); }
 }
 async function netLeave(){
-  const r = NET.room, wasGuest = isGuest(); resetNet();
+  const r = NET.room, wasGuest = isGuest(); if (!wasGuest) try { localStorage.removeItem("ashwing-hostcode"); } catch (e){}
+  resetNet();
   if (r) try { await r.leave(); } catch (e){}
   ["#trayLayer", "#loot", "#inv", "#modal", "#cards", "#artWin"].forEach(s => $(s).hidden = true); tray.stop(); busy = false; vote = null;
   if (wasGuest){ S.setup = blankSetup(); S.party = []; S.battle = null; show("title"); }
