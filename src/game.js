@@ -1260,7 +1260,7 @@ function renderGame(){
 
 /* ================= EVENTS ================= */
 document.addEventListener("click", e => {
-  Audio8.unlock();
+  Audio8.unlock(); $("#soundHint").hidden = true;
   const a = e.target.closest("[data-act]");
   if (!a){ if (e.target.closest("#dlgBox") && !e.target.closest("#choices")) advanceDialog(); return; }
   if (a.disabled) return;
@@ -1330,7 +1330,7 @@ document.addEventListener("dblclick", e => { const a = e.target.closest(".cell.i
 document.addEventListener("input", e => { if (!e.target.classList.contains("name")) return; const i = +e.target.dataset.i; if (!mine(i)) return; S.setup.heroes[i].name = e.target.value;
   if (isGuest()){ clearTimeout(NET.nmT); NET.nmT = setTimeout(() => sendInput("name", {i, v:e.target.value.slice(0, 8)}), 250); } else netDirty(); });
 document.addEventListener("keydown", e => {
-  const k = e.key, tag = e.target.tagName; Audio8.unlock();
+  const k = e.key, tag = e.target.tagName; Audio8.unlock(); $("#soundHint").hidden = true;
   if (tag === "INPUT"){ if (e.target.id === "chatIn"){ if (k === "Enter"){ e.preventDefault(); sendChat(); } else if (k === "Escape") e.target.blur(); return; }
     if (k === "Enter"){ if (e.target.id === "netCode") netAct("netJoin"); else if (e.target.id === "netNick" && !online()) netAct("netHost"); else e.target.blur(); } return; }
   if (!$("#netLayer").hidden){ if (k === "Escape") netAct("netClose"); return; }

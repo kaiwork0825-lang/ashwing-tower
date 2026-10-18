@@ -376,6 +376,7 @@ button:focus-visible,input:focus-visible{outline:3px dashed var(--gold); outline
 .choice .key{margin-left:auto}
 .prompt.walkhint{font-family:var(--f-pixel); font-size:15px; color:var(--mute); line-height:1.6}
 .dlg-text.walkt{font-size:26px; line-height:1.55}
+.sound-hint{position:absolute; left:50%; bottom:46px; transform:translateX(-50%); font-family:var(--f-pixel); font-size:16px; color:var(--mute); animation:blink 1.6s steps(2) infinite; pointer-events:none}
 .worldbar{position:absolute; left:50%; top:150px; transform:translateX(-50%); display:flex; align-items:center; gap:0; padding:8px 14px; background:rgba(7,9,15,.82); box-shadow:0 0 0 3px var(--void),0 0 0 6px var(--edge); z-index:6}
 .wb-node{all:unset; box-sizing:border-box; display:grid; justify-items:center; gap:2px; width:104px; cursor:var(--cursor); padding:4px 2px; position:relative}
 .wb-node canvas{width:40px; height:40px; background:var(--panel2); box-shadow:0 0 0 3px var(--void),0 0 0 5px var(--edge)}
@@ -478,6 +479,7 @@ button:focus-visible,input:focus-visible{outline:3px dashed var(--gold); outline
       <button data-act="howto">조작법</button>
       <button data-act="fullscreen">전체 화면</button>
     </nav>
+    <p class="sound-hint" id="soundHint">♪ 화면을 아무 곳이나 누르면 음악이 켜져요</p>
     <div class="title-foot"><b>잿날개의 탑</b> · VER 3.0<br>1920 × 1080</div>
   </section>
 
@@ -2504,7 +2506,8 @@ const Audio8 = (() => {
     }
   }
   return {
-    unlock(){ ensure(); },
+    // browsers keep audio locked until the first click/key; once it unlocks, start the track that was already chosen (the title theme)
+    unlock(){ const was = !!ac; if (!ensure()) return; if (!was && track && musicOn && !timer){ nextT = ac.currentTime + 0.08; timer = setInterval(schedule, 40); } },
     sfx(name, arg){ if (!sfxOn || !ensure()) return; try { SFX[name] && SFX[name](ac.currentTime + 0.005, arg); } catch (e) {} },
     music(name){ if (name === track) return; track = name; step = 0; if (!ac) return; nextT = ac.currentTime + 0.08;
       if (!timer) timer = setInterval(schedule, 40); },
@@ -3776,7 +3779,7 @@ function renderGame(){
 
 /* ================= EVENTS ================= */
 document.addEventListener("click", e => {
-  Audio8.unlock();
+  Audio8.unlock(); $("#soundHint").hidden = true;
   const a = e.target.closest("[data-act]");
   if (!a){ if (e.target.closest("#dlgBox") && !e.target.closest("#choices")) advanceDialog(); return; }
   if (a.disabled) return;
@@ -3846,7 +3849,7 @@ document.addEventListener("dblclick", e => { const a = e.target.closest(".cell.i
 document.addEventListener("input", e => { if (!e.target.classList.contains("name")) return; const i = +e.target.dataset.i; if (!mine(i)) return; S.setup.heroes[i].name = e.target.value;
   if (isGuest()){ clearTimeout(NET.nmT); NET.nmT = setTimeout(() => sendInput("name", {i, v:e.target.value.slice(0, 8)}), 250); } else netDirty(); });
 document.addEventListener("keydown", e => {
-  const k = e.key, tag = e.target.tagName; Audio8.unlock();
+  const k = e.key, tag = e.target.tagName; Audio8.unlock(); $("#soundHint").hidden = true;
   if (tag === "INPUT"){ if (e.target.id === "chatIn"){ if (k === "Enter"){ e.preventDefault(); sendChat(); } else if (k === "Escape") e.target.blur(); return; }
     if (k === "Enter"){ if (e.target.id === "netCode") netAct("netJoin"); else if (e.target.id === "netNick" && !online()) netAct("netHost"); else e.target.blur(); } return; }
   if (!$("#netLayer").hidden){ if (k === "Escape") netAct("netClose"); return; }

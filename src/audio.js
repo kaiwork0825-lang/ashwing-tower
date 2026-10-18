@@ -206,7 +206,8 @@ const Audio8 = (() => {
     }
   }
   return {
-    unlock(){ ensure(); },
+    // browsers keep audio locked until the first click/key; once it unlocks, start the track that was already chosen (the title theme)
+    unlock(){ const was = !!ac; if (!ensure()) return; if (!was && track && musicOn && !timer){ nextT = ac.currentTime + 0.08; timer = setInterval(schedule, 40); } },
     sfx(name, arg){ if (!sfxOn || !ensure()) return; try { SFX[name] && SFX[name](ac.currentTime + 0.005, arg); } catch (e) {} },
     music(name){ if (name === track) return; track = name; step = 0; if (!ac) return; nextT = ac.currentTime + 0.08;
       if (!timer) timer = setInterval(schedule, 40); },
