@@ -501,11 +501,18 @@ function loop(t){
   const dt = Math.min(0.1, (t - lastT)/1000); if (t - lastT < 33) return; lastT = t;
   if (S.screen === "game"){ worldTick(dt, t); scene.update(dt, t); scene.render(t, buildUnits(t), VW.world ? worldOverlay : artOverlay()); }
   else if (S.screen === "setup"){ scene.update(dt, t); scene.render(t, []); }
-  else if (S.screen === "title"){ titleScene.update(dt, t); titleScene.render(t, titleUnits(t)); }
+  else if (S.screen === "title" || S.screen === "splash"){ if (S.screen === "title") titleAsh(titleScene); titleScene.update(dt, t); titleScene.render(t, S.screen === "splash" ? splashUnits(t) : titleUnits(t)); }
 }
-function titleUnits(t){ const G = 156, u = [];
-  ["fighter","wizard","rogue","cleric"].forEach((k,i) => { const sp = spr(k); u.push({sp, x:150 + i*27, y:G - sp.h - (REDUCED ? 0 : Math.floor(t/460 + i*0.5) % 2)}); });
-  const d = spr("drake"); u.push({sp:d, x:222, y:22 + Math.round(Math.sin(t/700)*4), noShadow:true, alpha:0.85, glow:[14,30,40,[1,0.45,0.2]]}); return u; }
+// the title: the four stand before the tower gate under falling red ash (after the splash they walk in and stop)
+const TITLE = {arriveT:0};
+function titleUnits(t){ const G = 156, u = [], now = performance.now(), p = TITLE.arriveT ? Math.min(1, Math.max(0, (now - TITLE.arriveT)/1700)) : 1, walking = p < 1;
+  ["fighter","wizard","rogue","cleric"].forEach((k, i) => { const sp = spr(k), x = 118 + i*23 - (1 - EASE(p))*170;
+    const bob = REDUCED ? 0 : walking ? Math.floor(t/140 + i) % 2 : Math.floor(t/1300 + i*0.6) % 2;
+    u.push({sp, x:Math.round(x), y:G - sp.h - bob, glow:[11, 10, 22, [0.7, 0.32, 0.16]]}); });
+  return u; }
+function titleAsh(sc){ if (REDUCED) return;
+  if (Math.random() < 0.55) sc.spawn({x:Math.random()*SW, y:-2, vx:-2 + Math.random()*5, vy:7 + Math.random()*7, life:18, c:["#e04a3c","#e2762d","#7a1f2a","#b02e33"][Math.floor(Math.random()*4)], em:Math.random() < 0.45 ? 1 : 0, ash:1});
+  if (Math.random() < 0.06) sc.spawn({x:Math.random()*SW, y:-2, vx:1, vy:9, life:18, c:"#ffd678", em:1, ash:1}); }
 
 // effects
 const HERO_STYLE = {fighter:["slash","heavy"], rogue:["stab","backstab"], cleric:["smash","smash"], wizard:["firebolt","missiles"]};
@@ -561,8 +568,9 @@ function flushFx(){ fxHold = false; fxQ.splice(0).forEach((fn, i) => setTimeout(
 /* ================= SCREENS ================= */
 function show(scr){
   S.screen = scr; $("#stage").dataset.scr = scr; if (isHost()) netDirty();
-  $("#sTitle").hidden = scr !== "title"; $("#sSetup").hidden = scr !== "setup"; $("#sGame").hidden = scr !== "game";
-  $("#titleCv").hidden = scr !== "title"; $("#scene").hidden = scr === "title"; $("#pause").hidden = true;
+  $("#sTitle").hidden = scr !== "title"; $("#sSetup").hidden = scr !== "setup"; $("#sGame").hidden = scr !== "game"; $("#sSplash").hidden = scr !== "splash";
+  $("#titleCv").hidden = scr !== "title" && scr !== "splash"; $("#scene").hidden = scr === "title" || scr === "splash"; $("#pause").hidden = true;
+  if (scr === "splash"){ titleScene.bgKey = "ashtower"; titleScene.parts = []; Audio8.music("ashen"); }
   if (scr === "title"){ $("#btnCont").hidden = !loadSave(); Audio8.music("ashen"); setTimeout(() => { const b = document.querySelector(".menu button:not([hidden])"); b && b.focus({preventScroll:true}); }, 60); }
   if (scr === "setup"){ scene.bgKey = "tavern"; scene.parts = []; scene.dyn = []; scene.fade = scene.fadeTo = 0; renderSetup(); Audio8.music("tavern"); }
 }
@@ -1261,6 +1269,7 @@ function renderGame(){
 /* ================= EVENTS ================= */
 document.addEventListener("click", e => {
   Audio8.unlock(); $("#soundHint").hidden = true;
+  if (S.screen === "splash"){ pressStart(); return; }
   const a = e.target.closest("[data-act]");
   if (!a){ if (e.target.closest("#dlgBox") && !e.target.closest("#choices")) advanceDialog(); return; }
   if (a.disabled) return;
@@ -1330,7 +1339,9 @@ document.addEventListener("dblclick", e => { const a = e.target.closest(".cell.i
 document.addEventListener("input", e => { if (!e.target.classList.contains("name")) return; const i = +e.target.dataset.i; if (!mine(i)) return; S.setup.heroes[i].name = e.target.value;
   if (isGuest()){ clearTimeout(NET.nmT); NET.nmT = setTimeout(() => sendInput("name", {i, v:e.target.value.slice(0, 8)}), 250); } else netDirty(); });
 document.addEventListener("keydown", e => {
-  const k = e.key, tag = e.target.tagName; Audio8.unlock(); $("#soundHint").hidden = true;
+  const k = e.key, tag = e.target.tagName;
+  if (S.screen === "splash" && tag !== "INPUT"){ if (!["Shift","Control","Alt","Meta","Tab","CapsLock"].includes(k)){ e.preventDefault(); pressStart(); } return; }
+  Audio8.unlock(); $("#soundHint").hidden = true;
   if (tag === "INPUT"){ if (e.target.id === "chatIn"){ if (k === "Enter"){ e.preventDefault(); sendChat(); } else if (k === "Escape") e.target.blur(); return; }
     if (k === "Enter"){ if (e.target.id === "netCode") netAct("netJoin"); else if (e.target.id === "netNick" && !online()) netAct("netHost"); else e.target.blur(); } return; }
   if (!$("#netLayer").hidden){ if (k === "Escape") netAct("netClose"); return; }
@@ -1363,7 +1374,7 @@ window.__dbg = {get WV(){ return WV; }, get VW(){ return VW; }, travel:ai => tra
 try { window.claude?.hot?.snapshot?.(() => JSON.parse(JSON.stringify(S))); } catch (e) {}
 function start(data){
   paintAll(document);
-  if (data && data.screen){ S = Object.assign(S, data); if (S.screen === "game"){ show("game"); renderGame(); } else show(S.screen); } else show("title");
+  if (data && data.screen){ S = Object.assign(S, data); if (S.screen === "game"){ show("game"); renderGame(); } else show(S.screen); } else show(/^#[A-Za-z0-9]{4}$/.test(location.hash || "") ? "title" : "splash");
   requestAnimationFrame(loop);
 }
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});

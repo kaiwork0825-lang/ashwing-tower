@@ -377,6 +377,21 @@ button:focus-visible,input:focus-visible{outline:3px dashed var(--gold); outline
 .prompt.walkhint{font-family:var(--f-pixel); font-size:15px; color:var(--mute); line-height:1.6}
 .dlg-text.walkt{font-size:26px; line-height:1.55}
 .sound-hint{position:absolute; left:50%; bottom:46px; transform:translateX(-50%); font-family:var(--f-pixel); font-size:16px; color:var(--mute); animation:blink 1.6s steps(2) infinite; pointer-events:none}
+#sSplash{z-index:1}
+#sSplash::before{content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(7,9,15,.82) 0,rgba(7,9,15,.4) 36%,rgba(7,9,15,0) 56%),linear-gradient(0deg,rgba(7,9,15,.7) 0,rgba(7,9,15,0) 26%); pointer-events:none}
+.splash-logo{position:absolute; left:130px; top:150px; display:grid; gap:18px; animation:splashIn 1.6s ease-out both}
+.splash-logo .eyebrow{font-family:var(--f-pixel); font-size:20px; letter-spacing:.32em; color:var(--dim)}
+.splash-logo h1{font-family:var(--f-display); font-size:176px; line-height:1; white-space:nowrap; color:var(--ember-hi); text-shadow:7px 7px 0 #82341c,14px 14px 0 var(--void),0 0 60px rgba(226,118,45,.35)}
+.splash-sub{font-size:30px; line-height:1.6; color:var(--text); text-shadow:2px 2px 0 var(--void)}
+.splash-press{position:absolute; left:0; right:0; margin:0 auto; width:max-content; bottom:118px; display:grid; grid-template-columns:auto auto auto; align-items:center; justify-items:center; gap:4px 22px; animation:splashIn 1.6s .9s ease-out both}
+.splash-press b{font-family:var(--f-display); font-weight:400; font-size:48px; color:var(--gold); text-shadow:4px 4px 0 var(--void); animation:pressPulse 1.8s ease-in-out infinite}
+.splash-press canvas{width:44px; height:44px; animation:pressPulse 1.8s ease-in-out infinite}
+.splash-press small{grid-column:1 / -1; font-family:var(--f-pixel); font-size:18px; letter-spacing:.5em; color:var(--mute)}
+.splash-foot{position:absolute; right:48px; bottom:36px; font-family:var(--f-pixel); font-size:16px; letter-spacing:.12em; color:var(--mute)}
+#sSplash.go .splash-logo,#sSplash.go .splash-press,#sSplash.go .splash-foot{animation:splashOut .6s ease-in forwards}
+@keyframes splashOut{from{opacity:1; transform:none} to{opacity:0; transform:translateY(-10px) scale(1.03)}}
+@keyframes splashIn{from{opacity:0; transform:translateY(16px)} to{opacity:1}}
+@keyframes pressPulse{0%,100%{opacity:1} 50%{opacity:.35}}
 .worldbar{position:absolute; left:50%; top:150px; transform:translateX(-50%); display:flex; align-items:center; gap:0; padding:8px 14px; background:rgba(7,9,15,.82); box-shadow:0 0 0 3px var(--void),0 0 0 6px var(--edge); z-index:6}
 .wb-node{all:unset; box-sizing:border-box; display:grid; justify-items:center; gap:2px; width:104px; cursor:var(--cursor); padding:4px 2px; position:relative}
 .wb-node canvas{width:40px; height:40px; background:var(--panel2); box-shadow:0 0 0 3px var(--void),0 0 0 5px var(--edge)}
@@ -466,6 +481,15 @@ button:focus-visible,input:focus-visible{outline:3px dashed var(--gold); outline
   <canvas id="scene" class="px" aria-label="현재 장면" hidden></canvas>
 
   <!-- TITLE -->
+  <section id="sSplash" class="screen" hidden>
+    <div class="splash-logo">
+      <p class="eyebrow">D20 TABLETOP RPG · 1–4 PLAYERS</p>
+      <h1>잿날개의 탑</h1>
+      <p class="splash-sub">밤마다 재가 내린다.<br>탑 꼭대기에서, 무언가 깨어났다.</p>
+    </div>
+    <div class="splash-press" aria-label="화면을 눌러 시작"><canvas class="px" data-spr="d20icon"></canvas><b>화면을 눌러 시작</b><canvas class="px" data-spr="d20icon"></canvas><small>PRESS ANY KEY</small></div>
+    <p class="splash-foot">♪ 소리를 켜고 플레이하세요</p>
+  </section>
   <section id="sTitle" class="screen">
     <div class="logo">
       <p class="eyebrow">D20 TABLETOP RPG · 1–4 PLAYERS</p>
@@ -3020,11 +3044,18 @@ function loop(t){
   const dt = Math.min(0.1, (t - lastT)/1000); if (t - lastT < 33) return; lastT = t;
   if (S.screen === "game"){ worldTick(dt, t); scene.update(dt, t); scene.render(t, buildUnits(t), VW.world ? worldOverlay : artOverlay()); }
   else if (S.screen === "setup"){ scene.update(dt, t); scene.render(t, []); }
-  else if (S.screen === "title"){ titleScene.update(dt, t); titleScene.render(t, titleUnits(t)); }
+  else if (S.screen === "title" || S.screen === "splash"){ if (S.screen === "title") titleAsh(titleScene); titleScene.update(dt, t); titleScene.render(t, S.screen === "splash" ? splashUnits(t) : titleUnits(t)); }
 }
-function titleUnits(t){ const G = 156, u = [];
-  ["fighter","wizard","rogue","cleric"].forEach((k,i) => { const sp = spr(k); u.push({sp, x:150 + i*27, y:G - sp.h - (REDUCED ? 0 : Math.floor(t/460 + i*0.5) % 2)}); });
-  const d = spr("drake"); u.push({sp:d, x:222, y:22 + Math.round(Math.sin(t/700)*4), noShadow:true, alpha:0.85, glow:[14,30,40,[1,0.45,0.2]]}); return u; }
+// the title: the four stand before the tower gate under falling red ash (after the splash they walk in and stop)
+const TITLE = {arriveT:0};
+function titleUnits(t){ const G = 156, u = [], now = performance.now(), p = TITLE.arriveT ? Math.min(1, Math.max(0, (now - TITLE.arriveT)/1700)) : 1, walking = p < 1;
+  ["fighter","wizard","rogue","cleric"].forEach((k, i) => { const sp = spr(k), x = 118 + i*23 - (1 - EASE(p))*170;
+    const bob = REDUCED ? 0 : walking ? Math.floor(t/140 + i) % 2 : Math.floor(t/1300 + i*0.6) % 2;
+    u.push({sp, x:Math.round(x), y:G - sp.h - bob, glow:[11, 10, 22, [0.7, 0.32, 0.16]]}); });
+  return u; }
+function titleAsh(sc){ if (REDUCED) return;
+  if (Math.random() < 0.55) sc.spawn({x:Math.random()*SW, y:-2, vx:-2 + Math.random()*5, vy:7 + Math.random()*7, life:18, c:["#e04a3c","#e2762d","#7a1f2a","#b02e33"][Math.floor(Math.random()*4)], em:Math.random() < 0.45 ? 1 : 0, ash:1});
+  if (Math.random() < 0.06) sc.spawn({x:Math.random()*SW, y:-2, vx:1, vy:9, life:18, c:"#ffd678", em:1, ash:1}); }
 
 // effects
 const HERO_STYLE = {fighter:["slash","heavy"], rogue:["stab","backstab"], cleric:["smash","smash"], wizard:["firebolt","missiles"]};
@@ -3080,8 +3111,9 @@ function flushFx(){ fxHold = false; fxQ.splice(0).forEach((fn, i) => setTimeout(
 /* ================= SCREENS ================= */
 function show(scr){
   S.screen = scr; $("#stage").dataset.scr = scr; if (isHost()) netDirty();
-  $("#sTitle").hidden = scr !== "title"; $("#sSetup").hidden = scr !== "setup"; $("#sGame").hidden = scr !== "game";
-  $("#titleCv").hidden = scr !== "title"; $("#scene").hidden = scr === "title"; $("#pause").hidden = true;
+  $("#sTitle").hidden = scr !== "title"; $("#sSetup").hidden = scr !== "setup"; $("#sGame").hidden = scr !== "game"; $("#sSplash").hidden = scr !== "splash";
+  $("#titleCv").hidden = scr !== "title" && scr !== "splash"; $("#scene").hidden = scr === "title" || scr === "splash"; $("#pause").hidden = true;
+  if (scr === "splash"){ titleScene.bgKey = "ashtower"; titleScene.parts = []; Audio8.music("ashen"); }
   if (scr === "title"){ $("#btnCont").hidden = !loadSave(); Audio8.music("ashen"); setTimeout(() => { const b = document.querySelector(".menu button:not([hidden])"); b && b.focus({preventScroll:true}); }, 60); }
   if (scr === "setup"){ scene.bgKey = "tavern"; scene.parts = []; scene.dyn = []; scene.fade = scene.fadeTo = 0; renderSetup(); Audio8.music("tavern"); }
 }
@@ -3780,6 +3812,7 @@ function renderGame(){
 /* ================= EVENTS ================= */
 document.addEventListener("click", e => {
   Audio8.unlock(); $("#soundHint").hidden = true;
+  if (S.screen === "splash"){ pressStart(); return; }
   const a = e.target.closest("[data-act]");
   if (!a){ if (e.target.closest("#dlgBox") && !e.target.closest("#choices")) advanceDialog(); return; }
   if (a.disabled) return;
@@ -3849,7 +3882,9 @@ document.addEventListener("dblclick", e => { const a = e.target.closest(".cell.i
 document.addEventListener("input", e => { if (!e.target.classList.contains("name")) return; const i = +e.target.dataset.i; if (!mine(i)) return; S.setup.heroes[i].name = e.target.value;
   if (isGuest()){ clearTimeout(NET.nmT); NET.nmT = setTimeout(() => sendInput("name", {i, v:e.target.value.slice(0, 8)}), 250); } else netDirty(); });
 document.addEventListener("keydown", e => {
-  const k = e.key, tag = e.target.tagName; Audio8.unlock(); $("#soundHint").hidden = true;
+  const k = e.key, tag = e.target.tagName;
+  if (S.screen === "splash" && tag !== "INPUT"){ if (!["Shift","Control","Alt","Meta","Tab","CapsLock"].includes(k)){ e.preventDefault(); pressStart(); } return; }
+  Audio8.unlock(); $("#soundHint").hidden = true;
   if (tag === "INPUT"){ if (e.target.id === "chatIn"){ if (k === "Enter"){ e.preventDefault(); sendChat(); } else if (k === "Escape") e.target.blur(); return; }
     if (k === "Enter"){ if (e.target.id === "netCode") netAct("netJoin"); else if (e.target.id === "netNick" && !online()) netAct("netHost"); else e.target.blur(); } return; }
   if (!$("#netLayer").hidden){ if (k === "Escape") netAct("netClose"); return; }
@@ -4860,6 +4895,82 @@ function walkKey(e){
   return false;
 }
 
+/* ================= SPLASH: "press to start" =================
+   Browsers keep audio locked until the first click or key, so the game opens on a scene that asks for one:
+   the ash tower far off, its red window beating like a heart, the dragon circling it, the party on a cliff.
+   The press unlocks sound, starts the theme and opens the title. */
+SPRITE_DEFS.d20icon = {p:{o:"#07090f", g:"#ffd678", G:"#fbb954", d:"#c95a24"}, em:["g","G","d"], g:[
+  ".....o.....",
+  "....oGo....",
+  "...oGgGo...",
+  "..oGgggGo..",
+  ".oGdGgGdGo.",
+  "oGdddGdddGo",
+  ".oGdGgGdGo.",
+  "..oGgggGo..",
+  "...oGgGo...",
+  "....oGo....",
+  ".....o....."]};
+BGS.ashtower = {ground:150, amb:[0.4,0.42,0.6], shadowFrom:0,
+  lights:[{x:236,y:38,r:46,c:[1.3,0.3,0.16],f:0.3}, {x:236,y:60,r:150,c:[0.3,0.36,0.5],f:0}, {x:60,y:150,r:80,c:[0.3,0.3,0.4],f:0}],
+  draw(fb, r){
+    fb.vgrad(0, 152, ["#07090f","#0c111c","#121a29","#182337","#283d55","#3a2850"]);
+    for (let i=0;i<70;i++) fb.px(Math.floor(r()*SW), Math.floor(r()*70), r() < 0.2 ? "#dfe6d6" : "#557887", r() < 0.25 ? 1 : 0);
+    // a huge pale moon behind the tower, with a soft halo
+    for (let y=-40;y<=40;y++) for (let x=-40;x<=40;x++){ const d = Math.sqrt(x*x + y*y); if (d > 25 && d < 40){ const X = 236 + x, Y = 58 + y; if (BAYER4[(Y&3)*4+(X&3)] + 0.47 < (40 - d)/15*0.5) fb.px(X, Y, "#283d55"); } }
+    for (let y=-24;y<=24;y++){ const w = Math.floor(Math.sqrt(576 - y*y)); fb.rect(236 - w, 58 + y, w*2, 1, y > 10 ? "#b6cbc0" : "#dfe6d6", 1, 1); }
+    [[222, 50, 5, 3], [246, 64, 6, 4], [229, 70, 3, 2], [250, 46, 3, 2]].forEach(([x, y, w, h]) => fb.rect(x, y, w, h, "#b6cbc0", 1, 1));
+    // far ranges
+    for (let x=0;x<SW;x++){ const h = 20 + Math.round(Math.sin(x/37)*8 + Math.sin(x/11 + 2)*3); fb.rect(x, 140 - h, 1, h + 12, "#182337"); }
+    for (let x=0;x<SW;x++){ const h = 10 + Math.round(Math.sin(x/23 + 1)*5 + Math.sin(x/7)*2); fb.rect(x, 146 - h, 1, h + 8, "#121a29"); }
+    // the crag and the tower on it
+    for (let y=0;y<30;y++){ const w = 18 + y*2.2; fb.rect(236 - w, 124 + y, w*2, 1, y % 4 ? "#0c111c" : "#121a29"); }
+    const cx = 236;
+    for (let y=26;y<128;y++){ const hw = Math.round(9 + (y - 26)*0.075); fb.rect(cx - hw, y, hw*2, 1, "#0c111c"); fb.px(cx - hw, y, "#182337"); fb.px(cx + hw - 1, y, "#1f2f45"); }
+    for (let k=0;k<5;k++) fb.rect(cx - 11 + k*5, 20, 3, 7, "#0c111c");
+    fb.rect(cx - 11, 25, 22, 3, "#0c111c");
+    for (let y=0;y<16;y++) fb.px(cx - 3 + Math.floor(y/5), 4 + y, "#0c111c");
+    [[cx - 5, 62], [cx + 3, 80], [cx - 4, 98], [cx + 2, 112]].forEach(([x, y]) => fb.rect(x, y, 2, 5, "#07090f"));
+    // the near cliff where the party stands, and a dead tree
+    for (let x=0;x<170;x++){ const top = 146 + Math.round(Math.max(0, (x - 120)*0.35) + Math.sin(x/9)*1.2); fb.rect(x, top, 1, SH - top, "#07090f"); }
+    for (let x=170;x<SW;x++){ const top = 162 + Math.round(Math.sin(x/13)*2); fb.rect(x, top, 1, SH - top, "#07090f"); }
+    const tree = (x, b, h) => { fb.rect(x, b - h, 2, h, "#07090f"); for (let k=0;k<5;k++){ const by = b - h + 4 + k*6, d = k % 2 ? 1 : -1; for (let i=0;i<8 - k;i++) fb.px(x + 1 + d*i, by - Math.floor(i/2), "#07090f"); } };
+    tree(18, 148, 38); tree(150, 152, 22);
+  },
+  anim(fb, t){
+    // heartbeat in the top window: two quick pulses, then rest
+    const ph = (t % 1700)/1700, beat = ph < 0.08 || (ph > 0.16 && ph < 0.24);
+    fb.rect(234, 34, 4, 6, beat ? "#ffd678" : "#e04a3c", 1, 1); fb.rect(235, 35, 2, 4, beat ? "#fff0b0" : "#e2762d", 1, 1);
+    // ash clouds drifting around the tower
+    for (let b=0;b<3;b++){ const y = 92 + b*9, off = ((t*0.006*(b + 1)) % 140) - 70; fb.dith(170 + off + b*12, y, 80, 2, "#283d55", 0.2); fb.dith(210 - off*0.7, y + 4, 70, 2, "#344e66", 0.14); }
+  },
+  emit(t, sc){
+    if (Math.random() < 0.45) sc.spawn({x:Math.random()*SW, y:-2, vx:3 + Math.random()*4, vy:7 + Math.random()*6, life:16, c:Math.random() < 0.8 ? "#8fadaa" : "#b6cbc0", em:0, ash:1});
+    if (Math.random() < 0.22) sc.spawn({x:Math.random()*SW, y:-2, vx:2 + Math.random()*4, vy:6 + Math.random()*5, life:16, c:["#e04a3c","#e2762d","#7a1f2a"][Math.floor(Math.random()*3)], em:Math.random() < 0.4 ? 1 : 0, ash:1});
+    if (Math.random() < 0.18) sc.spawn({x:228 + Math.random()*16, y:30, vx:(Math.random() - 0.3)*10, vy:-6 - Math.random()*8, life:3, c:Math.random() < 0.5 ? FIRE1 : FIRE2, em:1, fly:1});
+  }
+};
+function splashUnits(t){
+  const G = BGS.ashtower.ground, u = [];
+  // once the player presses, the four set off toward the tower
+  const walk = splashWalkT ? Math.max(0, performance.now() - splashWalkT) : 0;
+  ["fighter","wizard","rogue","cleric"].forEach((k, i) => { const sp = spr(k), bob = walk && !REDUCED ? Math.floor(t/140 + i) % 2 : 0;
+    u.push({sp, x:Math.round(12 + i*22 + walk*0.05), y:G - sp.h - (i === 1 ? 1 : 0) - bob, flash:"#426276"}); });
+  // the dragon wheels around the tower top
+  const d = spr("drake", true), a = t/2600, x = 236 + Math.cos(a)*58 - d.w/2, y = 30 + Math.sin(a)*12;
+  u.push({sp:d, x:Math.round(x), y:Math.round(y), flip:Math.sin(a) < 0, flash:"#07090f", noShadow:true});
+  return u;
+}
+let splashGo = false, splashWalkT = 0;
+// press → the party walks off toward the tower, the night closes in, and they arrive at its gate (the title)
+function pressStart(){
+  if (splashGo || S.screen !== "splash") return; splashGo = true;
+  Audio8.unlock(); sfx("door"); splashWalkT = performance.now(); $("#soundHint").hidden = true;
+  $("#sSplash").classList.add("go");
+  setTimeout(() => { titleScene.fadeTo = 1; }, REDUCED ? 100 : 900);
+  setTimeout(() => { titleScene.bgKey = "gate"; titleScene.parts = []; titleScene.fade = 1; titleScene.fadeTo = 0; TITLE.arriveT = performance.now() + 200; show("title"); }, REDUCED ? 300 : 1450);
+}
+
 /* ================= ONLINE PLAY =================
    Host-authoritative: the host's page runs the whole game. Everyone else mirrors it.
    host → guests : room topic "g" — state diffs (top-level keys of S) + view events (banners, FX, tray windows)
@@ -5285,7 +5396,7 @@ $("#netNick").addEventListener("input", () => { if (!online()) return; clearTime
 try { window.claude?.hot?.snapshot?.(() => JSON.parse(JSON.stringify(S))); } catch (e) {}
 function start(data){
   paintAll(document);
-  if (data && data.screen){ S = Object.assign(S, data); if (S.screen === "game"){ show("game"); renderGame(); } else show(S.screen); } else show("title");
+  if (data && data.screen){ S = Object.assign(S, data); if (S.screen === "game"){ show("game"); renderGame(); } else show(S.screen); } else show(/^#[A-Za-z0-9]{4}$/.test(location.hash || "") ? "title" : "splash");
   requestAnimationFrame(loop);
 }
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});

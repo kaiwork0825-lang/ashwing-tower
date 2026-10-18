@@ -377,6 +377,21 @@ button:focus-visible,input:focus-visible{outline:3px dashed var(--gold); outline
 .prompt.walkhint{font-family:var(--f-pixel); font-size:15px; color:var(--mute); line-height:1.6}
 .dlg-text.walkt{font-size:26px; line-height:1.55}
 .sound-hint{position:absolute; left:50%; bottom:46px; transform:translateX(-50%); font-family:var(--f-pixel); font-size:16px; color:var(--mute); animation:blink 1.6s steps(2) infinite; pointer-events:none}
+#sSplash{z-index:1}
+#sSplash::before{content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(7,9,15,.82) 0,rgba(7,9,15,.4) 36%,rgba(7,9,15,0) 56%),linear-gradient(0deg,rgba(7,9,15,.7) 0,rgba(7,9,15,0) 26%); pointer-events:none}
+.splash-logo{position:absolute; left:130px; top:150px; display:grid; gap:18px; animation:splashIn 1.6s ease-out both}
+.splash-logo .eyebrow{font-family:var(--f-pixel); font-size:20px; letter-spacing:.32em; color:var(--dim)}
+.splash-logo h1{font-family:var(--f-display); font-size:176px; line-height:1; white-space:nowrap; color:var(--ember-hi); text-shadow:7px 7px 0 #82341c,14px 14px 0 var(--void),0 0 60px rgba(226,118,45,.35)}
+.splash-sub{font-size:30px; line-height:1.6; color:var(--text); text-shadow:2px 2px 0 var(--void)}
+.splash-press{position:absolute; left:0; right:0; margin:0 auto; width:max-content; bottom:118px; display:grid; grid-template-columns:auto auto auto; align-items:center; justify-items:center; gap:4px 22px; animation:splashIn 1.6s .9s ease-out both}
+.splash-press b{font-family:var(--f-display); font-weight:400; font-size:48px; color:var(--gold); text-shadow:4px 4px 0 var(--void); animation:pressPulse 1.8s ease-in-out infinite}
+.splash-press canvas{width:44px; height:44px; animation:pressPulse 1.8s ease-in-out infinite}
+.splash-press small{grid-column:1 / -1; font-family:var(--f-pixel); font-size:18px; letter-spacing:.5em; color:var(--mute)}
+.splash-foot{position:absolute; right:48px; bottom:36px; font-family:var(--f-pixel); font-size:16px; letter-spacing:.12em; color:var(--mute)}
+#sSplash.go .splash-logo,#sSplash.go .splash-press,#sSplash.go .splash-foot{animation:splashOut .6s ease-in forwards}
+@keyframes splashOut{from{opacity:1; transform:none} to{opacity:0; transform:translateY(-10px) scale(1.03)}}
+@keyframes splashIn{from{opacity:0; transform:translateY(16px)} to{opacity:1}}
+@keyframes pressPulse{0%,100%{opacity:1} 50%{opacity:.35}}
 .worldbar{position:absolute; left:50%; top:150px; transform:translateX(-50%); display:flex; align-items:center; gap:0; padding:8px 14px; background:rgba(7,9,15,.82); box-shadow:0 0 0 3px var(--void),0 0 0 6px var(--edge); z-index:6}
 .wb-node{all:unset; box-sizing:border-box; display:grid; justify-items:center; gap:2px; width:104px; cursor:var(--cursor); padding:4px 2px; position:relative}
 .wb-node canvas{width:40px; height:40px; background:var(--panel2); box-shadow:0 0 0 3px var(--void),0 0 0 5px var(--edge)}
@@ -466,6 +481,15 @@ button:focus-visible,input:focus-visible{outline:3px dashed var(--gold); outline
   <canvas id="scene" class="px" aria-label="현재 장면" hidden></canvas>
 
   <!-- TITLE -->
+  <section id="sSplash" class="screen" hidden>
+    <div class="splash-logo">
+      <p class="eyebrow">D20 TABLETOP RPG · 1–4 PLAYERS</p>
+      <h1>잿날개의 탑</h1>
+      <p class="splash-sub">밤마다 재가 내린다.<br>탑 꼭대기에서, 무언가 깨어났다.</p>
+    </div>
+    <div class="splash-press" aria-label="화면을 눌러 시작"><canvas class="px" data-spr="d20icon"></canvas><b>화면을 눌러 시작</b><canvas class="px" data-spr="d20icon"></canvas><small>PRESS ANY KEY</small></div>
+    <p class="splash-foot">♪ 소리를 켜고 플레이하세요</p>
+  </section>
   <section id="sTitle" class="screen">
     <div class="logo">
       <p class="eyebrow">D20 TABLETOP RPG · 1–4 PLAYERS</p>
