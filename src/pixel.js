@@ -727,12 +727,18 @@ class PixelScene {
     this.fb = new FB(); this.cache = {}; this.L = new Float32Array(SW*SH*3); this.shadow = new Uint8Array(SW*SH);
     this.parts = []; this.floats = []; this.dyn = []; this.fxs = []; this.shakeT = 0; this.fade = 0; this.fadeTo = 0; this.flashT = 0; this.flashC = [255,255,255]; this.flashDur = 1;
     this.bgKey = "tavern"; this.units = []; this.party = [];
+    this.camX = 0; this.lastCam = 0; this.tmp = null; this.colMap = new Int16Array(SW);
     this.vign = new Float32Array(SW*SH); for (let y=0;y<SH;y++) for (let x=0;x<SW;x++){ const dx = (x-SW/2)/(SW/2), dy = (y-SH/2)/(SH/2); this.vign[y*SW+x] = Math.max(0.55, 1 - 0.32*(dx*dx*0.7+dy*dy)); }
   }
   layer(key){
     if (this.cache[key]) return this.cache[key];
-    const fb = new FB(); BGS[key].draw(fb, mkRng(key.length*977 + 13)); return this.cache[key] = fb;
+    const fb = new FB(BGS[key].w || SW, SH); BGS[key].draw(fb, mkRng(key.length*977 + 13)); return this.cache[key] = fb;
   }
+  patched(key){ const ck = key + ":p"; if (this.cache[ck]) return this.cache[ck];
+    const src = this.layer(key), fb = new FB(); fb.copyFrom(src);
+    for (const [x0, y0, w, h, dx] of BGS[key].uniq || []) for (let y=y0;y<y0+h;y++) for (let x=x0;x<x0+w;x++){ const s = y*SW + Math.max(0, Math.min(SW-1, x + dx)), d = y*SW + x;
+      fb.rgb[d*3] = src.rgb[s*3]; fb.rgb[d*3+1] = src.rgb[s*3+1]; fb.rgb[d*3+2] = src.rgb[s*3+2]; fb.em[d] = src.em[s]; }
+    return this.cache[ck] = fb; }
   spawn(p){ p.t = 0; this.parts.push(p); if (this.parts.length > 400) this.parts.shift(); }
   burst(x, y, n, c, sp=40, opts={}){ for (let i=0;i<n;i++){ const a = Math.random()*Math.PI*2, s = sp*(0.4+Math.random()*0.6); this.spawn({x, y, vx:Math.cos(a)*s, vy:Math.sin(a)*s - (opts.up||0), life:opts.life||0.6, c:Array.isArray(c) ? c[i%c.length] : c, em:1, g:opts.g ?? 60}); } }
   float(text, x, y, c, big){ this.floats.push({text, x, y, c, t:0, big}); }
@@ -740,8 +746,21 @@ class PixelScene {
   shake(ms=260){ this.shakeT = performance.now() + ms; }
   addFx(type, o){ this.fxs.push({type, t0:performance.now() + (o.delay || 0), ...o}); }
   flash(ms=120, c="#f4f2ea"){ this.flashT = performance.now() + ms; this.flashDur = ms; this.flashC = col(c); }
+  /* side-scrolling: camX moves the view along a strip. Wide backgrounds (bg.w) are drawn once at full width;
+     ordinary 320px backgrounds repeat as a ping-pong (original, mirrored, original…) so every seam matches. */
+  tiles(cam, pad){ const out = []; for (let k = Math.floor((cam - pad)/SW); k <= Math.floor((cam + SW + pad)/SW); k++) out.push(k); return out; }
+  tileX(k, x, cam){ return k*SW + ((k & 1) ? SW - x : x) - cam; }
+  lightsNow(){ const bg = BGS[this.bgKey], cam = this.lastCam; if (!cam) return bg.lights;
+    if (bg.w) return bg.lights.map(l => ({...l, x:l.x - cam, seed:l.x}));
+    const out = []; for (const k of this.tiles(cam, 160)) for (const l of bg.lights){ const x = this.tileX(k, l.x, cam); if (x > -l.r && x < SW + l.r) out.push({...l, x, seed:l.x + k}); }
+    return out; }
   update(dt, t){
-    const bg = BGS[this.bgKey]; if (bg.emit && !REDUCED) bg.emit(t, this);
+    const bg = BGS[this.bgKey], cam = this.lastCam;
+    if (bg.emit && !REDUCED){
+      if (!cam) bg.emit(t, this, 0);
+      else if (bg.w) bg.emit(t, this, cam);
+      else for (const k of this.tiles(cam, 12)){ const sc = {spawn:p => { p.x = this.tileX(k, p.x, cam); if (k & 1) p.vx = -(p.vx || 0); if (p.x > -12 && p.x < SW + 12) this.spawn(p); }}; bg.emit(t, sc, 0); }
+    }
     for (const p of this.parts){ p.t += dt; if (p.ash){ p.vx += Math.sin(t/700 + p.y*0.05)*0.3; } if (p.fly){ p.vx += (Math.random()-0.5)*8; p.vy += (Math.random()-0.5)*8; }
       if (p.g) p.vy += p.g*dt; p.x += p.vx*dt; p.y += p.vy*dt; }
     this.parts = this.parts.filter(p => p.t < p.life && p.y < SH+4 && p.y > -10);
@@ -750,11 +769,24 @@ class PixelScene {
     if (this.fade !== this.fadeTo) this.fade += Math.sign(this.fadeTo - this.fade)*Math.min(Math.abs(this.fadeTo-this.fade), dt*3.2);
   }
   render(t, units, overlay){
-    const fb = this.fb, bg = BGS[this.bgKey];
-    fb.copyFrom(this.layer(this.bgKey));
-    bg.anim(fb, t);
-    // shadows: long, cast away from the main light
-    const L0 = bg.lights[bg.shadowFrom || 0]; this.shadow.fill(0);
+    const fb = this.fb, bg = BGS[this.bgKey], lay = this.layer(this.bgKey);
+    const cam = bg.w ? Math.max(0, Math.min(bg.w - SW, Math.round(this.camX || 0))) : Math.max(0, Math.round(this.camX || 0));
+    if (cam !== this.lastCam){ const d = cam - this.lastCam; for (const p of this.parts) p.x -= d; this.lastCam = cam; }
+    if (!cam){ if (bg.w){ for (let y=0;y<SH;y++){ fb.rgb.set(lay.rgb.subarray(y*bg.w*3, (y*bg.w + SW)*3), y*SW*3); fb.em.set(lay.em.subarray(y*bg.w, y*bg.w + SW), y*SW); } } else fb.copyFrom(lay); bg.anim(fb, t, 0); }
+    else if (bg.w){ for (let y=0;y<SH;y++){ const o = y*bg.w + cam; fb.rgb.set(lay.rgb.subarray(o*3, (o + SW)*3), y*SW*3); fb.em.set(lay.em.subarray(o, o + SW), y*SW); } bg.anim(fb, t, cam); }
+    else {
+      // tile 0 is the original picture; later tiles hide one-of-a-kind landmarks (a moon, a distant tower) so they never repeat
+      const tmp = this.tmp || (this.tmp = new FB()); tmp.copyFrom(lay); bg.anim(tmp, t, 0);
+      const cm = this.colMap, ck = this.colK || (this.colK = new Uint8Array(SW)); let other = false;
+      for (let x=0;x<SW;x++){ const wx = cam + x, k = Math.floor(wx/SW); let lx = wx - k*SW; if (k & 1) lx = SW - 1 - lx; cm[x] = lx; ck[x] = k !== 0 && bg.uniq ? 1 : 0; if (ck[x]) other = true; }
+      let tmp2 = tmp; if (other){ tmp2 = this.tmp2 || (this.tmp2 = new FB()); tmp2.copyFrom(this.patched(this.bgKey)); bg.anim(tmp2, t, 0); }
+      for (let y=0;y<SH;y++){ const r0 = y*SW; for (let x=0;x<SW;x++){ const src = ck[x] ? tmp2 : tmp, s = r0 + cm[x], d = r0 + x; fb.rgb[d*3] = src.rgb[s*3]; fb.rgb[d*3+1] = src.rgb[s*3+1]; fb.rgb[d*3+2] = src.rgb[s*3+2]; fb.em[d] = src.em[s]; } }
+    }
+    const LIGHTS = this.lightsNow();
+    // shadows: long, cast away from the main light (the nearest one when the view scrolls)
+    let L0 = bg.lights[bg.shadowFrom || 0];
+    if (cam){ let bd = 1e9; for (const l of LIGHTS){ const d = Math.abs(l.x - SW/2) - l.r*0.5; if (d < bd){ bd = d; L0 = l; } } }
+    this.shadow.fill(0);
     for (const u of units){ if (!u.sp || u.noShadow) continue; const sp = u.sp, foot = u.y + sp.h;
       const shx = Math.max(-1.6, Math.min(1.6, (u.x + sp.w/2 - L0.x)/70)), shy = 0.22;
       for (let sy=0; sy<sp.h; sy++) for (let sx=0; sx<sp.w; sx++){ if (!sp.a[sy*sp.w+(u.flip ? sp.w-1-sx : sx)]) continue; const hgt = foot - (u.y+sy);
@@ -773,7 +805,7 @@ class PixelScene {
     for (let i=0;i<SW*SH;i++){ const v = this.vign[i]*ab; Lb[i*3]=amb[0]*v; Lb[i*3+1]=amb[1]*v; Lb[i*3+2]=amb[2]*v; }
     const add = (lx, ly, r, c, k) => { const x0 = Math.max(0, Math.floor(lx-r)), x1 = Math.min(SW, Math.ceil(lx+r)), y0 = Math.max(0, Math.floor(ly-r)), y1 = Math.min(SH, Math.ceil(ly+r)), r2 = r*r;
       for (let y=y0;y<y1;y++) for (let x=x0;x<x1;x++){ const d2 = (x-lx)*(x-lx)+(y-ly)*(y-ly); if (d2 >= r2) continue; let f = 1 - Math.sqrt(d2)/r; f = f*f*k; const j = (y*SW+x)*3; Lb[j]+=c[0]*f; Lb[j+1]+=c[1]*f; Lb[j+2]+=c[2]*f; } };
-    for (const l of bg.lights){ const k = 1 - l.f*0.5 + l.f*0.5*Math.sin(t/(70+l.x%40)) * (REDUCED ? 0 : 1) - l.f*0.25*(REDUCED?0:Math.random()); add(l.x, l.y, l.r, l.c, k); }
+    for (const l of LIGHTS){ const k = 1 - l.f*0.5 + l.f*0.5*Math.sin(t/(70+Math.abs(l.seed ?? l.x)%40)) * (REDUCED ? 0 : 1) - l.f*0.25*(REDUCED?0:Math.random()); add(l.x, l.y, l.r, l.c, k); }
     for (const l of this.dyn) add(l.x, l.y, l.r, l.c, 1 - l.t/l.life);
     for (const u of units) if (u.glow) add(u.x+u.glow[0], u.y+u.glow[1], u.glow[2], u.glow[3], 1);
     // floating text drawn after lighting decisions (emissive)

@@ -100,7 +100,7 @@ const statOf = (h, st) => h.stats[st] + bonus(h, st);
 const calcHp = h => { const C = CLASSES[h.cls]; return Math.max(10, C.hd + 2 * (C.hd / 2 + 1) + 3 * mod(h.stats.con)); };
 const calcAc = h => { const C = CLASSES[h.cls]; return C.ac + Math.min(C.dexCap, mod(h.eq ? statOf(h, "dex") : h.stats.dex)) + (h.eq ? bonus(h, "ac") : 0); };
 const checkMod = (h, st) => mod(statOf(h, st)) + (CLASSES[h.cls].prof.includes(st) ? 2 : 0) + bonus(h, "check");
-const atkMod = h => mod(statOf(h, CLASSES[h.cls].atkStat)) + 2 + Math.floor((S.level || 1) / 2) + bonus(h, "atk") + (S.battle && S.battle.key === "drake" && S.flags.spear ? 2 : 0);
+const atkMod = h => mod(statOf(h, CLASSES[h.cls].atkStat)) + 2 + Math.floor((S.level || 1) / 2) + bonus(h, "atk") + (S.battle && S.battle.key === "drake" && S.flags.spear ? 2 : 0) + blessOf();
 const dmgMod = h => mod(statOf(h, CLASSES[h.cls].atkStat)) + bonus(h, "dmg");
 // recompute AC and max HP after gear or level changes
 function refreshHero(h){ if (h.hpBase == null) h.hpBase = h.maxHp; h.eq = h.eq || {}; const was = h.maxHp; h.ac = calcAc(h); h.maxHp = h.hpBase + bonus(h, "hp"); if (h.maxHp > was) h.hp += h.maxHp - was; h.hp = Math.min(h.hp, h.maxHp); }
@@ -134,7 +134,7 @@ const HP_SCALE = [0.5, 1, 1.35, 1.7];
 // chapter cards appear once, when the story first reaches these places
 const CHAPTERS = {tavern:["프롤로그","꺼진 화로"], forest:["1장","잿빛 숲길"], bridge:["2장","트롤의 다리"], cave:["3장","버려진 광산"], camp:["4장","잿빛 탑 아래"], hall:["5장","탑의 심장"], lair:["6장","잿날개"], dawn:["에필로그","새벽"]};
 const OBJECTIVES = {tavern:"오르나의 이야기를 듣고 길을 나서자", forest:"숲을 지나 강가의 다리로", bridge:"다리를 건너 늪을 지나자", cave:"폐광을 지나 탑으로 가는 지름길을 찾자", camp:"탑 아래에서 하룻밤을 버티자", hall:"탑 꼭대기로 오르자", lair:"잿날개 바르쿠스를 쓰러뜨려라", dawn:"모험 완료!"};
-const MUSIC = {tavern:"tavern", forest:"night", glade:"night", bridge:"night", swamp:"night", cave:"tower", camp:"tavern", gate:"tower", hall:"tower", mirror:"tower", library:"tower", shrine:"tower", lair:"tower", dawn:"dawn"};
+const MUSIC = {tavern:"tavern", forest:"ashen", glade:"ashen", bridge:"ashen", swamp:"ashen", cave:"ashen", camp:"tavern", gate:"ashen", hall:"ashen", mirror:"ashen", library:"ashen", shrine:"ashen", lair:"ashen", dawn:"dawn"};
 
 /* ================= STORY ================= */
 const FLAG_TXT = {
@@ -456,7 +456,9 @@ function animOff(a, t, dir){
   return {dx, dy, flash};
 }
 function buildUnits(t){
+  if (VW.world) return worldUnits(t);
   const bg = BGS[scene.bgKey], G = bg.ground, units = [], b = S.battle;
+  { const pl = scene.dyn.find(l => l.party); if (pl) pl.x = 22 + S.party.length*15; }
   // foes / npcs (right side, facing left)
   let list = [];
   if (b){ const fo = FOES[b.key]; if (b.hp > 0){ const cnt = Math.max(1, Math.ceil(fo.count * b.hp / b.maxHp)); list = Array(cnt).fill(fo.sprite); } }
@@ -472,7 +474,7 @@ function buildUnits(t){
   // party (left side, facing right)
   LAST.heroes = [];
   S.party.forEach((h, i) => {
-    const down = h.hp <= 0, sp = down ? sprLying(h.cls) : spr(h.cls);
+    const hk = heroKey(h), down = h.hp <= 0, sp = down ? sprLying(hk) : spr(hk);
     const o = animOff(ANIM.hero[i], t, 1);
     const active = b && b.phase === "hero" && b.cur === i;
     const bob = down || REDUCED ? 0 : Math.floor(t/460 + i*0.5) % 2;
@@ -480,6 +482,7 @@ function buildUnits(t){
     const u = {sp, x:px, y:py, flash:o.flash, alpha:down ? 0.65 : 1};
     if (h.cls === "wizard" && !down) u.glow = [20, 2, 26, [0.3,0.6,0.6]];
     if (h.cls === "cleric" && !down) u.glow = [11, 9, 18, [0.6,0.5,0.25]];
+    const aura = !down && heroAura(h); if (aura) u.glow = aura;
     units.push(u); LAST.heroes[i] = {x:px, y:py, w:sp.w, h:sp.h};
     if (active){ const ay = py - 7 - (REDUCED ? 0 : Math.floor(t/300) % 2); units.push({sp:ARROW, x:px + sp.w/2 - 2, y:ay, noShadow:true}); }
   });
@@ -496,7 +499,7 @@ function loop(t){
   requestAnimationFrame(loop);
   if (t < freezeUntil) return; // hit-stop: hold the impact frame
   const dt = Math.min(0.1, (t - lastT)/1000); if (t - lastT < 33) return; lastT = t;
-  if (S.screen === "game"){ scene.update(dt, t); scene.render(t, buildUnits(t)); }
+  if (S.screen === "game"){ worldTick(dt, t); scene.update(dt, t); scene.render(t, buildUnits(t), VW.world ? worldOverlay : artOverlay()); }
   else if (S.screen === "setup"){ scene.update(dt, t); scene.render(t, []); }
   else if (S.screen === "title"){ titleScene.update(dt, t); titleScene.render(t, titleUnits(t)); }
 }
@@ -560,7 +563,7 @@ function show(scr){
   S.screen = scr; $("#stage").dataset.scr = scr; if (isHost()) netDirty();
   $("#sTitle").hidden = scr !== "title"; $("#sSetup").hidden = scr !== "setup"; $("#sGame").hidden = scr !== "game";
   $("#titleCv").hidden = scr !== "title"; $("#scene").hidden = scr === "title"; $("#pause").hidden = true;
-  if (scr === "title"){ $("#btnCont").hidden = !loadSave(); Audio8.music("night"); setTimeout(() => { const b = document.querySelector(".menu button:not([hidden])"); b && b.focus({preventScroll:true}); }, 60); }
+  if (scr === "title"){ $("#btnCont").hidden = !loadSave(); Audio8.music("ashen"); setTimeout(() => { const b = document.querySelector(".menu button:not([hidden])"); b && b.focus({preventScroll:true}); }, 60); }
   if (scr === "setup"){ scene.bgKey = "tavern"; scene.parts = []; scene.dyn = []; scene.fade = scene.fadeTo = 0; renderSetup(); Audio8.music("tavern"); }
 }
 function togglePause(force){ if (S.screen !== "game") return; const p = $("#pause"), open = force ?? p.hidden; p.hidden = !open; if (open){ $("#optVote").textContent = "파티 투표: " + (S.opts && S.opts.vote === false ? "끔 (P1이 결정)" : "켬"); $("#optVote").hidden = S.party.length < 2 || isGuest(); $("#optQuit").disabled = busy && !isGuest(); $("#optQuit").textContent = isGuest() ? "방 나가기" : "타이틀로 (자동 저장)"; $("#pause .btn").focus({preventScroll:true}); sfx("select"); } }
@@ -649,6 +652,9 @@ function trayClose(){ tray.stop(); $("#trayLayer").hidden = true; flushFx(); }
 const verdictHTML = (calc, txt, tone) => `<div class="calc">${calc}</div><div class="verdict ${tone}">${txt}</div>`;
 
 /* ---------- setup ---------- */
+// each roll is made for a named ability (the class's important ones first) and lands there directly
+function assignRolled(h){ if (!h.raw) return; const ok = h.raw.length === 6 && h.raw.every(r => STATS.includes(r.st)) && new Set(h.raw.map(r => r.st)).size === 6;
+  if (!ok) return assignByClass(h); h.stats = {}; h.dice = {}; h.raw.forEach(r => { h.stats[r.st] = r.v; h.dice[r.st] = r.d; }); h.sel = null; }
 function assignByClass(h){ if (!h.raw) return; const sorted = [...h.raw].sort((a,b) => b.v - a.v); h.stats = {}; h.dice = {}; CLASSES[h.cls].prio.forEach((st,i) => { h.stats[st] = sorted[i].v; h.dice[st] = sorted[i].d; }); h.sel = null; }
 function diceStr(d){ if (!d) return ""; const low = Math.min(...d); let struck = false; return d.map(x => { if (x === low && !struck){ struck = true; return `<s>${x}</s>`; } return x; }).join(" "); }
 function statGridHTML(h, i){ const C = CLASSES[h.cls];
@@ -680,25 +686,26 @@ async function statRollModal(i){
   if (h.stats){ if (h.rerolls <= 0) return; h.rerolls--; }
   busy = true; statAuto = false; NET.lb = true;
   const m = $("#modal"); m.hidden = false; $("#modalTitle").textContent = `${h.name || DEF_NAMES[i]}의 능력치 굴림`;
-  $("#modalSub").textContent = "4d6을 여섯 번 굴립니다. 가장 낮은 눈 하나는 버려요.";
+  $("#modalSub").textContent = "직업에 중요한 능력치부터 하나씩 4d6을 굴려요. 가장 낮은 눈 하나는 버려요. 굴린 뒤 카드에서 두 능력치를 차례로 누르면 서로 바꿀 수 있어요.";
   paintSpriteCanvas($("#modalPortrait"), h.cls);
   mountTray($("#modalSlot"), 1520, 640);
-  const rolls = []; const slots = $("#statSlots");
-  const drawSlots = (cur) => { slots.innerHTML = Array.from({length:6}, (_, k) => { const r = rolls[k];
-    return `<li class="${k === cur ? "cur" : ""} ${r ? "done" : ""}"><span>#${k+1}</span><b>${r ? r.v : "–"}</b><i>${r ? diceStr(r.d) : ""}</i></li>`; }).join(""); };
+  const rolls = [], slots = $("#statSlots"), order = CLASSES[h.cls].prio, prof = CLASSES[h.cls].prof;
+  const drawSlots = (cur) => { slots.innerHTML = Array.from({length:6}, (_, k) => { const r = rolls[k], st = order[k];
+    return `<li class="${k === cur ? "cur" : ""} ${r ? "done" : ""}"><span>#${k+1}</span><em class="st">${prof.includes(st) ? '<small>★</small>' : ""}${STAT_KO[st]}</em><b>${r ? r.v : "–"}</b><i>${r ? diceStr(r.d) : ""}</i></li>`; }).join(""); };
   $("#modalDone").hidden = true; $("#modalAuto").hidden = false; $("#modalAuto").disabled = false;
   for (let k=0;k<6;k++){
     drawSlots(k);
-    const vals = await throwLocal(dice(6, 4, h.cls), {auto:statAuto, hint:`#${k+1} — 끌어서 던지거나 버튼을 누르세요`});
+    $("#modalTitle").textContent = `${h.name || DEF_NAMES[i]}의 능력치 굴림 — ${STAT_KO[order[k]]}`;
+    const vals = await throwLocal(dice(6, 4, h.cls), {auto:statAuto, hint:`${STAT_KO[order[k]]} 굴림 (#${k+1}) — 끌어서 던지거나 버튼을 누르세요`});
     const low = vals.indexOf(Math.min(...vals));
     showLabels(vals, vals.map((v, j) => j === low ? "drop" : "keep"));
-    const v = vals.reduce((a,b) => a+b, 0) - vals[low]; rolls.push({v, d:vals});
+    const v = vals.reduce((a,b) => a+b, 0) - vals[low]; rolls.push({v, d:vals, st:order[k]});
     sfx(v >= 15 ? "good" : "select"); drawSlots(k+1);
     await sleep(statAuto ? 650 : 900);
   }
   $("#modalAuto").hidden = true; $("#modalDone").hidden = false; $("#modalDone").focus();
   await new Promise(res => $("#modalDone").onclick = res);
-  h.raw = rolls; assignByClass(h); tray.stop(); m.hidden = true; busy = false; NET.lb = false; sfx("good");
+  h.raw = rolls; assignRolled(h); tray.stop(); m.hidden = true; busy = false; NET.lb = false; sfx("good");
   if (isGuest()) sendInput("stats", {i, raw:rolls}); rerenderCard(i);
 }
 function startGame(){
@@ -706,6 +713,7 @@ function startGame(){
   S.items = {}; S.inv = []; S.itemSeq = 0; S.newItems = 0; S.luck = 1; S.chapSeen = {}; S.objective = "";
   S.party = st.heroes.slice(0, n).map((h, i) => { const hp = calcHp(h); const hero = {name:(h.name || "").trim() || DEF_NAMES[i], cls:h.cls, stats:{...h.stats}, maxHp:hp, hpBase:hp, hp, eq:{}};
     STARTER[h.cls].forEach(k => { hero.eq[ITEMS[k].slot] = newItem(k); }); hero.ac = calcAc(hero); return hero; });
+  S.party.forEach(h => { h.skills = []; }); S.world = newWorld(); S.walk = null; S.loot = genLoot(); S.stageGo = null; S.quests = {}; S.chat = S.chat || []; S.freeBooks = 0;
   S.gold = 15; S.potions = 1 + Math.floor(n / 2); S.flags = {}; S.seenNodes = {}; S.battle = null; S.preBattle = null; S.roller = 0; S.xp = 0; S.level = 1; S.bg = null;
   show("game"); enterNode("start");
 }
@@ -736,6 +744,9 @@ function applyFx(fx){
   }
   if (fx.heal){ S.party.forEach((h,i) => { const was = h.hp; h.hp = fx.heal === "full" ? h.maxHp : Math.min(h.maxHp, h.hp + Math.ceil(h.maxHp / 2)); if (h.hp > was) setTimeout(() => FX.heal(i, h.hp - was), 300 + i*120); }); out.push(["sys", fx.heal === "full" ? "일행의 HP가 모두 회복되었다." : "일행의 HP가 절반만큼 회복되었다."]); }
   if (fx.door) sfx("door");
+  if (fx.loot){ const got = rollLoot(fx.loot.filter(k => !ITEMS[k].cls || ITEMS[k].cls.some(c => S.party.some(h => h.cls === c))), 2); got.forEach(k => giveItem(k)); if (got.length){ out.push(["sys", `획득: ${got.map(itemName).join(", ")} — 가방(I)에서 장착하세요.`]); setTimeout(() => itemToast(got[0]), 400); } }
+  if (fx.take){ Object.values(S.loot || {}).forEach(L => L.forEach(o => { if (o.k === fx.take) o.taken = true; })); }
+  if (fx.qdone && S.quests && S.quests[fx.qdone] === "active"){ S.quests[fx.qdone] = "done"; out.push(["sys", `현상금 달성: ${QUESTS[fx.qdone].name} — 마을 게시판에서 보상을 받으세요.`]); }
   if (fx.xp) gainXp(fx.xp, out);
   return out;
 }
@@ -749,6 +760,10 @@ function setBg(bg){
   Audio8.music(MUSIC[bg]);
 }
 function enterNode(id, extra=[]){
+  const ai = AREA_BY_ENTRY[id];
+  // the story walked into another area's first scene: either a new road opens, or (already open) the party is just back on the road
+  if (ai != null && S.world && ai !== S.world.at){ if (ai > S.world.unlocked) return arriveFrontier(ai, extra); return enterNode("hub", extra); }
+  if (stageBreak(id, extra)) return;
   const n = NODES[id];
   const again = S.seenNodes[id] && n.again; S.seenNodes[id] = true;
   S.mode = "story"; S.nodeId = id; S.pick = null; S.enterSeq = (S.enterSeq || 0) + 1;
@@ -760,6 +775,7 @@ function enterNode(id, extra=[]){
   S.lines = lines.map(normLine); S.li = 0;
   showArt(n.art); hideCards(); vote = null;
   save(); refreshStatus(); typeLine();
+  if (n.walk && !S.lines.length) startWalk();
 }
 const tw = {t:null, done:true};
 function setSpeaker(who){ const sp = SPEAKERS[who] || SPEAKERS.narr; $("#speaker").textContent = sp.name; paintSpriteCanvas($("#portrait"), sp.spr); }
@@ -777,11 +793,12 @@ function advanceDialog(){
   if (S.mode !== "story" || busy) return; const L = S.lines[S.li];
   if (!tw.done){ clearInterval(tw.t); $("#dlgText").textContent = L.text; tw.done = true; afterLine(); return; }
   if (S.li < S.lines.length - 1){ if (isGuest()) return sendInput("adv", {li:S.li}); S.li++; save(); typeLine(); }
+  else if (NODES[S.nodeId].walk){ if (isGuest()) return sendInput("walkGo", {}); startWalk(); }
 }
 const nodeChoices = n => n.next ? [{t:"go", label:n.nextLabel || "계속", to:n.next}] : (n.choices || []);
 const costOf = c => c.cost ? (S.flags.discount ? Math.ceil(c.cost*0.7) : c.cost) : 0;
 const visibleChoices = n => nodeChoices(n).map((c, i) => [c, i]).filter(([c]) => !(c.hide && S.flags[c.hide]) && !(c.need && !S.flags[c.need]));
-function choiceTag(c){ let tag = "", dis = false;
+function choiceTag(c){ let tag = "", dis = !!c.dis;
   if (c.t === "check") tag = `<span class="tag">${STAT_KO[c.stat]} DC ${c.dc}</span>`;
   if (c.t === "battle") tag = `<span class="tag fight">전투</span>`;
   if (c.need) tag += `<span class="tag best">단서</span>`;
@@ -790,7 +807,7 @@ function choiceTag(c){ let tag = "", dis = false;
 /* ---------- party vote: everyone picks; if the party disagrees, a d20 duel decides ---------- */
 let vote = null;
 const voteOn = () => S.party.length > 1 && !(S.opts && S.opts.vote === false);
-function needVote(n){ if (!voteOn() || S.mode !== "story" || n.next) return false;
+function needVote(n){ if (!voteOn() || S.mode !== "story" || n.next || n.noVote) return false;
   return visibleChoices(n).filter(([c]) => !choiceTag(c).dis && c.t !== "restart" && c.t !== "retry").length >= 2; }
 const nextVoter = () => S.party.findIndex((_, k) => vote.votes[k] == null);
 const seatToVote = peer => S.party.findIndex((_, k) => vote.votes[k] == null && ownerPeer(k) === peer);
@@ -802,13 +819,14 @@ function voteHead(){ const k = curVoter(), h = S.party[k];
 const voterChips = i => vote ? vote.votes.map((v, k) => v === i ? `<canvas class="px vchip" data-spr="${S.party[k].cls}" title="${esc(S.party[k].name)}"></canvas>` : "").join("") : "";
 function renderChoices(){
   const n = NODES[S.nodeId];
+  if (n.walk){ $("#choices").innerHTML = `<button class="choice" data-act="walkGo"><span>둘러본다</span></button>`; $("#choices").classList.remove("dense", "dense2"); netDirty(); return; }
   if (needVote(n)){ if (!vote || vote.node !== S.nodeId) vote = {node:S.nodeId, votes:[], turn:0}; } else vote = null;
   const vk = curVoter(), voter = vote && S.party[vk], wait = vote && !voter;
   let html = vote ? `<p class="prompt vote">${voter ? `<canvas class="px" data-spr="${voter.cls}"></canvas>` : ""}${voteHead()}</p>` : n.prompt ? `<p class="prompt">${esc(n.prompt)}</p>` : "";
   const vis = visibleChoices(n);
   vis.forEach(([c, i]) => { const {tag, dis} = choiceTag(c);
     html += `<button class="choice" data-act="choice" data-i="${i}" ${dis || wait ? "disabled" : ""}><span>${esc(c.label)}</span>${tag}<span class="voters">${voterChips(i)}</span></button>`; });
-  $("#choices").innerHTML = html; $("#choices").classList.toggle("dense", vis.length > 4); paintAll($("#choices"));
+  $("#choices").innerHTML = html; $("#choices").classList.toggle("dense", vis.length > 4); $("#choices").classList.toggle("dense2", vis.length > 6); paintAll($("#choices"));
   if (n.cardView) showCards(n, vis);
   netDirty();
 }
@@ -870,6 +888,10 @@ function doChoice(i){
   else if (c.t === "battle") startBattle(c.foe, c.win);
   else if (c.t === "restart"){ clearSave(); S.setup = blankSetup(); show("title"); }
   else if (c.t === "retry") retryBattle();
+  else if (c.t === "travel") travel(c.to);
+  else if (c.t === "shop") openShop(c.shop);
+  else if (c.t === "quest") acceptQuest(c.q);
+  else if (c.t === "claim") claimQuest(c.q);
 }
 function renderPick(){
   const c = nodeChoices(NODES[S.nodeId])[S.pick];
@@ -909,10 +931,11 @@ function startBattle(key, win){
   const f = FOES[key], n = S.party.length;
   S.preBattle = {snap:JSON.parse(JSON.stringify({party:S.party, gold:S.gold, potions:S.potions, flags:S.flags, nodeId:S.nodeId, bg:S.bg, xp:S.xp, level:S.level, items:S.items, inv:S.inv, itemSeq:S.itemSeq, luck:S.luck})), key, win};
   let hp = Math.round(f.hp * HP_SCALE[n - 1]); const msg = [f.intro];
+  if (f.regen) msg.push(`재생 능력! 매 턴 주사위로 상처를 아물게 한다 — 파티가 주사위로 막을 수 있고, 불 공격(화염 화살 · 화염구 · 불꽃 무기)에 그을린 상처는 막기 쉽다.`);
   if (key === "drake" && S.flags.weakness) msg.push("약점을 알고 있다! 용의 방어도 −2.");
   if (key === "drake" && S.flags.spear) msg.push("은빛 창이 용을 향해 떨린다. 명중 +2.");
   if (key === "drake" && S.flags.ambush){ hp -= 10; msg.push("선제 공격으로 이미 피해 10!"); }
-  S.battle = {key, name:f.name, hp, maxHp:hp, ac:f.ac - (key === "drake" && S.flags.weakness ? 2 : 0), cur:-1, phase:"hero", round:1, uses:S.party.map(h => CLASSES[h.cls].uses), win, msg, picking:null};
+  S.battle = {suses:S.party.map(h => Object.fromEntries((h.skills || []).map(k => [k, SKILLS[k].uses]))), key, name:f.name, hp, maxHp:hp, ac:f.ac - (key === "drake" && S.flags.weakness ? 2 : 0), cur:-1, phase:"hero", round:1, uses:S.party.map(h => CLASSES[h.cls].uses), win, msg, picking:null};
   S.mode = "battle"; Audio8.music(key === "drake" ? "boss" : "battle"); banner(key === "drake" ? "BOSS BATTLE" : "BATTLE!", "red"); sfx("hit");
   showArt(null); hideCards(); setTimeout(() => bark(0, pickLine(key === "drake" ? BARK.boss : BARK.battle)), 600);
   advanceTurn();
@@ -938,7 +961,7 @@ async function heroAct(kind){
   if (special && h.cls === "wizard"){
     trayOpen({who:h.cls, seat:i, title:`${h.name} — 마법 화살`, sub:`${esc(f.name)}에게 · 반드시 명중 · 3d4${sgn(3 + bonus(h, "dmg"))}`});
     const vals = await throwDice(dice(4, 3, h.cls)); showLabels(vals, vals.map(() => "keep"));
-    const r = sumRoll(vals, 3 + bonus(h, "dmg")); dmgFoe(r.t); FX.strike(i, "missiles", r.t, false, false); bmsg(`${h.name}의 마법 화살! 빛나는 화살 세 발이 꽂힌다. 피해 ${r.t}.`);
+    const r = sumRoll(vals, 3 + bonus(h, "dmg")); dmgFoe(r.t); if (fireHit(h, "missiles")) S.battle.burn = true; FX.strike(i, "missiles", r.t, false, false); bmsg(`${h.name}의 마법 화살! 빛나는 화살 세 발이 꽂힌다. 피해 ${r.t}.`);
     trayResult(verdictHTML(r.calc, `피해 ${r.t}!`, "good")); refreshStatus();
     await trayWait("계속", 0); trayClose(); busy = false; return endHeroTurn();
   }
@@ -976,7 +999,7 @@ async function heroAct(kind){
   const all = crit ? dl.concat(dl) : dl, dbonus = dmgMod(h);
   await trayWait("피해 굴리기"); setTarget(null);
   const dv = await throwDice(all.map(s => ({sides:s, scheme:h.cls})), {hint:"피해 주사위를 던지세요"}); showLabels(dv, dv.map(() => "keep"));
-  const r = sumRoll(dv, dbonus); dmgFoe(r.t); FX.strike(i, style, r.t, crit, false);
+  const r = sumRoll(dv, dbonus); dmgFoe(r.t); if (fireHit(h, style)) S.battle.burn = true; FX.strike(i, style, r.t, crit, false);
   bmsg(`${h.name}의 ${title}! ${crit ? "치명타! " : ""}피해 ${r.t}.`);
   trayResult(verdictHTML(r.calc, `피해 ${r.t}!`, crit ? "crit" : "good")); refreshStatus();
   await trayWait("계속"); trayClose(); busy = false; endHeroTurn();
@@ -990,13 +1013,50 @@ async function usePotion(ti, inBattle){
   if (inBattle) bmsg(`${drinker === tgt ? `${eun(tgt.name)} 물약을 마셨다` : `${eun(drinker.name)} ${tgt.name}에게 물약을 먹였다`}. HP +${tgt.hp - was}.`);
   trayResult(verdictHTML(r.calc, `${tgt.name} HP +${tgt.hp - was}${was === 0 ? " · 다시 일어섰다!" : ""}`, "good")); refreshStatus();
   await trayWait("계속"); trayClose(); busy = false;
-  if (inBattle){ S.battle.picking = null; endHeroTurn(); } else { save(); refreshStatus(); if (S.mode === "story" && tw.done) renderChoices(); }
+  if (inBattle){ S.battle.picking = null; endHeroTurn(); } else { save(); refreshStatus(); if (S.mode === "walk") renderWalkUI(true); else if (S.mode === "story" && tw.done) renderChoices(); }
 }
 function endHeroTurn(){ refreshStatus(); if (S.battle.hp <= 0) return winBattle(); advanceTurn(); }
+/* regeneration, all on dice: the foe rolls to knit its wounds; if it does, the sturdiest hero rolls to tear them open;
+   if that fails, the foe rolls how much it heals. A fire hit since its last turn makes stopping it easier (advantage). */
+const REGEN_DC = 10, STOP_DC = 12;
+async function regenPhase(f, b){
+  const adv = !!b.burn; b.burn = false;
+  trayOpen({who:f.sprite, title:`${f.name} — 재생 시도`, sub:`적이 d20에서 <b>${REGEN_DC}</b> 이상이면 상처가 아물기 시작해요`, foe:true});
+  setTarget({lead:"적이 d20에서", target:REGEN_DC, mod:0, word:"나오면 재생 시작", foe:true, subject:"재생할"});
+  const [r1] = await throwDice(dice(20, 1, "foe"), {auto:true}); markTarget([r1]); showLabels([r1], [r1 === 20 ? "crit" : r1 === 1 ? "fumble" : "keep"]);
+  if (r1 !== 20 && (r1 === 1 || r1 < REGEN_DC)){
+    trayResult(verdictHTML(`${r1} <em>vs ${REGEN_DC}</em>`, "재생 실패! 상처가 아물지 않았다", "good")); sfx("good");
+    bmsg(`${f.name}의 상처가 꿈틀거렸지만 아물지 않았다.`); renderBattle(); await trayWait("계속", 2200); trayClose(); return;
+  }
+  trayResult(verdictHTML(`${r1} <em>vs ${REGEN_DC}</em>`, "상처가 아물기 시작한다!", "bad")); sfx("bad"); await sleep(900);
+  // the hero best at it (strength or dexterity) tries to stop it — their owner throws
+  const alive = S.party.map((h, i) => [h, i]).filter(([h]) => h.hp > 0), stOf = h => checkMod(h, "str") >= checkMod(h, "dex") ? "str" : "dex";
+  const [h, hi] = alive.sort((a, z) => checkMod(z[0], stOf(z[0])) - checkMod(a[0], stOf(a[0])))[0], st = stOf(h), m = checkMod(h, st);
+  trayActor = hi; trayResult("");
+  trayHead(h.cls, `${h.name} — 재생 방해`, `벌어진 상처를 다시 벌려 재생을 막아요 · ${STAT_KO[st]} 판정 · 목표 <b>${STOP_DC}</b> · 보정 <b>${sgn(m)}</b>${adv ? " · <b>불에 그을린 상처</b>: d20 두 개 중 높은 눈" : ""}${online() ? ` · <b>${esc(seatNick(hi))}</b>님이 던져요` : ""}`);
+  setTarget({lead:"d20에서", target:STOP_DC, mod:m, word:"나오면 재생을 막아요", adv});
+  const vals = await throwDice(dice(20, adv ? 2 : 1, h.cls), {hint:`${h.name} — 주사위를 던져 재생을 막으세요`, outPolicy:"fail"});
+  let ok = false;
+  if (vals.out){ showLabels(vals); trayResult(verdictHTML("주사위가 트레이를 넘어갔다", "장외 — 막지 못했다!", "bad")); }
+  else { markTarget(vals); const raw = Math.max(...vals), keep = vals.indexOf(raw); ok = raw === 20 || (raw !== 1 && raw + m >= STOP_DC);
+    showLabels(vals, vals.map((v, k) => k !== keep ? "drop" : raw === 20 ? "crit" : raw === 1 ? "fumble" : "keep"));
+    trayResult(verdictHTML(`${raw} ${sgn(m)} = <strong>${raw + m}</strong> <em>vs ${STOP_DC}</em>`, ok ? "재생을 막았다!" : "막지 못했다...", ok ? "good" : "bad")); }
+  if (ok){ sfx("good"); bark(hi, "어딜 아물어!"); bmsg(`${iga(h.name)} ${f.name}의 상처를 다시 벌려 재생을 막았다!`); renderBattle(); await trayWait("계속"); trayClose(); return; }
+  sfx("bad"); await trayWait("재생량 굴리기", 2600);
+  // how much it heals
+  trayActor = null; setTarget(null); trayResult("");
+  trayHead(f.sprite, `${f.name} — 재생`, `재생량 ${f.regen.map(d => "d" + d).join("+")}`);
+  const dv = await throwDice(f.regen.map(s => ({sides:s, scheme:"foe"})), {auto:true}); showLabels(dv, dv.map(() => "keep"));
+  const amt = Math.min(dv.reduce((a, c) => a + c, 0), b.maxHp - b.hp); b.hp += amt;
+  floatFoe("+" + amt, "#7aa35a"); bmsg(`${f.name}의 상처가 꿈틀거리며 아문다. HP +${amt}.`);
+  trayResult(verdictHTML(`${dv.join(" + ")} = <strong>${amt}</strong>`, `${f.name} HP +${amt}`, "bad")); refreshStatus(); renderBattle();
+  await trayWait("계속", 2600); trayClose();
+}
 async function foeTurn(){
   const b = S.battle; if (!b || S.mode !== "battle" || busy) return; busy = true;
   const f = FOES[b.key];
-  if (f.regen && b.hp > 0 && b.hp < b.maxHp){ const r = Math.min(f.regen, b.maxHp - b.hp); b.hp += r; bmsg(`그룸의 상처가 꿈틀거리며 아문다. HP +${r}.`); floatFoe("+" + r, "#7aa35a"); refreshStatus(); renderBattle(); await sleep(500); }
+  if (await foeStatus()) return;
+  if (f.regen && b.hp > 0 && b.hp < b.maxHp) await regenPhase(f, b);
   const alive = S.party.map((h, i) => [h, i]).filter(([h]) => h.hp > 0);
   if (f.breath && b.round % 3 === 0){
     trayOpen({who:f.sprite, title:"화염 숨결!", sub:"모두 민첩 내성 DC 13 · 성공하면 피해 절반", foe:true});
@@ -1010,12 +1070,13 @@ async function foeTurn(){
     await trayWait("계속", 4200); trayClose(); busy = false; return endFoeTurn();
   }
   const [h, hi] = alive[Math.floor(Math.random() * alive.length)];
-  trayOpen({who:f.sprite, title:`${f.name} — ${f.verb}`, sub:`대상: <b>${esc(h.name)}</b> · 방어도 ${h.ac} · 명중 ${sgn(f.atk)}`, foe:true});
-  setTarget({lead:"적이 d20에서", target:h.ac, mod:f.atk, word:"나오면 맞아요", foe:true, subject:"맞을"});
+  const hac = acOf(h);
+  trayOpen({who:f.sprite, title:`${f.name} — ${f.verb}`, sub:`대상: <b>${esc(h.name)}</b> · 방어도 ${hac}${hac !== h.ac ? " (진형)" : ""} · 명중 ${sgn(f.atk)}`, foe:true});
+  setTarget({lead:"적이 d20에서", target:hac, mod:f.atk, word:"나오면 맞아요", foe:true, subject:"맞을"});
   const [raw] = await throwDice(dice(20, 1, "foe"), {auto:true}); markTarget([raw]);
-  const crit = raw === 20, hit = crit || (raw !== 1 && raw + f.atk >= h.ac);
+  const crit = raw === 20, hit = crit || (raw !== 1 && raw + f.atk >= hac);
   showLabels([raw], [crit ? "crit" : raw === 1 ? "fumble" : "keep"]);
-  const calc = `${raw} ${sgn(f.atk)} = <strong>${raw + f.atk}</strong> <em>vs AC ${h.ac}</em>`;
+  const calc = `${raw} ${sgn(f.atk)} = <strong>${raw + f.atk}</strong> <em>vs AC ${hac}</em>`;
   const fstyle = FOE_STYLE[b.key] || "claw";
   if (!hit){ FX.foeStrike(hi, fstyle, 0, false, true); bmsg(`${f.name}의 ${f.verb}! ${eun(h.name)} 가볍게 피했다.`); trayResult(verdictHTML(calc, `${eun(h.name)} 피했다!`, "good")); sfx("good");
     await trayWait("계속", 2600); trayClose(); busy = false; return endFoeTurn(); }
@@ -1029,7 +1090,7 @@ async function foeTurn(){
   trayResult(verdictHTML(r.calc + (d !== r.t ? ` <em>(혼자라서 ×0.7 → ${d})</em>` : ""), `${h.name} 피해 ${d}${h.hp === 0 ? " · 쓰러졌다!" : ""}`, "bad")); refreshStatus();
   await trayWait("계속", 3000); trayClose(); busy = false; endFoeTurn();
 }
-function endFoeTurn(){ const b = S.battle; refreshStatus(); if (S.party.every(h => h.hp <= 0)) return loseBattle(); b.round++; b.cur = -1; advanceTurn(); }
+function endFoeTurn(){ const b = S.battle; tickBuffs(); refreshStatus(); if (S.party.every(h => h.hp <= 0)) return loseBattle(); b.round++; b.cur = -1; advanceTurn(); }
 function winBattle(){
   const b = S.battle, f = FOES[b.key], win = b.win;
   S.party.forEach(h => { if (h.hp <= 0) h.hp = 1; });
@@ -1056,19 +1117,23 @@ function renderBattle(){
       html = `<p class="prompt">${esc(h.name)}의 차례 — 무엇을 할까?</p>
         <button class="choice" data-act="atk"><span>${C.atkName}</span><span class="tag">명중 ${sgn(atkMod(h))}</span><span class="tag">${C.dmg.map(d => "d" + d).join("+")}${sgn(dmgMod(h))}</span></button>
         <button class="choice" data-act="special" ${b.uses[b.cur] <= 0 ? "disabled" : ""}><span>${C.special.name}</span><span class="tag ok">${C.special.desc}</span><span class="tag">남은 ${b.uses[b.cur]}회</span></button>
+        ${(h.skills || []).map(k => { const sk = SKILLS[k], u = b.suses && b.suses[b.cur] ? b.suses[b.cur][k] || 0 : 0;
+          return `<button class="choice" data-act="skill" data-k="${k}" ${u <= 0 ? "disabled" : ""}><span>${sk.name}</span><span class="tag ok">${esc(sk.desc)}</span><span class="tag">남은 ${u}회</span></button>`; }).join("")}
         <button class="choice" data-act="potion" ${S.potions <= 0 ? "disabled" : ""}><span>회복 물약</span><span class="tag ok">2d4+2</span><span class="tag">${S.potions}개</span></button>`;
     }
   } else html = `<p class="prompt">${esc(b.name)}의 차례...</p>`;
   if (b.phase === "hero" && !mine(b.cur)) html = `<p class="prompt">${esc(S.party[b.cur].name)}의 차례 — <b>${esc(seatNick(b.cur))}</b>님이 행동을 고르는 중…</p>`;
-  $("#choices").innerHTML = html; netDirty();
+  const bf = [b.guard ? `방어도 +${b.guard.v} (${b.guard.t})` : "", b.bless ? `명중 +${b.bless.v} (${b.bless.t})` : "", b.poison && b.poison.t > 0 ? `적 중독 (${b.poison.t})` : "", b.stun ? "적 기절" : ""].filter(Boolean);
+  if (bf.length) html = `<p class="prompt buffs">${bf.map(x => `<span class="tag ok">${x}</span>`).join("")}</p>` + html;
+  $("#choices").innerHTML = html; $("#choices").classList.toggle("dense", $("#choices").querySelectorAll(".choice").length > 3); netDirty();
 }
 
 /* ---------- event pictures, branch cards, luck, loot, barks ---------- */
 let artTimer = null;
-function showArt(spec){ const w = $("#artWin"); clearInterval(artTimer);
-  if (!spec){ w.hidden = true; return; }
-  const cv = $("#artCv"); VIG.draw(cv, spec, performance.now()); $("#artCap").textContent = spec.cap || ""; w.hidden = false; w.classList.remove("on"); void w.offsetWidth; w.classList.add("on");
-  if (!REDUCED) artTimer = setInterval(() => { if (w.hidden) return clearInterval(artTimer); VIG.draw(cv, spec, performance.now()); }, 160); }
+// event effects (a trap snapping, coins, fire…) are painted straight onto the game scene instead of a picture window
+let ART_FX = null;
+function showArt(spec){ $("#artWin").hidden = true; clearInterval(artTimer); ART_FX = spec && spec.o && OVER[spec.o] ? spec : null; }
+const artOverlay = () => ART_FX && !S.battle && scene.bgKey === ART_FX.bg ? (fb, t) => OVER[ART_FX.o](fb, t) : null;
 function showCards(n, vis){
   const L = $("#cards");
   const wait = vote && curVoter() < 0;
@@ -1115,16 +1180,17 @@ function openInv(){ if (S.screen !== "game") return; $("#inv").hidden = false; S
 function closeInv(){ $("#inv").hidden = true; refreshStatus(); if (S.mode === "story" && !busy && tw.done && S.lines[S.li]) renderChoices(); }
 function renderInv(){
   const m = invSel.m, h = S.party[m]; if (!h) return;
-  $("#invTabs").innerHTML = S.party.map((p, i) => `<button class="inv-tab ${i === m ? "on" : ""}" data-act="invTab" data-i="${i}"><canvas class="px" data-spr="${p.cls}"></canvas><span>${esc(p.name)}<small>${CLASSES[p.cls].ko}</small></span></button>`).join("");
-  paintSpriteCanvas($("#invPortrait"), h.cls);
+  $("#invTabs").innerHTML = S.party.map((p, i) => `<button class="inv-tab ${i === m ? "on" : ""}" data-act="invTab" data-i="${i}"><canvas class="px" data-spr="${heroKey(p)}"></canvas><span>${esc(p.name)}<small>${CLASSES[p.cls].ko}</small></span></button>`).join("");
+  paintSpriteCanvas($("#invPortrait"), heroKey(h));
   $("#eqSlots").innerHTML = SLOTS.map(sl => { const uid = h.eq[sl], key = uid && S.items[uid] && S.items[uid].key, it = key && ITEMS[key];
     return `<button class="slot slot-${sl} ${uid && invSel.uid === uid ? "sel" : ""}" data-act="invSlot" data-s="${sl}" style="--rc:${it ? RARITY[it.r].c : "#283d55"}"><span class="slot-lab">${SLOT_KO[sl]}</span>${it ? `<canvas class="px" data-spr="it_${key}"></canvas><b style="color:${RARITY[it.r].c}">${esc(it.name)}</b>` : `<i>비어 있음</i>`}</button>`; }).join("");
   $("#invStats").innerHTML = `<div class="kv"><span>HP</span><b>${h.hp}/${h.maxHp}</b></div><div class="kv"><span>방어도</span><b>${h.ac}</b></div><div class="kv"><span>명중</span><b>${sgn(atkMod(h))}</b></div><div class="kv"><span>피해</span><b>${sgn(dmgMod(h))}</b></div><div class="kv"><span>판정</span><b>${sgn(bonus(h, "check"))}</b></div>
     <div class="abil">${STATS.map(k => { const b = bonus(h, k); return `<span>${STAT_KO[k]}<b>${statOf(h, k)}</b>${b ? `<em>+${b}</em>` : ""}</span>`; }).join("")}</div>`;
-  const n = Math.max(32, Math.ceil(S.inv.length/8)*8);
-  $("#bag").innerHTML = Array.from({length:n}, (_, k) => { const uid = S.inv[k]; if (!uid) return `<div class="cell"></div>`;
-    const key = S.items[uid].key, it = ITEMS[key], can = !it.cls || it.cls.includes(h.cls);
-    return `<button class="cell item ${invSel.uid === uid ? "sel" : ""} ${can ? "" : "no"}" data-act="invItem" data-u="${uid}" style="--rc:${RARITY[it.r].c}" aria-label="${esc(it.name)}"><canvas class="px" data-spr="it_${key}"></canvas></button>`; }).join("");
+  // bag first, then everything the party is wearing (marked with the wearer)
+  const worn = wornList(), cells = S.inv.filter(u => S.items[u]).map(u => ({uid:u, m:-1})).concat(worn), n = Math.max(32, Math.ceil(cells.length/8)*8);
+  $("#bag").innerHTML = Array.from({length:n}, (_, k) => { const c = cells[k]; if (!c) return `<div class="cell"></div>`; const uid = c.uid;
+    const key = S.items[uid].key, it = ITEMS[key], can = !it.cls || it.cls.includes(h.cls), w = c.m >= 0 ? S.party[c.m] : null;
+    return `<button class="cell item ${invSel.uid === uid ? "sel" : ""} ${can || w ? "" : "no"} ${w ? "worn" : ""}" data-act="invItem" data-u="${uid}" ${w ? `data-w="${c.m}"` : ""} style="--rc:${RARITY[it.r].c}" aria-label="${esc(it.name)}${w ? ` (${esc(w.name)} 착용 중)` : ""}"><canvas class="px" data-spr="it_${key}"></canvas>${w ? `<canvas class="px wearer" data-spr="${heroKey(w)}" title="${esc(w.name)} 착용 중"></canvas><i class="eq-mark">E</i>` : ""}</button>`; }).join("");
   $("#invMeta").innerHTML = `<span><canvas class="px" data-spr="coin"></canvas>${S.gold}</span><span><canvas class="px" data-spr="potion"></canvas>${S.potions}</span><span class="luck-ic">♣</span><span>${S.luck}</span>`;
   paintAll($("#inv")); renderDetail(h);
 }
@@ -1152,8 +1218,11 @@ function unequipU(m, uid){ const h = S.party[m]; if (!h || !uid || S.battle || b
 function equip(){ if (!mine(invSel.m)) return; if (isGuest()) return sendInput("equip", {m:invSel.m, u:invSel.uid}); equipU(invSel.m, invSel.uid); }
 function unequip(){ if (!mine(invSel.m)) return; if (isGuest()) return sendInput("unequip", {m:invSel.m, u:invSel.uid}); unequipU(invSel.m, invSel.uid); }
 // older saves: give everyone their starter kit and the new resources
-function migrate(){ S.items = S.items || {}; S.inv = S.inv || []; S.luck = S.luck ?? 1; S.chapSeen = S.chapSeen || {}; S.itemSeq = S.itemSeq || 0;
-  S.party.forEach(h => { if (!h.eq){ h.eq = {}; STARTER[h.cls].forEach(k => { h.eq[ITEMS[k].slot] = newItem(k); }); } if (h.hpBase == null) h.hpBase = h.maxHp; refreshHero(h); }); }
+function migrate(){ S.quests = S.quests || {}; if (S.world){ S.world.stage = S.world.stage || {}; } if (!S.loot) S.loot = genLoot(); S.chat = S.chat || []; S.freeBooks = S.freeBooks || 0;
+  if (!S.world){ const BG_AREA = {tavern:0, forest:1, glade:1, bridge:2, swamp:3, cave:4, camp:5, gate:6, hall:6, mirror:6, library:6, shrine:6, lair:7, dawn:7}, k = BG_AREA[S.bg] ?? 0;
+    S.world = {at:k, unlocked:k, entered:{}, cleared:{}, stage:{}}; for (let j=0;j<=k;j++){ S.world.entered[j] = true; if (j < k) S.world.cleared[j] = true; } }
+  S.items = S.items || {}; S.inv = S.inv || []; S.luck = S.luck ?? 1; S.chapSeen = S.chapSeen || {}; S.itemSeq = S.itemSeq || 0;
+  S.party.forEach(h => { h.skills = h.skills || []; if (!h.eq){ h.eq = {}; STARTER[h.cls].forEach(k => { h.eq[ITEMS[k].slot] = newItem(k); }); } if (h.hpBase == null) h.hpBase = h.maxHp; refreshHero(h); }); }
 
 /* ---------- status ---------- */
 function refreshStatus(){
@@ -1165,24 +1234,25 @@ function refreshStatus(){
   $("#lvl").textContent = `LV ${S.level}`; const lo = XP_T[S.level-1] || 0, hi = XP_T[S.level]; $("#xpFill").style.width = hi ? Math.min(100, (S.xp - lo) / (hi - lo) * 100) + "%" : "100%"; $("#xpBox").title = hi ? `경험치 ${S.xp}/${hi}` : `경험치 ${S.xp} (최고 레벨)`;
   const b = S.battle; $("#sGame").classList.toggle("battle", !!b);
   $("#foeBar").hidden = !b; $("#turnStrip").hidden = !b;
-  if (b){ $("#foeName").textContent = b.name; $("#foeHp").style.width = (100 * b.hp / b.maxHp) + "%"; $("#foeHpn").textContent = `HP ${b.hp}/${b.maxHp} · AC ${b.ac}`;
+  if (b){ $("#foeName").textContent = b.name; $("#foeHp").style.width = (100 * b.hp / b.maxHp) + "%"; $("#foeHpn").textContent = `HP ${b.hp}/${b.maxHp} · AC ${b.ac}${FOES[b.key].regen ? (b.burn ? " · 불에 그을림" : ` · 재생 ${FOES[b.key].regen.map(d => "d" + d).join("+")}`) : ""}`;
     $("#turnStrip").innerHTML = `<span class="rnd">R${b.round}</span>` + S.party.map((h, i) => `<canvas class="px ${b.phase === "hero" && b.cur === i ? "cur" : ""} ${h.hp <= 0 ? "down" : ""}" data-spr="${h.cls}" title="${esc(h.name)}"></canvas>`).join("") + `<canvas class="px foe ${b.phase === "foe" ? "cur" : ""}" data-spr="${FOES[b.key].sprite}"></canvas>`;
     paintAll($("#turnStrip")); }
   $("#party").innerHTML = S.party.map((h, i) => {
     const active = b && b.phase === "hero" && b.cur === i, pct = 100 * h.hp / h.maxHp;
-    const canDrink = !b && S.mode === "story" && S.potions > 0 && h.hp < h.maxHp && !busy && mine(i);
-    return `<div class="hero win ${active ? "active" : ""} ${h.hp <= 0 ? "down" : ""}">${online() ? `<span class="owntag ${mine(i) ? "me" : ""}">${esc(seatNick(i))}</span>` : ""}<div class="por"><canvas class="px" data-spr="${h.cls}"></canvas></div>
+    const canDrink = !b && (S.mode === "story" || S.mode === "walk") && S.potions > 0 && h.hp < h.maxHp && !busy && mine(i);
+    return `<div class="hero win ${active ? "active" : ""} ${h.hp <= 0 ? "down" : ""}">${online() ? `<span class="owntag ${mine(i) ? "me" : ""}">${esc(seatNick(i))}</span>` : ""}<div class="por"><canvas class="px" data-spr="${heroKey(h)}"></canvas></div>
       <div class="nm"><span>${esc(h.name)}</span><small>${CLASSES[h.cls].ko}</small>${h.hp <= 0 ? '<span class="downtag">DOWN</span>' : ""}</div>
       <div class="bar"><i class="${pct <= 30 ? "low" : ""}" style="width:${pct}%"></i></div>
       <div class="sub"><span>HP <b>${h.hp}/${h.maxHp}</b></span><span>AC <b>${h.ac}</b></span></div>
       ${canDrink ? `<button class="btn small drink" data-act="drink" data-i="${i}" title="회복 물약 마시기"><canvas class="px" data-spr="potion"></canvas>마시기</button>` : ""}</div>`; }).join("");
-  paintAll($("#party")); netDirty();
+  paintAll($("#party")); renderWorldBar(); renderChat(); if (SHOP.id) renderShop(); netDirty();
 }
 function renderGame(){
   refreshStatus(); scene.bgKey = S.bg || "tavern"; partyLight(); $("#chapName").textContent = CHAPTERS[S.bg] ? CHAPTERS[S.bg].join(" · ") : "";
   if (S.mode === "battle" && S.battle){ Audio8.music(S.battle.key === "drake" ? "boss" : "battle"); renderBattle(); if (S.battle.phase === "foe") setTimeout(foeTurn, 600); return; }
   Audio8.music(MUSIC[S.bg]);
   if (S.mode === "pick"){ renderPick(); return; }
+  if (S.nodeId === "hub" && (S.mode === "walk" || S.mode === "busy" || !S.lines.length)){ if (S.walk && S.walk.auto){ const [lo, hi] = S.world ? walkBounds() : [2, 2]; S.walk.auto = 0; S.walk.tx = null; S.walk.x = Math.max(lo, Math.min(hi, S.walk.x)); } startWalk(); return; }
   const L = S.lines[S.li]; if (!L) return;
   setSpeaker(L.who); $("#dlgText").className = "dlg-text" + (L.who === "sys" ? " sysl" : ""); $("#dlgText").textContent = L.text; tw.done = true;
   $("#dlgPos").textContent = S.lines.length > 1 ? `${S.li + 1}/${S.lines.length}` : ""; afterLine();
@@ -1197,7 +1267,8 @@ document.addEventListener("click", e => {
   const act = a.dataset.act, i = +a.dataset.i;
   if (act.startsWith("net") || act === "online") return netAct(act);
   if (online()){
-    const d = {i, n:+a.dataset.n || 0, c:a.dataset.c, st:a.dataset.s};
+    const d = {i, n:+a.dataset.n || 0, c:a.dataset.c, st:a.dataset.s, k:a.dataset.k};
+    if (act === "choice" || act === "poi"){ const c0 = nodeChoices(NODES[S.nodeId])[i]; if (c0 && c0.t === "shop"){ if (!busy) openShop(c0.shop); return; } }
     if (isGuest()){
       if (act === "quit"){ togglePause(false); netLeave(); return; }
       if (["new","continue","toTitle","count","start","vote"].includes(act)){ netMsg("진행은 방장이 해요"); return; }
@@ -1205,7 +1276,7 @@ document.addEventListener("click", e => {
       if (act === "roll" && !mine(i)) return;
     } else if (!LOCAL_ACTS.has(act) && !actAllowed(NET.me, act, d)) return;
   }
-  if (busy && !["sound","music","throw","autoRoll","pause","resume","vote","fullscreen","howto","closeHowto","dismissRotate","invOpen","closeInv","invTab","invItem","invSlot","closeArt"].includes(act)) return;
+  if (busy && !["sound","music","throw","autoRoll","pause","resume","vote","fullscreen","howto","closeHowto","dismissRotate","invOpen","closeInv","invTab","invItem","invSlot","closeArt","shopTab","closeShop","chatSend","chatToggle"].includes(act)) return;
   switch (act){
     case "new": S.setup = blankSetup(); sfx("select"); show("setup"); break;
     case "continue": { const s = loadSave(); if (s){ S = Object.assign(S, s); migrate(); show("game"); renderGame(); } break; }
@@ -1234,7 +1305,16 @@ document.addEventListener("click", e => {
     case "invOpen": openInv(); break;
     case "closeInv": closeInv(); break;
     case "invTab": invSel = {m:i, uid:null}; sfx("blip"); renderInv(); break;
-    case "invItem": invSel.uid = a.dataset.u; sfx("blip"); renderInv(); break;
+    case "invItem": if (invSel.uid === a.dataset.u && a.dataset.w == null && performance.now() - (invSel.t || 0) < 450){ invSel.t = 0; equip(); break; } invSel.t = performance.now(); invSel.uid = a.dataset.u; if (a.dataset.w != null) invSel.m = +a.dataset.w; sfx("blip"); renderInv(); break;
+    case "travel": travel(i); break;
+    case "poi": poiAct(i, NET.me); break;
+    case "walkGo": startWalk(); break;
+    case "skill": useSkill(a.dataset.k); break;
+    case "shopTab": SHOP.tab = a.dataset.t; sfx("blip"); renderShop(); break;
+    case "closeShop": closeShop(); break;
+    case "shopBuy": case "shopSell": case "shopLearn": case "shopSupply": { const d2 = {s:SHOP.id, k:a.dataset.k, u:a.dataset.u, m:i}; if (isGuest()) { sendInput(act, {sh:SHOP.id, k:d2.k, u:d2.u, i}); sfx("select"); } else shopAct(NET.me, act, d2); break; }
+    case "chatSend": sendChat(); break;
+    case "chatToggle": { const w = $("#chatWin"); w.classList.toggle("min"); renderChat(true); break; }
     case "invSlot": { const h = S.party[invSel.m]; invSel.uid = h.eq[a.dataset.s] || null; sfx("blip"); renderInv(); break; }
     case "equip": equip(); break;
     case "unequip": unequip(); break;
@@ -1251,10 +1331,13 @@ document.addEventListener("input", e => { if (!e.target.classList.contains("name
   if (isGuest()){ clearTimeout(NET.nmT); NET.nmT = setTimeout(() => sendInput("name", {i, v:e.target.value.slice(0, 8)}), 250); } else netDirty(); });
 document.addEventListener("keydown", e => {
   const k = e.key, tag = e.target.tagName; Audio8.unlock();
-  if (tag === "INPUT"){ if (k === "Enter"){ if (e.target.id === "netCode") netAct("netJoin"); else if (e.target.id === "netNick" && !online()) netAct("netHost"); else e.target.blur(); } return; }
+  if (tag === "INPUT"){ if (e.target.id === "chatIn"){ if (k === "Enter"){ e.preventDefault(); sendChat(); } else if (k === "Escape") e.target.blur(); return; }
+    if (k === "Enter"){ if (e.target.id === "netCode") netAct("netJoin"); else if (e.target.id === "netNick" && !online()) netAct("netHost"); else e.target.blur(); } return; }
   if (!$("#netLayer").hidden){ if (k === "Escape") netAct("netClose"); return; }
   if (k === "f" || k === "F"){ toggleFull(); return; }
-  if (k === "Escape"){ if (!$("#howto").hidden) $("#howto").hidden = true; else if (invOpen()) closeInv(); else togglePause(); return; }
+  if (k === "/" && !$("#chatWin").hidden){ e.preventDefault(); $("#chatWin").classList.remove("min"); renderChat(true); $("#chatIn").focus(); return; }
+  if (k === "Escape"){ if (!$("#howto").hidden) $("#howto").hidden = true; else if (!$("#shop").hidden) closeShop(); else if (invOpen()) closeInv(); else togglePause(); return; }
+  if (!$("#shop").hidden) return;
   if ((k === "i" || k === "I") && S.screen === "game" && $("#pause").hidden && $("#loot").hidden){ invOpen() ? closeInv() : openInv(); return; }
   if (invOpen()){ if (k === "e" || k === "E"){ const b = $('#itemDetail [data-act="equip"]'); if (b && !b.disabled) equip(); } return; }
   if (!$("#loot").hidden){ if (k === " " || k === "Enter"){ e.preventDefault(); $("#lootOk").click(); } return; }
@@ -1270,11 +1353,12 @@ document.addEventListener("keydown", e => {
     const items = [...document.querySelectorAll(".menu button:not([hidden])")], cur = items.indexOf(document.activeElement);
     const n = items[(cur + (k === "ArrowDown" ? 1 : -1) + items.length) % items.length]; n.focus(); sfx("blip"); return; }
   if (S.screen !== "game" || busy) return;
+  if (walkKey(e)) return;
   if (/^[1-9]$/.test(k)){ const b = document.querySelectorAll("#choices .choice")[+k - 1]; if (b && !b.disabled) b.click(); return; }
   if ((k === " " || k === "Enter") && S.mode === "story" && !(tag === "BUTTON" && e.target.closest("#choices"))){ e.preventDefault(); advanceDialog(); }
 });
 
-window.__dbg = {get vote(){ return vote; }, get busy(){ return busy; }, get NET(){ return NET; }, NODES, FOES, ITEMS, get S(){ return S; }, enterNode:(id) => enterNode(id), giveItem:k => giveItem(k), showLoot:k => showLoot(k), openInv:() => openInv(), FX, scene};
+window.__dbg = {get WV(){ return WV; }, get VW(){ return VW; }, travel:ai => travel(ai), get vote(){ return vote; }, get busy(){ return busy; }, get NET(){ return NET; }, NODES, FOES, ITEMS, get S(){ return S; }, enterNode:(id) => enterNode(id), giveItem:k => giveItem(k), showLoot:k => showLoot(k), openInv:() => openInv(), FX, scene};
 /* ================= BOOT ================= */
 try { window.claude?.hot?.snapshot?.(() => JSON.parse(JSON.stringify(S))); } catch (e) {}
 function start(data){

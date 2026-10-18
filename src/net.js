@@ -136,12 +136,13 @@ function guestRender(){
   if (S.screen !== "game"){ renderNetPanel(); return; }
   if (!S.party || !S.party.length) return;
   guestBg(S.bg);
-  Audio8.music(S.battle ? (S.battle.key === "drake" ? "boss" : "battle") : MUSIC[S.bg] || "night");
+  Audio8.music(S.battle ? (S.battle.key === "drake" ? "boss" : "battle") : MUSIC[S.bg] || "ashen");
   refreshStatus(); if (invOpen()) renderInv();
   const k = [S.enterSeq, S.mode, S.li, S.pick].join("|"), [pe, , pl] = NET.gk.split("|"), vj = JSON.stringify(vote);
   if (S.mode === "battle" && S.battle) renderBattle();
   else if (S.mode === "busy"){ if (k !== NET.gk) $("#choices").innerHTML = ""; }
   else if (S.mode === "pick"){ if (k !== NET.gk) renderPick(); }
+  else if (S.mode === "walk") renderWalkUI(k !== NET.gk);
   else if (S.lines && S.lines[S.li]){
     if (k !== NET.gk){
       if (String(S.enterSeq) !== pe){ hideCards(); typeLine(); }
@@ -159,16 +160,17 @@ function sendInput(a, extra = {}){
   while (NET.inp.length > 6 || JSON.stringify(NET.inp).length > 2400) NET.inp.shift();
   NET.room.presence({inp:NET.inp}).catch(() => {});
 }
-const GUEST_SEND = new Set(["choice", "pickHero", "cancelPick", "atk", "special", "potion", "potionTo", "cancelPotion", "drink", "cls", "swap"]);
+const GUEST_SEND = new Set(["poi", "walkGo", "travel", "skill", "choice", "pickHero", "cancelPick", "atk", "special", "potion", "potionTo", "cancelPotion", "drink", "cls", "swap"]);
 const LOCAL_ACTS = new Set(["sound", "music", "fullscreen", "howto", "closeHowto", "dismissRotate", "invOpen", "closeInv", "invTab", "invItem", "invSlot", "closeArt", "pause", "resume", "throw", "autoRoll"]);
 function actAllowed(peer, act, d){
   const b = S.battle, i = d.i;
   switch (act){
-    case "atk": case "special": case "potion": case "potionTo": case "cancelPotion": return !!b && b.phase === "hero" && ownerPeer(b.cur) === peer;
+    case "atk": case "special": case "potion": case "potionTo": case "cancelPotion": case "skill": return !!b && b.phase === "hero" && ownerPeer(b.cur) === peer;
     case "drink": return ownerPeer(i) === peer;
     case "cls": case "swap": case "roll": case "name": case "stats": return S.screen === "setup" && i >= 0 && i < 4 && ownerPeer(i) === peer;
     case "equip": case "unequip": return ownerPeer(d.m) === peer;
-    case "choice": case "pickHero": case "cancelPick": case "adv": return true;
+    case "choice": case "pickHero": case "cancelPick": case "adv": case "travel": case "walk": case "poi": case "walkGo": case "chat": case "shopBuy": case "shopSell": case "shopSupply": return true;
+    case "shopLearn": return ownerPeer(i) === peer;
     default: return peer === NET.me;
   }
 }
@@ -176,12 +178,14 @@ function setCls(i, c){ const h = S.setup.heroes[i]; if (!h || !CLASSES[c]) retur
 function doSwap(i, st){ const h = S.setup.heroes[i]; if (!h || !h.stats || !STATS.includes(st)) return false;
   if (!h.sel) h.sel = st; else if (h.sel === st) h.sel = null; else { [h.stats[h.sel], h.stats[st]] = [h.stats[st], h.stats[h.sel]]; [h.dice[h.sel], h.dice[st]] = [h.dice[st], h.dice[h.sel]]; h.sel = null; }
   rerenderCard(i); return true; }
-function cancelPick(){ if (S.mode !== "pick") return; S.mode = "story"; S.pick = null; renderChoices(); setSpeaker(S.lines[S.li].who); $("#dlgText").textContent = S.lines[S.li].text; save(); }
+function cancelPick(){ if (S.mode !== "pick") return; if (S.nodeId === "hub"){ S.pick = null; return startWalk(); } S.mode = "story"; S.pick = null; renderChoices(); setSpeaker(S.lines[S.li].who); $("#dlgText").textContent = S.lines[S.li].text; save(); }
 function hostInput(peer, m){
   const a = String(m.a || ""), i = Number.isInteger(m.i) ? m.i : -1;
   if (a === "dice") return remoteDice(peer, m);
   if (a === "w"){ const W = NET.W; if (W && W.id === m.id && (W.seat == null || ownerPeer(W.seat) === peer)) W.fin(m.v === "luck" ? "luck" : "next"); return; }
   if (a === "loot"){ if (NET.LW && NET.LW.id === m.id) NET.LW.fin(false); return; }
+  if (a === "chat"){ const k = NET.seats.findIndex(s => s && s.peer === peer); pushChat(peerNick(peer), m.v, k); return; }
+  if (a.startsWith("shop")){ if (actAllowed(peer, a, {i})) shopAct(peer, a, {s:String(m.sh || ""), k:String(m.k || ""), u:String(m.u || ""), m:i}); return; }
   const d = {i, m:Number.isInteger(m.m) ? m.m : -1};
   if (!actAllowed(peer, a, d)) return;
   if (a === "name"){ const h = S.setup.heroes[i]; if (h){ h.name = String(m.v ?? "").replace(/[\u0000-\u001f\u007f]/g, "").slice(0, 8); rerenderCard(i); } return; }
@@ -194,21 +198,26 @@ function hostInput(peer, m){
   switch (a){
     case "choice": if (S.screen === "game" && S.mode === "story" && m.e === S.enterSeq) choose(i, peer); break;
     case "pickHero": if (S.mode === "pick" && S.party[i]) doCheck(i); break;
+    case "travel": travel(i); break;
+    case "walk": hostWalkInput(peer, m); break;
+    case "poi": poiAct(i, peer); break;
+    case "walkGo": if (S.nodeId === "hub" && S.mode === "story" && S.li >= S.lines.length - 1) startWalk(); break;
+    case "skill": useSkill(String(m.k || "")); break;
     case "cancelPick": cancelPick(); break;
     case "atk": heroAct("attack"); break;
     case "special": heroAct("special"); break;
     case "potion": heroAct("potion"); break;
     case "potionTo": if (S.party[i]) usePotion(i, true); break;
     case "cancelPotion": S.battle.picking = null; renderBattle(); break;
-    case "drink": if (S.party[i] && !S.battle && S.mode === "story") usePotion(i, false); break;
+    case "drink": if (S.party[i] && !S.battle && (S.mode === "story" || S.mode === "walk")) usePotion(i, false); break;
   }
 }
 function remoteStats(i, raw){
   const h = S.setup.heroes[i]; if (!h || !Array.isArray(raw) || raw.length !== 6) return;
   const ok = raw.every(r => r && Array.isArray(r.d) && r.d.length === 4 && r.d.every(x => Number.isInteger(x) && x >= 1 && x <= 6));
   if (!ok) return; if (h.stats){ if (h.rerolls <= 0) return; h.rerolls--; }
-  h.raw = raw.map(r => { const d = r.d.slice(), low = Math.min(...d); return {v:d.reduce((a, b) => a + b, 0) - low, d}; });
-  assignByClass(h); rerenderCard(i);
+  h.raw = raw.map(r => { const d = r.d.slice(), low = Math.min(...d); return {v:d.reduce((a, b) => a + b, 0) - low, d, st:STATS.includes(r.st) ? r.st : undefined}; });
+  assignRolled(h); rerenderCard(i);
 }
 
 /* ---------- dice over the network ---------- */

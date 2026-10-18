@@ -221,6 +221,7 @@ button:focus-visible,input:focus-visible{outline:3px dashed var(--gold); outline
 .slots li span{font-family:var(--f-pixel); font-size:14px; color:var(--mute)}
 .slots li b{font-family:var(--f-pixel); font-size:40px; font-weight:400; color:var(--edge)}
 .slots li.done b{color:var(--gold)}
+.slots li em.st{font-style:normal; font-family:var(--f-display); font-size:26px; color:var(--text); line-height:1.1} .slots li em.st small{color:var(--gold); font-size:16px; margin-right:2px} .slots li.cur em.st{color:var(--gold)}
 .slots li.cur{box-shadow:0 0 0 3px var(--ember)}
 .slots li i{font-style:normal; font-size:16px; color:var(--mute); min-height:1.2em} .slots li i s{color:var(--blood)}
 
@@ -278,6 +279,7 @@ button:focus-visible,input:focus-visible{outline:3px dashed var(--gold); outline
 .card-tags{display:flex; flex-wrap:wrap; gap:6px; min-height:0}
 .card-desc{font-size:19px; color:var(--dim); line-height:1.5}
 .choices.dense .choice{font-size:21px; padding-block:3px} .choices.dense .choice::before{top:4px}
+.choices.dense2 .choice{font-size:19px; padding-block:1px; line-height:1.25} .choices.dense2 .choice::before{top:1px; transform:scale(.85)} .choices.dense2 .prompt{font-size:21px; padding-bottom:0} .choices.dense2 .tag{font-size:13px}
 .toast{position:absolute; left:50%; top:118px; transform:translateX(-50%); display:flex; align-items:center; gap:14px; padding:10px 22px 10px 12px; z-index:30}
 .toast canvas{width:56px; height:56px; background:var(--void)}
 .toast small{display:block; font-family:var(--f-pixel); font-size:14px; color:var(--dim)}
@@ -361,6 +363,65 @@ button:focus-visible,input:focus-visible{outline:3px dashed var(--gold); outline
 #rotate button{white-space:nowrap; flex:none; font-family:var(--f-display); font-size:15px; background:var(--panel2); color:var(--text); border:0; padding:6px 12px; box-shadow:0 0 0 2px var(--edge)}
 @media (orientation:portrait) and (max-width:820px){ #rotate:not(.off){display:flex} }
 @media (prefers-reduced-motion:reduce){ .more,.tray-hint,.banner.on,.dlabel{animation:none} .banner.on{opacity:1} .bar i{transition:none} .chapter{transition:none} }
+/* ---------- world bar ---------- */
+#poiTags{position:absolute; left:0; top:0; width:1920px; height:1080px; pointer-events:none; z-index:5}
+.poi-tag{position:absolute; left:0; top:0; white-space:nowrap; font-family:var(--f-display); font-size:21px; line-height:1.3; color:var(--dim); background:rgba(7,9,15,.72); padding:2px 12px 3px; box-shadow:0 0 0 2px var(--void),0 0 0 4px var(--edge); opacity:.8}
+.poi-tag.exit{color:var(--teal)}
+.poi-tag.on{color:var(--gold); opacity:1; font-size:24px; box-shadow:0 0 0 2px var(--void),0 0 0 4px var(--gold)}
+.poi-tag .key{margin:0 10px 0 0}
+.poi-tag.who{font-family:var(--f-pixel); font-size:14px; padding:1px 8px 2px; color:var(--text); box-shadow:0 0 0 2px var(--void); opacity:.9} .poi-tag.who.me{color:var(--void); background:var(--teal)}
+.walkpad{display:flex; align-items:center; gap:12px; padding:0 0 6px 6px; font-family:var(--f-pixel); font-size:14px; color:var(--mute)}
+.wbtn{all:unset; box-sizing:border-box; width:68px; height:46px; display:grid; place-items:center; font-size:22px; color:var(--text); background:var(--void); box-shadow:0 0 0 2px var(--edge); cursor:var(--cursor); touch-action:none; user-select:none; -webkit-user-select:none}
+.wbtn:hover{box-shadow:0 0 0 2px var(--ember-hi)} .wbtn:active{background:var(--ember-hi); color:var(--void)}
+.choice .key{margin-left:auto}
+.prompt.walkhint{font-family:var(--f-pixel); font-size:15px; color:var(--mute); line-height:1.6}
+.dlg-text.walkt{font-size:26px; line-height:1.55}
+.worldbar{position:absolute; left:50%; top:150px; transform:translateX(-50%); display:flex; align-items:center; gap:0; padding:8px 14px; background:rgba(7,9,15,.82); box-shadow:0 0 0 3px var(--void),0 0 0 6px var(--edge); z-index:6}
+.wb-node{all:unset; box-sizing:border-box; display:grid; justify-items:center; gap:2px; width:104px; cursor:var(--cursor); padding:4px 2px; position:relative}
+.wb-node canvas{width:40px; height:40px; background:var(--panel2); box-shadow:0 0 0 3px var(--void),0 0 0 5px var(--edge)}
+.wb-node span{font-family:var(--f-display); font-size:17px; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:104px}
+.wb-node.done canvas{box-shadow:0 0 0 3px var(--void),0 0 0 5px var(--heal)}
+.wb-node.here canvas{box-shadow:0 0 0 3px var(--void),0 0 0 6px var(--gold)} .wb-node.here span{color:var(--gold)}
+.wb-node.here::after{content:"▼"; position:absolute; top:-18px; font-size:14px; color:var(--gold); animation:blink 1s steps(2) infinite}
+.wb-node.lock{opacity:.4}
+.wb-node:not(:disabled):hover canvas{box-shadow:0 0 0 3px var(--void),0 0 0 6px var(--ember-hi)} .wb-node:not(:disabled):hover span{color:var(--text)}
+.wb-road{display:block; width:22px; height:4px; background:var(--edge-hi); margin-bottom:22px} .wb-road.lock{background:repeating-linear-gradient(90deg,var(--edge) 0 4px,transparent 4px 8px)}
+.wb-tip{font-family:var(--f-pixel); font-size:13px; color:var(--mute); margin-left:12px; max-width:150px; line-height:1.3}
+#sGame.battle .worldbar,#sGame.cardsopen .worldbar{display:none}
+
+/* ---------- chat ---------- */
+.chat{position:absolute; right:32px; top:330px; width:420px; display:grid; grid-template-rows:auto 1fr auto; height:300px; z-index:7; background:rgba(12,17,28,.86)}
+.chat header{display:flex; align-items:center; gap:10px; padding:8px 12px 6px; font-family:var(--f-display); font-size:22px; color:var(--gold)} .chat header span{flex:1}
+.chat header .btn{padding:0 10px; font-size:18px} .chat .badge{position:static; animation:none}
+.chat-log{overflow-y:auto; padding:4px 14px; display:grid; align-content:start; gap:4px; font-size:19px; line-height:1.4; user-select:text}
+.chat-log p{color:var(--text); word-break:break-all} .chat-log p b{color:var(--teal); font-weight:400; margin-right:8px} .chat-log p.me b{color:var(--gold)} .chat-log p.sys{color:var(--mute); font-size:16px}
+.chat-in{display:flex; gap:8px; padding:8px 10px 10px} .chat-in input{flex:1; min-width:0; font-family:var(--f-body); font-size:19px; background:var(--void); color:var(--text); border:0; padding:6px 10px; box-shadow:inset 0 0 0 2px var(--edge)}
+.chat.min{height:auto} .chat.min .chat-log,.chat.min .chat-in{display:none}
+#sGame.cardsopen .chat{opacity:.25; pointer-events:none}
+#sGame.battle .chat:not(:focus-within){opacity:.8}
+
+/* ---------- shop ---------- */
+.shop-win{width:1480px; max-height:940px; display:grid; grid-template-rows:auto auto 1fr; padding:28px 34px 30px; gap:16px}
+.shop-head{display:flex; align-items:center; gap:20px} .shop-head > div:nth-child(2){flex:1}
+.shop-head .por{width:96px; height:96px; background:radial-gradient(circle at 50% 70%,#283d55 0,#0c111c 70%); box-shadow:inset 0 0 0 3px var(--void)} .shop-head .por canvas{width:96px; height:96px}
+.shop-head h2{font-family:var(--f-display); font-size:48px; color:var(--ember-hi); line-height:1.1; text-shadow:4px 4px 0 var(--void)} .shop-head p{font-size:21px; color:var(--dim)}
+.shop-gold{display:flex; align-items:center; gap:8px; font-family:var(--f-pixel); font-size:28px; color:var(--gold)} .shop-gold canvas{width:32px; height:32px} .shop-gold small{font-family:var(--f-display); font-size:18px; color:var(--heal); margin-left:8px}
+.shop-tabs{display:flex; gap:8px} .sh-tab{all:unset; cursor:var(--cursor); font-family:var(--f-display); font-size:26px; color:var(--dim); padding:6px 26px; background:var(--panel2); box-shadow:inset 0 0 0 3px var(--void)} .sh-tab.on{color:var(--void); background:var(--gold)}
+.shop-body{overflow-y:auto; padding-right:8px} .shop-body h4{font-family:var(--f-display); font-size:26px; color:var(--teal); margin:10px 0 8px; font-weight:400} .shop-body h4 small{font-size:17px; color:var(--mute); margin-left:10px}
+.sh-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px}
+.sh-card{display:grid; grid-template-columns:60px minmax(0,1fr) auto; align-items:center; gap:14px; padding:10px 14px; background:var(--panel); box-shadow:inset 0 0 0 3px var(--void),inset 4px 0 0 3px var(--rc,var(--edge))}
+.sh-card > canvas{width:56px; height:56px; background:var(--void)}
+.sh-info{display:grid; gap:2px; min-width:0} .sh-info b{font-family:var(--f-display); font-size:26px; font-weight:400; color:var(--text)} .sh-info span{font-size:16px; color:var(--mute)} .sh-info em{font-style:normal; font-size:18px; color:var(--heal)}
+.sh-buy{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; align-items:center; max-width:330px}
+.sh-buy .btn{display:flex; align-items:center; gap:6px; font-size:20px; padding:6px 14px 5px} .sh-buy canvas.coin{width:20px; height:20px}
+.sh-learned{font-family:var(--f-display); font-size:18px; color:var(--heal)} .sh-sell{font-family:var(--f-pixel); font-size:14px; color:var(--mute)}
+.sh-empty{font-size:22px; color:var(--dim); padding:20px}
+/* worn items in the bag */
+.cell.item.worn{opacity:.78} .cell.item .wearer{position:absolute; left:2px; bottom:2px; width:24px; height:24px; background:var(--void); box-shadow:0 0 0 2px var(--gold)}
+.cell.item .eq-mark{position:absolute; right:3px; top:2px; font-style:normal; font-family:var(--f-pixel); font-size:12px; color:var(--void); background:var(--gold); padding:1px 4px}
+.cell.item{position:relative}
+.prompt.buffs{display:flex; gap:8px; flex-wrap:wrap}
+
 /* ---------- online ---------- */
 .net-win{width:980px; padding:36px 44px 32px; display:grid; gap:20px}
 .net-win h2{font-family:var(--f-display); font-size:60px; color:var(--ember-hi); text-shadow:4px 4px 0 var(--void); line-height:1}
@@ -443,12 +504,17 @@ button:focus-visible,input:focus-visible{outline:3px dashed var(--gold); outline
       <span class="res" title="행운 토큰 — 실패한 굴림을 다시 던질 수 있어요"><span class="luck-ic">♣</span><span id="luck">0</span></span>
     </div>
     <div class="hud-btns"><button class="btn small ghost" data-act="invOpen">가방<span class="key">I</span><b class="badge" id="bagBadge" hidden></b></button><button class="btn small ghost" data-act="pause">메뉴<span class="key">ESC</span></button></div>
+    <nav class="worldbar" id="worldBar" aria-label="지역 이동" hidden></nav>
+    <aside class="chat win" id="chatWin" hidden aria-label="파티 채팅"><header><span>파티 채팅</span><b class="badge" id="chatBadge" hidden></b><button class="btn small ghost" data-act="chatToggle" aria-label="채팅 접기">_</button></header>
+      <div class="chat-log" id="chatLog" aria-live="polite"></div>
+      <div class="chat-in"><label class="sr" for="chatIn">메시지</label><input id="chatIn" maxlength="120" autocomplete="off" placeholder="메시지 입력 ( / )"><button class="btn small primary" data-act="chatSend">전송</button></div></aside>
     <div class="questbox" id="questbox"><div class="chap" id="chapName"></div><div class="objective" id="objective"></div><div class="clues" id="clues"></div></div>
     <div class="foebar win red" id="foeBar" hidden><div class="nm"><span id="foeName"></span><small id="foeHpn"></small></div><div class="bar"><i id="foeHp"></i></div></div>
     <div class="turns win" id="turnStrip" hidden></div>
     <div class="chapter" id="chapter" hidden></div>
     <div class="banner" id="banner" hidden></div>
     <div id="barks" aria-hidden="true"></div>
+    <div id="poiTags" hidden aria-hidden="true"></div>
     <div class="art win" id="artWin" hidden><canvas id="artCv" class="px" aria-label="사건 장면"></canvas><div class="art-cap"><span id="artCap"></span><button class="art-x" data-act="closeArt" aria-label="그림 닫기">✕</button></div></div>
     <div class="cards" id="cards" hidden></div>
     <div class="toast win" id="toast" hidden></div>
@@ -485,6 +551,16 @@ button:focus-visible,input:focus-visible{outline:3px dashed var(--gold); outline
       </div>
       <p class="net-status" id="netStatus" aria-live="polite"></p>
       <div class="net-btns"><span></span><button class="btn ghost small" data-act="netClose">닫기<span class="key">ESC</span></button></div>
+    </div>
+  </div>
+
+  <!-- SHOP -->
+  <div class="layer" id="shop" hidden>
+    <div class="shop-win win" role="dialog" aria-modal="true" aria-labelledby="shopName">
+      <div class="shop-head"><div class="por"><canvas id="shopPortrait" class="px"></canvas></div><div><h2 id="shopName"></h2><p id="shopGreet"></p></div>
+        <div class="shop-gold" id="shopGold"></div><button class="btn small ghost" data-act="closeShop">닫기<span class="key">ESC</span></button></div>
+      <div class="shop-tabs"><button class="sh-tab on" data-act="shopTab" data-t="buy">사기</button><button class="sh-tab" data-act="shopTab" data-t="sell">팔기</button></div>
+      <div class="shop-body" id="shopBody"></div>
     </div>
   </div>
 
@@ -568,6 +644,8 @@ button:focus-visible,input:focus-visible{outline:3px dashed var(--gold); outline
       <div class="keys">
         <div>대사 넘기기 <span><span class="key">SPACE</span><span class="key">클릭</span></span></div>
         <div>선택지 고르기 <span><span class="key">1</span><span class="key">2</span><span class="key">3</span><span class="key">4</span></span></div>
+        <div>걸어 다니기 <span><span class="key">← →</span><span class="key">A D</span><span class="key">화면 누르기</span></span></div>
+        <div>상인 · 장소와 상호작용 <span class="key">E</span></div>
         <div>주사위 던지기 <span><span class="key">누른 채 흔들고 휙</span><span class="key">SPACE 대신 던지기</span></span></div>
         <div>결과 확인 후 계속 <span class="key">ENTER</span></div>
         <div>메뉴 <span class="key">ESC</span></div>
@@ -2013,12 +2091,18 @@ class PixelScene {
     this.fb = new FB(); this.cache = {}; this.L = new Float32Array(SW*SH*3); this.shadow = new Uint8Array(SW*SH);
     this.parts = []; this.floats = []; this.dyn = []; this.fxs = []; this.shakeT = 0; this.fade = 0; this.fadeTo = 0; this.flashT = 0; this.flashC = [255,255,255]; this.flashDur = 1;
     this.bgKey = "tavern"; this.units = []; this.party = [];
+    this.camX = 0; this.lastCam = 0; this.tmp = null; this.colMap = new Int16Array(SW);
     this.vign = new Float32Array(SW*SH); for (let y=0;y<SH;y++) for (let x=0;x<SW;x++){ const dx = (x-SW/2)/(SW/2), dy = (y-SH/2)/(SH/2); this.vign[y*SW+x] = Math.max(0.55, 1 - 0.32*(dx*dx*0.7+dy*dy)); }
   }
   layer(key){
     if (this.cache[key]) return this.cache[key];
-    const fb = new FB(); BGS[key].draw(fb, mkRng(key.length*977 + 13)); return this.cache[key] = fb;
+    const fb = new FB(BGS[key].w || SW, SH); BGS[key].draw(fb, mkRng(key.length*977 + 13)); return this.cache[key] = fb;
   }
+  patched(key){ const ck = key + ":p"; if (this.cache[ck]) return this.cache[ck];
+    const src = this.layer(key), fb = new FB(); fb.copyFrom(src);
+    for (const [x0, y0, w, h, dx] of BGS[key].uniq || []) for (let y=y0;y<y0+h;y++) for (let x=x0;x<x0+w;x++){ const s = y*SW + Math.max(0, Math.min(SW-1, x + dx)), d = y*SW + x;
+      fb.rgb[d*3] = src.rgb[s*3]; fb.rgb[d*3+1] = src.rgb[s*3+1]; fb.rgb[d*3+2] = src.rgb[s*3+2]; fb.em[d] = src.em[s]; }
+    return this.cache[ck] = fb; }
   spawn(p){ p.t = 0; this.parts.push(p); if (this.parts.length > 400) this.parts.shift(); }
   burst(x, y, n, c, sp=40, opts={}){ for (let i=0;i<n;i++){ const a = Math.random()*Math.PI*2, s = sp*(0.4+Math.random()*0.6); this.spawn({x, y, vx:Math.cos(a)*s, vy:Math.sin(a)*s - (opts.up||0), life:opts.life||0.6, c:Array.isArray(c) ? c[i%c.length] : c, em:1, g:opts.g ?? 60}); } }
   float(text, x, y, c, big){ this.floats.push({text, x, y, c, t:0, big}); }
@@ -2026,8 +2110,21 @@ class PixelScene {
   shake(ms=260){ this.shakeT = performance.now() + ms; }
   addFx(type, o){ this.fxs.push({type, t0:performance.now() + (o.delay || 0), ...o}); }
   flash(ms=120, c="#f4f2ea"){ this.flashT = performance.now() + ms; this.flashDur = ms; this.flashC = col(c); }
+  /* side-scrolling: camX moves the view along a strip. Wide backgrounds (bg.w) are drawn once at full width;
+     ordinary 320px backgrounds repeat as a ping-pong (original, mirrored, original…) so every seam matches. */
+  tiles(cam, pad){ const out = []; for (let k = Math.floor((cam - pad)/SW); k <= Math.floor((cam + SW + pad)/SW); k++) out.push(k); return out; }
+  tileX(k, x, cam){ return k*SW + ((k & 1) ? SW - x : x) - cam; }
+  lightsNow(){ const bg = BGS[this.bgKey], cam = this.lastCam; if (!cam) return bg.lights;
+    if (bg.w) return bg.lights.map(l => ({...l, x:l.x - cam, seed:l.x}));
+    const out = []; for (const k of this.tiles(cam, 160)) for (const l of bg.lights){ const x = this.tileX(k, l.x, cam); if (x > -l.r && x < SW + l.r) out.push({...l, x, seed:l.x + k}); }
+    return out; }
   update(dt, t){
-    const bg = BGS[this.bgKey]; if (bg.emit && !REDUCED) bg.emit(t, this);
+    const bg = BGS[this.bgKey], cam = this.lastCam;
+    if (bg.emit && !REDUCED){
+      if (!cam) bg.emit(t, this, 0);
+      else if (bg.w) bg.emit(t, this, cam);
+      else for (const k of this.tiles(cam, 12)){ const sc = {spawn:p => { p.x = this.tileX(k, p.x, cam); if (k & 1) p.vx = -(p.vx || 0); if (p.x > -12 && p.x < SW + 12) this.spawn(p); }}; bg.emit(t, sc, 0); }
+    }
     for (const p of this.parts){ p.t += dt; if (p.ash){ p.vx += Math.sin(t/700 + p.y*0.05)*0.3; } if (p.fly){ p.vx += (Math.random()-0.5)*8; p.vy += (Math.random()-0.5)*8; }
       if (p.g) p.vy += p.g*dt; p.x += p.vx*dt; p.y += p.vy*dt; }
     this.parts = this.parts.filter(p => p.t < p.life && p.y < SH+4 && p.y > -10);
@@ -2036,11 +2133,24 @@ class PixelScene {
     if (this.fade !== this.fadeTo) this.fade += Math.sign(this.fadeTo - this.fade)*Math.min(Math.abs(this.fadeTo-this.fade), dt*3.2);
   }
   render(t, units, overlay){
-    const fb = this.fb, bg = BGS[this.bgKey];
-    fb.copyFrom(this.layer(this.bgKey));
-    bg.anim(fb, t);
-    // shadows: long, cast away from the main light
-    const L0 = bg.lights[bg.shadowFrom || 0]; this.shadow.fill(0);
+    const fb = this.fb, bg = BGS[this.bgKey], lay = this.layer(this.bgKey);
+    const cam = bg.w ? Math.max(0, Math.min(bg.w - SW, Math.round(this.camX || 0))) : Math.max(0, Math.round(this.camX || 0));
+    if (cam !== this.lastCam){ const d = cam - this.lastCam; for (const p of this.parts) p.x -= d; this.lastCam = cam; }
+    if (!cam){ if (bg.w){ for (let y=0;y<SH;y++){ fb.rgb.set(lay.rgb.subarray(y*bg.w*3, (y*bg.w + SW)*3), y*SW*3); fb.em.set(lay.em.subarray(y*bg.w, y*bg.w + SW), y*SW); } } else fb.copyFrom(lay); bg.anim(fb, t, 0); }
+    else if (bg.w){ for (let y=0;y<SH;y++){ const o = y*bg.w + cam; fb.rgb.set(lay.rgb.subarray(o*3, (o + SW)*3), y*SW*3); fb.em.set(lay.em.subarray(o, o + SW), y*SW); } bg.anim(fb, t, cam); }
+    else {
+      // tile 0 is the original picture; later tiles hide one-of-a-kind landmarks (a moon, a distant tower) so they never repeat
+      const tmp = this.tmp || (this.tmp = new FB()); tmp.copyFrom(lay); bg.anim(tmp, t, 0);
+      const cm = this.colMap, ck = this.colK || (this.colK = new Uint8Array(SW)); let other = false;
+      for (let x=0;x<SW;x++){ const wx = cam + x, k = Math.floor(wx/SW); let lx = wx - k*SW; if (k & 1) lx = SW - 1 - lx; cm[x] = lx; ck[x] = k !== 0 && bg.uniq ? 1 : 0; if (ck[x]) other = true; }
+      let tmp2 = tmp; if (other){ tmp2 = this.tmp2 || (this.tmp2 = new FB()); tmp2.copyFrom(this.patched(this.bgKey)); bg.anim(tmp2, t, 0); }
+      for (let y=0;y<SH;y++){ const r0 = y*SW; for (let x=0;x<SW;x++){ const src = ck[x] ? tmp2 : tmp, s = r0 + cm[x], d = r0 + x; fb.rgb[d*3] = src.rgb[s*3]; fb.rgb[d*3+1] = src.rgb[s*3+1]; fb.rgb[d*3+2] = src.rgb[s*3+2]; fb.em[d] = src.em[s]; } }
+    }
+    const LIGHTS = this.lightsNow();
+    // shadows: long, cast away from the main light (the nearest one when the view scrolls)
+    let L0 = bg.lights[bg.shadowFrom || 0];
+    if (cam){ let bd = 1e9; for (const l of LIGHTS){ const d = Math.abs(l.x - SW/2) - l.r*0.5; if (d < bd){ bd = d; L0 = l; } } }
+    this.shadow.fill(0);
     for (const u of units){ if (!u.sp || u.noShadow) continue; const sp = u.sp, foot = u.y + sp.h;
       const shx = Math.max(-1.6, Math.min(1.6, (u.x + sp.w/2 - L0.x)/70)), shy = 0.22;
       for (let sy=0; sy<sp.h; sy++) for (let sx=0; sx<sp.w; sx++){ if (!sp.a[sy*sp.w+(u.flip ? sp.w-1-sx : sx)]) continue; const hgt = foot - (u.y+sy);
@@ -2059,7 +2169,7 @@ class PixelScene {
     for (let i=0;i<SW*SH;i++){ const v = this.vign[i]*ab; Lb[i*3]=amb[0]*v; Lb[i*3+1]=amb[1]*v; Lb[i*3+2]=amb[2]*v; }
     const add = (lx, ly, r, c, k) => { const x0 = Math.max(0, Math.floor(lx-r)), x1 = Math.min(SW, Math.ceil(lx+r)), y0 = Math.max(0, Math.floor(ly-r)), y1 = Math.min(SH, Math.ceil(ly+r)), r2 = r*r;
       for (let y=y0;y<y1;y++) for (let x=x0;x<x1;x++){ const d2 = (x-lx)*(x-lx)+(y-ly)*(y-ly); if (d2 >= r2) continue; let f = 1 - Math.sqrt(d2)/r; f = f*f*k; const j = (y*SW+x)*3; Lb[j]+=c[0]*f; Lb[j+1]+=c[1]*f; Lb[j+2]+=c[2]*f; } };
-    for (const l of bg.lights){ const k = 1 - l.f*0.5 + l.f*0.5*Math.sin(t/(70+l.x%40)) * (REDUCED ? 0 : 1) - l.f*0.25*(REDUCED?0:Math.random()); add(l.x, l.y, l.r, l.c, k); }
+    for (const l of LIGHTS){ const k = 1 - l.f*0.5 + l.f*0.5*Math.sin(t/(70+Math.abs(l.seed ?? l.x)%40)) * (REDUCED ? 0 : 1) - l.f*0.25*(REDUCED?0:Math.random()); add(l.x, l.y, l.r, l.c, k); }
     for (const l of this.dyn) add(l.x, l.y, l.r, l.c, 1 - l.t/l.life);
     for (const u of units) if (u.glow) add(u.x+u.glow[0], u.y+u.glow[1], u.glow[2], u.glow[3], 1);
     // floating text drawn after lighting decisions (emissive)
@@ -2187,9 +2297,143 @@ const FXDRAW = {
 };
 
 /* ===================== AUDIO: sfx + tiny chiptune sequencer ===================== */
+/* ---- "잿빛 회랑": calm retro synth-pop BGM (D minor, 84 BPM, half-time drums) ----
+   SynthPop(ac, out) builds the instrument rack once and returns { SD, step(i, t) }:
+   SD is one 16th note in seconds, step(i, t) schedules everything that sounds on 16th #i at time t.
+   The song is 8 bars (128 steps) of Dm – B♭maj7 – Gm7 – Asus4→A, played in 4 passes that add and
+   drop parts so the loop never feels busy: pads + arp → + drums & melody → arp & low melody → no melody. */
+function SynthPop(ac, out){
+  const BPM = 84, SD = 60 / BPM / 4, mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+  const bus = ac.createGain(); bus.gain.value = 0.36;   // sits under the sfx, about as loud as the chiptune tracks
+  const glue = ac.createBiquadFilter(); glue.type = "lowpass"; glue.frequency.value = 7000;   // soften the top end
+  bus.connect(glue).connect(out);
+  // reverb: generated stereo tail (~2.6 s)
+  const rev = ac.createConvolver(), rlen = Math.floor(ac.sampleRate * 2.6), rb = ac.createBuffer(2, rlen, ac.sampleRate);
+  for (let c = 0; c < 2; c++){ const d = rb.getChannelData(c); for (let i = 0; i < rlen; i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/rlen, 3.2); }
+  rev.buffer = rb; const revOut = ac.createGain(); revOut.gain.value = 0.42; rev.connect(revOut).connect(bus);
+  // dotted-eighth delay with a darkening feedback loop
+  const dly = ac.createDelay(2); dly.delayTime.value = SD * 3;
+  const dlp = ac.createBiquadFilter(); dlp.type = "lowpass"; dlp.frequency.value = 1900;
+  const fb = ac.createGain(); fb.gain.value = 0.36; dly.connect(dlp).connect(fb).connect(dly);
+  const dOut = ac.createGain(); dOut.gain.value = 0.5; dlp.connect(dOut); dOut.connect(bus); dOut.connect(rev);
+  // one mixer strip per instrument: dry level + reverb send + delay send
+  function strip(dry, toRev, toDly){
+    const inp = ac.createGain(), a = ac.createGain(); a.gain.value = dry; inp.connect(a).connect(bus);
+    if (toRev){ const r = ac.createGain(); r.gain.value = toRev; inp.connect(r).connect(rev); }
+    if (toDly){ const e = ac.createGain(); e.gain.value = toDly; inp.connect(e).connect(dly); }
+    return inp;
+  }
+  const PAD = strip(1, 0.55, 0), BASS = strip(1, 0.05, 0), ARP = strip(0.8, 0.35, 0.7), LEAD = strip(1, 0.4, 0.45),
+        KICK = strip(1, 0, 0), SNR = strip(0.9, 0.75, 0), HAT = strip(1, 0.15, 0);
+  const nb = ac.createBuffer(1, ac.sampleRate, ac.sampleRate), nd = nb.getChannelData(0);
+  for (let i = 0; i < nd.length; i++) nd[i] = Math.random()*2-1;
+
+  function env(g, t, peak, a, hold, rel){   // attack → hold → release
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(peak, t + a);
+    g.gain.setValueAtTime(peak, t + a + hold); g.gain.exponentialRampToValueAtTime(0.0001, t + a + hold + rel);
+    return t + a + hold + rel;
+  }
+  function pad(t, notes, dur){               // two detuned saws per note, panned apart, slow filter swell
+    const f = ac.createBiquadFilter(); f.type = "lowpass"; f.Q.value = 0.7;
+    f.frequency.setValueAtTime(520, t); f.frequency.linearRampToValueAtTime(1150, t + dur*0.5); f.frequency.linearRampToValueAtTime(700, t + dur);
+    const g = ac.createGain(); f.connect(g).connect(PAD);
+    const end = env(g, t, 1, 0.9, Math.max(0, dur - 1.2), 1.4);
+    notes.forEach(m => [-8, 8].forEach(ct => {
+      const o = ac.createOscillator(), p = ac.createStereoPanner ? ac.createStereoPanner() : null, v = ac.createGain();
+      o.type = "sawtooth"; o.frequency.value = mtof(m); o.detune.value = ct; v.gain.value = 0.013;
+      if (p){ p.pan.value = ct < 0 ? -0.45 : 0.45; o.connect(v).connect(p).connect(f); } else o.connect(v).connect(f);
+      o.start(t); o.stop(end + 0.05);
+    }));
+  }
+  function bass(t, m, len){                  // plucky filtered saw + sine sub
+    const o = ac.createOscillator(), s = ac.createOscillator(), f = ac.createBiquadFilter(), g = ac.createGain();
+    o.type = "sawtooth"; o.frequency.value = mtof(m); s.type = "sine"; s.frequency.value = mtof(m);
+    f.type = "lowpass"; f.Q.value = 3; f.frequency.setValueAtTime(900, t); f.frequency.exponentialRampToValueAtTime(180, t + 0.22);
+    const sg = ac.createGain(); sg.gain.value = 0.9;
+    o.connect(f).connect(g); s.connect(sg).connect(g); g.connect(BASS);
+    const end = env(g, t, 0.06, 0.006, len*0.4, len*0.8);
+    o.start(t); s.start(t); o.stop(end + 0.02); s.stop(end + 0.02);
+  }
+  function arp(t, m, vol){                   // soft square blips, mostly heard through the delay
+    const o = ac.createOscillator(), f = ac.createBiquadFilter(), g = ac.createGain();
+    o.type = "square"; o.frequency.value = mtof(m); f.type = "lowpass"; f.frequency.value = 1500;
+    o.connect(f).connect(g).connect(ARP);
+    const end = env(g, t, vol, 0.004, 0.02, 0.2); o.start(t); o.stop(end + 0.02);
+  }
+  function lead(t, m, dur){                  // mellow triangle + quiet saw, gentle late vibrato
+    const f = ac.createBiquadFilter(), g = ac.createGain(); f.type = "lowpass"; f.frequency.value = 1700; f.Q.value = 0.5;
+    f.connect(g).connect(LEAD);
+    const end = env(g, t, 1, 0.07, Math.max(0, dur - 0.1), 0.45);
+    const lfo = ac.createOscillator(), ld = ac.createGain(); lfo.frequency.value = 5;
+    ld.gain.setValueAtTime(0, t); ld.gain.linearRampToValueAtTime(0, t + 0.25); ld.gain.linearRampToValueAtTime(7, t + 0.7);
+    lfo.connect(ld); lfo.start(t); lfo.stop(end + 0.05);
+    [["triangle", 0, 0.022], ["sawtooth", 6, 0.004]].forEach(([type, ct, vol]) => {
+      const o = ac.createOscillator(), v = ac.createGain(); o.type = type; o.frequency.value = mtof(m); o.detune.value = ct;
+      ld.connect(o.detune); v.gain.value = vol; o.connect(v).connect(f); o.start(t); o.stop(end + 0.05);
+    });
+  }
+  function kick(t){
+    const o = ac.createOscillator(), g = ac.createGain(); o.type = "sine";
+    o.frequency.setValueAtTime(105, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.22);
+    o.connect(g).connect(KICK); const end = env(g, t, 0.17, 0.003, 0.04, 0.3); o.start(t); o.stop(end + 0.02);
+  }
+  function noiseHit(t, ch, type, freq, q, vol, dur){
+    const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+    s.buffer = nb; s.playbackRate.value = 0.7 + Math.random()*0.6; f.type = type; f.frequency.value = freq; f.Q.value = q;
+    s.connect(f).connect(g).connect(ch); const end = env(g, t, vol, 0.002, 0.005, dur); s.start(t, Math.random()*0.4); s.stop(end + 0.02);
+  }
+  function snare(t){
+    noiseHit(t, SNR, "bandpass", 1700, 0.8, 0.055, 0.2);
+    const o = ac.createOscillator(), g = ac.createGain(); o.type = "triangle"; o.frequency.value = 185;
+    o.connect(g).connect(SNR); const end = env(g, t, 0.035, 0.002, 0.01, 0.08); o.start(t); o.stop(end + 0.02);
+  }
+  const hat = (t, v) => noiseHit(t, HAT, "highpass", 7500, 0.7, 0.012*v, 0.035);
+
+  // ---- song data ----
+  const CH = [   // per 2 bars: bass root, pad voicing (+ a second voicing at bar 2 for the Asus4 → A resolve)
+    {b:38, pad:[57,62,65,69]}, {b:34, pad:[58,62,65,69]}, {b:43, pad:[55,58,62,65]}, {b:45, pad:[57,62,64,69], pad2:[57,61,64,69]}
+  ];
+  const MEL_A = [[0,69,8],[10,67,2],[12,65,4],[16,64,4],[20,62,10], [32,65,6],[38,67,2],[40,69,8],[48,70,4],[52,69,10],
+                 [64,67,6],[70,65,2],[72,62,16], [96,64,6],[102,62,2],[104,64,8],[112,61,14]];
+  const MEL_B = [[0,62,4],[4,65,4],[8,64,10],[20,62,10], [32,62,4],[36,65,4],[40,69,10],[52,67,10],
+                 [64,67,6],[70,65,2],[72,70,8],[80,69,14], [96,69,6],[102,67,2],[104,64,8],[112,61,14]];
+  const melAt = (mel, s) => mel.find(n => n[0] === s);
+  const ARP_ORDER = [0, 1, 2, 3, 2, 1, 3, 2];
+  //            pads  bass   drums  arp   melody
+  const PASSES = [
+    {bass:"q", drums:"hat", arp:true,  mel:null},     // 1: floating intro
+    {bass:"e", drums:"full", arp:false, mel:MEL_A},   // 2: groove + melody
+    {bass:"e", drums:"full", arp:true,  mel:MEL_B},   // 3: answer phrase over the arp
+    {bass:"e", drums:"full", arp:true,  mel:null}     // 4: breathing room
+  ];
+
+  function step(i, t){
+    const s = i % 128, P = PASSES[Math.floor(i / 128) % PASSES.length], c = CH[Math.floor(s / 32)], cs = s % 32, bs = s % 16;
+    const voicing = c.pad2 && cs >= 16 ? c.pad2 : c.pad;
+    if (cs === 0) pad(t, c.pad, (c.pad2 ? 16 : 32) * SD + 0.3);
+    if (c.pad2 && cs === 16) pad(t, c.pad2, 16 * SD + 0.3);
+    if (P.bass === "q" ? cs % 4 === 0 : cs % 2 === 0){
+      const oct = P.bass === "e" && bs === 14 ? 12 : 0;            // octave pickup at the end of each bar
+      bass(t, c.b + oct, P.bass === "q" ? 3*SD : 1.4*SD);
+    }
+    if (P.arp && cs % 2 === 0){
+      const k = ARP_ORDER[(cs / 2) % ARP_ORDER.length], m = voicing[k] + 12;
+      arp(t, m, bs % 8 === 0 ? 0.03 : 0.02);
+    }
+    if (P.drums === "full"){
+      if (bs === 0 || (bs === 11 && Math.floor(s/16) % 2 === 1)) kick(t);
+      if (bs === 8) snare(t);
+    }
+    if (P.drums && cs % 2 === 0) hat(t, bs % 4 === 2 ? 1 : 0.55);
+    const n = P.mel && melAt(P.mel, s);
+    if (n) lead(t, n[1], n[2] * SD);
+  }
+  return { SD, step };
+}
+
 const Audio8 = (() => {
   let ac = null, master = null, musicGain = null, sfxGain = null, noiseBuf = null;
-  let sfxOn = true, musicOn = true, track = null, step = 0, nextT = 0, timer = null;
+  let sfxOn = true, musicOn = true, track = null, step = 0, nextT = 0, timer = null, synth = null;
   const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
   function ensure(){
     if (ac) { if (ac.state === "suspended") ac.resume(); return true; }
@@ -2231,6 +2475,7 @@ const Audio8 = (() => {
   };
   // tracks: steps of length `step` seconds; lead/bass arrays of MIDI or null; drums string (k = kick, s = snare, h = hat)
   const TRACKS = {
+    ashen:{synth:true},   // retro synth-pop: title screen + exploration (see SynthPop above)
     tavern:{step:0.2, lead:[74,null,76,78,null,76,74,null,71,69,null,null,71,null,74,76,null,74,73,null,69,71,null,null], bass:[50,null,null,57,null,null,55,null,null,52,null,null,55,null,null,50,null,null,57,null,null,45,null,null], drums:"k..h..k..h..k..h..k..h.."},
     night:{step:0.26, lead:[69,null,null,72,null,71,null,null,64,null,null,null,67,null,null,69,null,65,null,null,64,null,null,null], bass:[45,null,null,null,null,null,45,null,null,null,null,null,41,null,null,null,null,null,40,null,null,null,null,null], drums:""},
     tower:{step:0.24, lead:[62,null,65,null,64,null,null,null,62,null,60,null,57,null,null,null,62,null,65,null,69,null,68,null,null,null,null,null,null,null,null,null], bass:[38,null,null,null,38,null,null,null,34,null,null,null,34,null,null,null,36,null,null,null,36,null,null,null,37,null,null,null,37,null,null,null], drums:""},
@@ -2241,6 +2486,12 @@ const Audio8 = (() => {
   function schedule(){
     if (!ac || !track || !musicOn) return;
     const T = TRACKS[track];
+    if (nextT < ac.currentTime - 0.25) nextT = ac.currentTime + 0.05;   // tab was in the background: skip ahead instead of bursting
+    if (T.synth){
+      if (!synth) synth = SynthPop(ac, musicGain);
+      while (nextT < ac.currentTime + 0.2){ synth.step(step, nextT); nextT += synth.SD; step++; }
+      return;
+    }
     while (nextT < ac.currentTime + 0.15){
       const L = T.lead.length, i = step % L;
       const ln = T.lead[i], bn = T.bass[i % T.bass.length], dr = T.drums ? T.drums[i % T.drums.length] : ".";
@@ -2365,7 +2616,7 @@ const statOf = (h, st) => h.stats[st] + bonus(h, st);
 const calcHp = h => { const C = CLASSES[h.cls]; return Math.max(10, C.hd + 2 * (C.hd / 2 + 1) + 3 * mod(h.stats.con)); };
 const calcAc = h => { const C = CLASSES[h.cls]; return C.ac + Math.min(C.dexCap, mod(h.eq ? statOf(h, "dex") : h.stats.dex)) + (h.eq ? bonus(h, "ac") : 0); };
 const checkMod = (h, st) => mod(statOf(h, st)) + (CLASSES[h.cls].prof.includes(st) ? 2 : 0) + bonus(h, "check");
-const atkMod = h => mod(statOf(h, CLASSES[h.cls].atkStat)) + 2 + Math.floor((S.level || 1) / 2) + bonus(h, "atk") + (S.battle && S.battle.key === "drake" && S.flags.spear ? 2 : 0);
+const atkMod = h => mod(statOf(h, CLASSES[h.cls].atkStat)) + 2 + Math.floor((S.level || 1) / 2) + bonus(h, "atk") + (S.battle && S.battle.key === "drake" && S.flags.spear ? 2 : 0) + blessOf();
 const dmgMod = h => mod(statOf(h, CLASSES[h.cls].atkStat)) + bonus(h, "dmg");
 // recompute AC and max HP after gear or level changes
 function refreshHero(h){ if (h.hpBase == null) h.hpBase = h.maxHp; h.eq = h.eq || {}; const was = h.maxHp; h.ac = calcAc(h); h.maxHp = h.hpBase + bonus(h, "hp"); if (h.maxHp > was) h.hp += h.maxHp - was; h.hp = Math.min(h.hp, h.maxHp); }
@@ -2399,7 +2650,7 @@ const HP_SCALE = [0.5, 1, 1.35, 1.7];
 // chapter cards appear once, when the story first reaches these places
 const CHAPTERS = {tavern:["프롤로그","꺼진 화로"], forest:["1장","잿빛 숲길"], bridge:["2장","트롤의 다리"], cave:["3장","버려진 광산"], camp:["4장","잿빛 탑 아래"], hall:["5장","탑의 심장"], lair:["6장","잿날개"], dawn:["에필로그","새벽"]};
 const OBJECTIVES = {tavern:"오르나의 이야기를 듣고 길을 나서자", forest:"숲을 지나 강가의 다리로", bridge:"다리를 건너 늪을 지나자", cave:"폐광을 지나 탑으로 가는 지름길을 찾자", camp:"탑 아래에서 하룻밤을 버티자", hall:"탑 꼭대기로 오르자", lair:"잿날개 바르쿠스를 쓰러뜨려라", dawn:"모험 완료!"};
-const MUSIC = {tavern:"tavern", forest:"night", glade:"night", bridge:"night", swamp:"night", cave:"tower", camp:"tavern", gate:"tower", hall:"tower", mirror:"tower", library:"tower", shrine:"tower", lair:"tower", dawn:"dawn"};
+const MUSIC = {tavern:"tavern", forest:"ashen", glade:"ashen", bridge:"ashen", swamp:"ashen", cave:"ashen", camp:"tavern", gate:"ashen", hall:"ashen", mirror:"ashen", library:"ashen", shrine:"ashen", lair:"ashen", dawn:"dawn"};
 
 /* ================= STORY ================= */
 const FLAG_TXT = {
@@ -2721,7 +2972,9 @@ function animOff(a, t, dir){
   return {dx, dy, flash};
 }
 function buildUnits(t){
+  if (VW.world) return worldUnits(t);
   const bg = BGS[scene.bgKey], G = bg.ground, units = [], b = S.battle;
+  { const pl = scene.dyn.find(l => l.party); if (pl) pl.x = 22 + S.party.length*15; }
   // foes / npcs (right side, facing left)
   let list = [];
   if (b){ const fo = FOES[b.key]; if (b.hp > 0){ const cnt = Math.max(1, Math.ceil(fo.count * b.hp / b.maxHp)); list = Array(cnt).fill(fo.sprite); } }
@@ -2737,7 +2990,7 @@ function buildUnits(t){
   // party (left side, facing right)
   LAST.heroes = [];
   S.party.forEach((h, i) => {
-    const down = h.hp <= 0, sp = down ? sprLying(h.cls) : spr(h.cls);
+    const hk = heroKey(h), down = h.hp <= 0, sp = down ? sprLying(hk) : spr(hk);
     const o = animOff(ANIM.hero[i], t, 1);
     const active = b && b.phase === "hero" && b.cur === i;
     const bob = down || REDUCED ? 0 : Math.floor(t/460 + i*0.5) % 2;
@@ -2745,6 +2998,7 @@ function buildUnits(t){
     const u = {sp, x:px, y:py, flash:o.flash, alpha:down ? 0.65 : 1};
     if (h.cls === "wizard" && !down) u.glow = [20, 2, 26, [0.3,0.6,0.6]];
     if (h.cls === "cleric" && !down) u.glow = [11, 9, 18, [0.6,0.5,0.25]];
+    const aura = !down && heroAura(h); if (aura) u.glow = aura;
     units.push(u); LAST.heroes[i] = {x:px, y:py, w:sp.w, h:sp.h};
     if (active){ const ay = py - 7 - (REDUCED ? 0 : Math.floor(t/300) % 2); units.push({sp:ARROW, x:px + sp.w/2 - 2, y:ay, noShadow:true}); }
   });
@@ -2761,7 +3015,7 @@ function loop(t){
   requestAnimationFrame(loop);
   if (t < freezeUntil) return; // hit-stop: hold the impact frame
   const dt = Math.min(0.1, (t - lastT)/1000); if (t - lastT < 33) return; lastT = t;
-  if (S.screen === "game"){ scene.update(dt, t); scene.render(t, buildUnits(t)); }
+  if (S.screen === "game"){ worldTick(dt, t); scene.update(dt, t); scene.render(t, buildUnits(t), VW.world ? worldOverlay : artOverlay()); }
   else if (S.screen === "setup"){ scene.update(dt, t); scene.render(t, []); }
   else if (S.screen === "title"){ titleScene.update(dt, t); titleScene.render(t, titleUnits(t)); }
 }
@@ -2825,7 +3079,7 @@ function show(scr){
   S.screen = scr; $("#stage").dataset.scr = scr; if (isHost()) netDirty();
   $("#sTitle").hidden = scr !== "title"; $("#sSetup").hidden = scr !== "setup"; $("#sGame").hidden = scr !== "game";
   $("#titleCv").hidden = scr !== "title"; $("#scene").hidden = scr === "title"; $("#pause").hidden = true;
-  if (scr === "title"){ $("#btnCont").hidden = !loadSave(); Audio8.music("night"); setTimeout(() => { const b = document.querySelector(".menu button:not([hidden])"); b && b.focus({preventScroll:true}); }, 60); }
+  if (scr === "title"){ $("#btnCont").hidden = !loadSave(); Audio8.music("ashen"); setTimeout(() => { const b = document.querySelector(".menu button:not([hidden])"); b && b.focus({preventScroll:true}); }, 60); }
   if (scr === "setup"){ scene.bgKey = "tavern"; scene.parts = []; scene.dyn = []; scene.fade = scene.fadeTo = 0; renderSetup(); Audio8.music("tavern"); }
 }
 function togglePause(force){ if (S.screen !== "game") return; const p = $("#pause"), open = force ?? p.hidden; p.hidden = !open; if (open){ $("#optVote").textContent = "파티 투표: " + (S.opts && S.opts.vote === false ? "끔 (P1이 결정)" : "켬"); $("#optVote").hidden = S.party.length < 2 || isGuest(); $("#optQuit").disabled = busy && !isGuest(); $("#optQuit").textContent = isGuest() ? "방 나가기" : "타이틀로 (자동 저장)"; $("#pause .btn").focus({preventScroll:true}); sfx("select"); } }
@@ -2914,6 +3168,9 @@ function trayClose(){ tray.stop(); $("#trayLayer").hidden = true; flushFx(); }
 const verdictHTML = (calc, txt, tone) => `<div class="calc">${calc}</div><div class="verdict ${tone}">${txt}</div>`;
 
 /* ---------- setup ---------- */
+// each roll is made for a named ability (the class's important ones first) and lands there directly
+function assignRolled(h){ if (!h.raw) return; const ok = h.raw.length === 6 && h.raw.every(r => STATS.includes(r.st)) && new Set(h.raw.map(r => r.st)).size === 6;
+  if (!ok) return assignByClass(h); h.stats = {}; h.dice = {}; h.raw.forEach(r => { h.stats[r.st] = r.v; h.dice[r.st] = r.d; }); h.sel = null; }
 function assignByClass(h){ if (!h.raw) return; const sorted = [...h.raw].sort((a,b) => b.v - a.v); h.stats = {}; h.dice = {}; CLASSES[h.cls].prio.forEach((st,i) => { h.stats[st] = sorted[i].v; h.dice[st] = sorted[i].d; }); h.sel = null; }
 function diceStr(d){ if (!d) return ""; const low = Math.min(...d); let struck = false; return d.map(x => { if (x === low && !struck){ struck = true; return `<s>${x}</s>`; } return x; }).join(" "); }
 function statGridHTML(h, i){ const C = CLASSES[h.cls];
@@ -2945,25 +3202,26 @@ async function statRollModal(i){
   if (h.stats){ if (h.rerolls <= 0) return; h.rerolls--; }
   busy = true; statAuto = false; NET.lb = true;
   const m = $("#modal"); m.hidden = false; $("#modalTitle").textContent = `${h.name || DEF_NAMES[i]}의 능력치 굴림`;
-  $("#modalSub").textContent = "4d6을 여섯 번 굴립니다. 가장 낮은 눈 하나는 버려요.";
+  $("#modalSub").textContent = "직업에 중요한 능력치부터 하나씩 4d6을 굴려요. 가장 낮은 눈 하나는 버려요. 굴린 뒤 카드에서 두 능력치를 차례로 누르면 서로 바꿀 수 있어요.";
   paintSpriteCanvas($("#modalPortrait"), h.cls);
   mountTray($("#modalSlot"), 1520, 640);
-  const rolls = []; const slots = $("#statSlots");
-  const drawSlots = (cur) => { slots.innerHTML = Array.from({length:6}, (_, k) => { const r = rolls[k];
-    return `<li class="${k === cur ? "cur" : ""} ${r ? "done" : ""}"><span>#${k+1}</span><b>${r ? r.v : "–"}</b><i>${r ? diceStr(r.d) : ""}</i></li>`; }).join(""); };
+  const rolls = [], slots = $("#statSlots"), order = CLASSES[h.cls].prio, prof = CLASSES[h.cls].prof;
+  const drawSlots = (cur) => { slots.innerHTML = Array.from({length:6}, (_, k) => { const r = rolls[k], st = order[k];
+    return `<li class="${k === cur ? "cur" : ""} ${r ? "done" : ""}"><span>#${k+1}</span><em class="st">${prof.includes(st) ? '<small>★</small>' : ""}${STAT_KO[st]}</em><b>${r ? r.v : "–"}</b><i>${r ? diceStr(r.d) : ""}</i></li>`; }).join(""); };
   $("#modalDone").hidden = true; $("#modalAuto").hidden = false; $("#modalAuto").disabled = false;
   for (let k=0;k<6;k++){
     drawSlots(k);
-    const vals = await throwLocal(dice(6, 4, h.cls), {auto:statAuto, hint:`#${k+1} — 끌어서 던지거나 버튼을 누르세요`});
+    $("#modalTitle").textContent = `${h.name || DEF_NAMES[i]}의 능력치 굴림 — ${STAT_KO[order[k]]}`;
+    const vals = await throwLocal(dice(6, 4, h.cls), {auto:statAuto, hint:`${STAT_KO[order[k]]} 굴림 (#${k+1}) — 끌어서 던지거나 버튼을 누르세요`});
     const low = vals.indexOf(Math.min(...vals));
     showLabels(vals, vals.map((v, j) => j === low ? "drop" : "keep"));
-    const v = vals.reduce((a,b) => a+b, 0) - vals[low]; rolls.push({v, d:vals});
+    const v = vals.reduce((a,b) => a+b, 0) - vals[low]; rolls.push({v, d:vals, st:order[k]});
     sfx(v >= 15 ? "good" : "select"); drawSlots(k+1);
     await sleep(statAuto ? 650 : 900);
   }
   $("#modalAuto").hidden = true; $("#modalDone").hidden = false; $("#modalDone").focus();
   await new Promise(res => $("#modalDone").onclick = res);
-  h.raw = rolls; assignByClass(h); tray.stop(); m.hidden = true; busy = false; NET.lb = false; sfx("good");
+  h.raw = rolls; assignRolled(h); tray.stop(); m.hidden = true; busy = false; NET.lb = false; sfx("good");
   if (isGuest()) sendInput("stats", {i, raw:rolls}); rerenderCard(i);
 }
 function startGame(){
@@ -2971,6 +3229,7 @@ function startGame(){
   S.items = {}; S.inv = []; S.itemSeq = 0; S.newItems = 0; S.luck = 1; S.chapSeen = {}; S.objective = "";
   S.party = st.heroes.slice(0, n).map((h, i) => { const hp = calcHp(h); const hero = {name:(h.name || "").trim() || DEF_NAMES[i], cls:h.cls, stats:{...h.stats}, maxHp:hp, hpBase:hp, hp, eq:{}};
     STARTER[h.cls].forEach(k => { hero.eq[ITEMS[k].slot] = newItem(k); }); hero.ac = calcAc(hero); return hero; });
+  S.party.forEach(h => { h.skills = []; }); S.world = newWorld(); S.walk = null; S.loot = genLoot(); S.stageGo = null; S.quests = {}; S.chat = S.chat || []; S.freeBooks = 0;
   S.gold = 15; S.potions = 1 + Math.floor(n / 2); S.flags = {}; S.seenNodes = {}; S.battle = null; S.preBattle = null; S.roller = 0; S.xp = 0; S.level = 1; S.bg = null;
   show("game"); enterNode("start");
 }
@@ -3001,6 +3260,9 @@ function applyFx(fx){
   }
   if (fx.heal){ S.party.forEach((h,i) => { const was = h.hp; h.hp = fx.heal === "full" ? h.maxHp : Math.min(h.maxHp, h.hp + Math.ceil(h.maxHp / 2)); if (h.hp > was) setTimeout(() => FX.heal(i, h.hp - was), 300 + i*120); }); out.push(["sys", fx.heal === "full" ? "일행의 HP가 모두 회복되었다." : "일행의 HP가 절반만큼 회복되었다."]); }
   if (fx.door) sfx("door");
+  if (fx.loot){ const got = rollLoot(fx.loot.filter(k => !ITEMS[k].cls || ITEMS[k].cls.some(c => S.party.some(h => h.cls === c))), 2); got.forEach(k => giveItem(k)); if (got.length){ out.push(["sys", `획득: ${got.map(itemName).join(", ")} — 가방(I)에서 장착하세요.`]); setTimeout(() => itemToast(got[0]), 400); } }
+  if (fx.take){ Object.values(S.loot || {}).forEach(L => L.forEach(o => { if (o.k === fx.take) o.taken = true; })); }
+  if (fx.qdone && S.quests && S.quests[fx.qdone] === "active"){ S.quests[fx.qdone] = "done"; out.push(["sys", `현상금 달성: ${QUESTS[fx.qdone].name} — 마을 게시판에서 보상을 받으세요.`]); }
   if (fx.xp) gainXp(fx.xp, out);
   return out;
 }
@@ -3014,6 +3276,10 @@ function setBg(bg){
   Audio8.music(MUSIC[bg]);
 }
 function enterNode(id, extra=[]){
+  const ai = AREA_BY_ENTRY[id];
+  // the story walked into another area's first scene: either a new road opens, or (already open) the party is just back on the road
+  if (ai != null && S.world && ai !== S.world.at){ if (ai > S.world.unlocked) return arriveFrontier(ai, extra); return enterNode("hub", extra); }
+  if (stageBreak(id, extra)) return;
   const n = NODES[id];
   const again = S.seenNodes[id] && n.again; S.seenNodes[id] = true;
   S.mode = "story"; S.nodeId = id; S.pick = null; S.enterSeq = (S.enterSeq || 0) + 1;
@@ -3025,6 +3291,7 @@ function enterNode(id, extra=[]){
   S.lines = lines.map(normLine); S.li = 0;
   showArt(n.art); hideCards(); vote = null;
   save(); refreshStatus(); typeLine();
+  if (n.walk && !S.lines.length) startWalk();
 }
 const tw = {t:null, done:true};
 function setSpeaker(who){ const sp = SPEAKERS[who] || SPEAKERS.narr; $("#speaker").textContent = sp.name; paintSpriteCanvas($("#portrait"), sp.spr); }
@@ -3042,11 +3309,12 @@ function advanceDialog(){
   if (S.mode !== "story" || busy) return; const L = S.lines[S.li];
   if (!tw.done){ clearInterval(tw.t); $("#dlgText").textContent = L.text; tw.done = true; afterLine(); return; }
   if (S.li < S.lines.length - 1){ if (isGuest()) return sendInput("adv", {li:S.li}); S.li++; save(); typeLine(); }
+  else if (NODES[S.nodeId].walk){ if (isGuest()) return sendInput("walkGo", {}); startWalk(); }
 }
 const nodeChoices = n => n.next ? [{t:"go", label:n.nextLabel || "계속", to:n.next}] : (n.choices || []);
 const costOf = c => c.cost ? (S.flags.discount ? Math.ceil(c.cost*0.7) : c.cost) : 0;
 const visibleChoices = n => nodeChoices(n).map((c, i) => [c, i]).filter(([c]) => !(c.hide && S.flags[c.hide]) && !(c.need && !S.flags[c.need]));
-function choiceTag(c){ let tag = "", dis = false;
+function choiceTag(c){ let tag = "", dis = !!c.dis;
   if (c.t === "check") tag = `<span class="tag">${STAT_KO[c.stat]} DC ${c.dc}</span>`;
   if (c.t === "battle") tag = `<span class="tag fight">전투</span>`;
   if (c.need) tag += `<span class="tag best">단서</span>`;
@@ -3055,7 +3323,7 @@ function choiceTag(c){ let tag = "", dis = false;
 /* ---------- party vote: everyone picks; if the party disagrees, a d20 duel decides ---------- */
 let vote = null;
 const voteOn = () => S.party.length > 1 && !(S.opts && S.opts.vote === false);
-function needVote(n){ if (!voteOn() || S.mode !== "story" || n.next) return false;
+function needVote(n){ if (!voteOn() || S.mode !== "story" || n.next || n.noVote) return false;
   return visibleChoices(n).filter(([c]) => !choiceTag(c).dis && c.t !== "restart" && c.t !== "retry").length >= 2; }
 const nextVoter = () => S.party.findIndex((_, k) => vote.votes[k] == null);
 const seatToVote = peer => S.party.findIndex((_, k) => vote.votes[k] == null && ownerPeer(k) === peer);
@@ -3067,13 +3335,14 @@ function voteHead(){ const k = curVoter(), h = S.party[k];
 const voterChips = i => vote ? vote.votes.map((v, k) => v === i ? `<canvas class="px vchip" data-spr="${S.party[k].cls}" title="${esc(S.party[k].name)}"></canvas>` : "").join("") : "";
 function renderChoices(){
   const n = NODES[S.nodeId];
+  if (n.walk){ $("#choices").innerHTML = `<button class="choice" data-act="walkGo"><span>둘러본다</span></button>`; $("#choices").classList.remove("dense", "dense2"); netDirty(); return; }
   if (needVote(n)){ if (!vote || vote.node !== S.nodeId) vote = {node:S.nodeId, votes:[], turn:0}; } else vote = null;
   const vk = curVoter(), voter = vote && S.party[vk], wait = vote && !voter;
   let html = vote ? `<p class="prompt vote">${voter ? `<canvas class="px" data-spr="${voter.cls}"></canvas>` : ""}${voteHead()}</p>` : n.prompt ? `<p class="prompt">${esc(n.prompt)}</p>` : "";
   const vis = visibleChoices(n);
   vis.forEach(([c, i]) => { const {tag, dis} = choiceTag(c);
     html += `<button class="choice" data-act="choice" data-i="${i}" ${dis || wait ? "disabled" : ""}><span>${esc(c.label)}</span>${tag}<span class="voters">${voterChips(i)}</span></button>`; });
-  $("#choices").innerHTML = html; $("#choices").classList.toggle("dense", vis.length > 4); paintAll($("#choices"));
+  $("#choices").innerHTML = html; $("#choices").classList.toggle("dense", vis.length > 4); $("#choices").classList.toggle("dense2", vis.length > 6); paintAll($("#choices"));
   if (n.cardView) showCards(n, vis);
   netDirty();
 }
@@ -3135,6 +3404,10 @@ function doChoice(i){
   else if (c.t === "battle") startBattle(c.foe, c.win);
   else if (c.t === "restart"){ clearSave(); S.setup = blankSetup(); show("title"); }
   else if (c.t === "retry") retryBattle();
+  else if (c.t === "travel") travel(c.to);
+  else if (c.t === "shop") openShop(c.shop);
+  else if (c.t === "quest") acceptQuest(c.q);
+  else if (c.t === "claim") claimQuest(c.q);
 }
 function renderPick(){
   const c = nodeChoices(NODES[S.nodeId])[S.pick];
@@ -3174,10 +3447,11 @@ function startBattle(key, win){
   const f = FOES[key], n = S.party.length;
   S.preBattle = {snap:JSON.parse(JSON.stringify({party:S.party, gold:S.gold, potions:S.potions, flags:S.flags, nodeId:S.nodeId, bg:S.bg, xp:S.xp, level:S.level, items:S.items, inv:S.inv, itemSeq:S.itemSeq, luck:S.luck})), key, win};
   let hp = Math.round(f.hp * HP_SCALE[n - 1]); const msg = [f.intro];
+  if (f.regen) msg.push(`재생 능력! 매 턴 주사위로 상처를 아물게 한다 — 파티가 주사위로 막을 수 있고, 불 공격(화염 화살 · 화염구 · 불꽃 무기)에 그을린 상처는 막기 쉽다.`);
   if (key === "drake" && S.flags.weakness) msg.push("약점을 알고 있다! 용의 방어도 −2.");
   if (key === "drake" && S.flags.spear) msg.push("은빛 창이 용을 향해 떨린다. 명중 +2.");
   if (key === "drake" && S.flags.ambush){ hp -= 10; msg.push("선제 공격으로 이미 피해 10!"); }
-  S.battle = {key, name:f.name, hp, maxHp:hp, ac:f.ac - (key === "drake" && S.flags.weakness ? 2 : 0), cur:-1, phase:"hero", round:1, uses:S.party.map(h => CLASSES[h.cls].uses), win, msg, picking:null};
+  S.battle = {suses:S.party.map(h => Object.fromEntries((h.skills || []).map(k => [k, SKILLS[k].uses]))), key, name:f.name, hp, maxHp:hp, ac:f.ac - (key === "drake" && S.flags.weakness ? 2 : 0), cur:-1, phase:"hero", round:1, uses:S.party.map(h => CLASSES[h.cls].uses), win, msg, picking:null};
   S.mode = "battle"; Audio8.music(key === "drake" ? "boss" : "battle"); banner(key === "drake" ? "BOSS BATTLE" : "BATTLE!", "red"); sfx("hit");
   showArt(null); hideCards(); setTimeout(() => bark(0, pickLine(key === "drake" ? BARK.boss : BARK.battle)), 600);
   advanceTurn();
@@ -3203,7 +3477,7 @@ async function heroAct(kind){
   if (special && h.cls === "wizard"){
     trayOpen({who:h.cls, seat:i, title:`${h.name} — 마법 화살`, sub:`${esc(f.name)}에게 · 반드시 명중 · 3d4${sgn(3 + bonus(h, "dmg"))}`});
     const vals = await throwDice(dice(4, 3, h.cls)); showLabels(vals, vals.map(() => "keep"));
-    const r = sumRoll(vals, 3 + bonus(h, "dmg")); dmgFoe(r.t); FX.strike(i, "missiles", r.t, false, false); bmsg(`${h.name}의 마법 화살! 빛나는 화살 세 발이 꽂힌다. 피해 ${r.t}.`);
+    const r = sumRoll(vals, 3 + bonus(h, "dmg")); dmgFoe(r.t); if (fireHit(h, "missiles")) S.battle.burn = true; FX.strike(i, "missiles", r.t, false, false); bmsg(`${h.name}의 마법 화살! 빛나는 화살 세 발이 꽂힌다. 피해 ${r.t}.`);
     trayResult(verdictHTML(r.calc, `피해 ${r.t}!`, "good")); refreshStatus();
     await trayWait("계속", 0); trayClose(); busy = false; return endHeroTurn();
   }
@@ -3241,7 +3515,7 @@ async function heroAct(kind){
   const all = crit ? dl.concat(dl) : dl, dbonus = dmgMod(h);
   await trayWait("피해 굴리기"); setTarget(null);
   const dv = await throwDice(all.map(s => ({sides:s, scheme:h.cls})), {hint:"피해 주사위를 던지세요"}); showLabels(dv, dv.map(() => "keep"));
-  const r = sumRoll(dv, dbonus); dmgFoe(r.t); FX.strike(i, style, r.t, crit, false);
+  const r = sumRoll(dv, dbonus); dmgFoe(r.t); if (fireHit(h, style)) S.battle.burn = true; FX.strike(i, style, r.t, crit, false);
   bmsg(`${h.name}의 ${title}! ${crit ? "치명타! " : ""}피해 ${r.t}.`);
   trayResult(verdictHTML(r.calc, `피해 ${r.t}!`, crit ? "crit" : "good")); refreshStatus();
   await trayWait("계속"); trayClose(); busy = false; endHeroTurn();
@@ -3255,13 +3529,50 @@ async function usePotion(ti, inBattle){
   if (inBattle) bmsg(`${drinker === tgt ? `${eun(tgt.name)} 물약을 마셨다` : `${eun(drinker.name)} ${tgt.name}에게 물약을 먹였다`}. HP +${tgt.hp - was}.`);
   trayResult(verdictHTML(r.calc, `${tgt.name} HP +${tgt.hp - was}${was === 0 ? " · 다시 일어섰다!" : ""}`, "good")); refreshStatus();
   await trayWait("계속"); trayClose(); busy = false;
-  if (inBattle){ S.battle.picking = null; endHeroTurn(); } else { save(); refreshStatus(); if (S.mode === "story" && tw.done) renderChoices(); }
+  if (inBattle){ S.battle.picking = null; endHeroTurn(); } else { save(); refreshStatus(); if (S.mode === "walk") renderWalkUI(true); else if (S.mode === "story" && tw.done) renderChoices(); }
 }
 function endHeroTurn(){ refreshStatus(); if (S.battle.hp <= 0) return winBattle(); advanceTurn(); }
+/* regeneration, all on dice: the foe rolls to knit its wounds; if it does, the sturdiest hero rolls to tear them open;
+   if that fails, the foe rolls how much it heals. A fire hit since its last turn makes stopping it easier (advantage). */
+const REGEN_DC = 10, STOP_DC = 12;
+async function regenPhase(f, b){
+  const adv = !!b.burn; b.burn = false;
+  trayOpen({who:f.sprite, title:`${f.name} — 재생 시도`, sub:`적이 d20에서 <b>${REGEN_DC}</b> 이상이면 상처가 아물기 시작해요`, foe:true});
+  setTarget({lead:"적이 d20에서", target:REGEN_DC, mod:0, word:"나오면 재생 시작", foe:true, subject:"재생할"});
+  const [r1] = await throwDice(dice(20, 1, "foe"), {auto:true}); markTarget([r1]); showLabels([r1], [r1 === 20 ? "crit" : r1 === 1 ? "fumble" : "keep"]);
+  if (r1 !== 20 && (r1 === 1 || r1 < REGEN_DC)){
+    trayResult(verdictHTML(`${r1} <em>vs ${REGEN_DC}</em>`, "재생 실패! 상처가 아물지 않았다", "good")); sfx("good");
+    bmsg(`${f.name}의 상처가 꿈틀거렸지만 아물지 않았다.`); renderBattle(); await trayWait("계속", 2200); trayClose(); return;
+  }
+  trayResult(verdictHTML(`${r1} <em>vs ${REGEN_DC}</em>`, "상처가 아물기 시작한다!", "bad")); sfx("bad"); await sleep(900);
+  // the hero best at it (strength or dexterity) tries to stop it — their owner throws
+  const alive = S.party.map((h, i) => [h, i]).filter(([h]) => h.hp > 0), stOf = h => checkMod(h, "str") >= checkMod(h, "dex") ? "str" : "dex";
+  const [h, hi] = alive.sort((a, z) => checkMod(z[0], stOf(z[0])) - checkMod(a[0], stOf(a[0])))[0], st = stOf(h), m = checkMod(h, st);
+  trayActor = hi; trayResult("");
+  trayHead(h.cls, `${h.name} — 재생 방해`, `벌어진 상처를 다시 벌려 재생을 막아요 · ${STAT_KO[st]} 판정 · 목표 <b>${STOP_DC}</b> · 보정 <b>${sgn(m)}</b>${adv ? " · <b>불에 그을린 상처</b>: d20 두 개 중 높은 눈" : ""}${online() ? ` · <b>${esc(seatNick(hi))}</b>님이 던져요` : ""}`);
+  setTarget({lead:"d20에서", target:STOP_DC, mod:m, word:"나오면 재생을 막아요", adv});
+  const vals = await throwDice(dice(20, adv ? 2 : 1, h.cls), {hint:`${h.name} — 주사위를 던져 재생을 막으세요`, outPolicy:"fail"});
+  let ok = false;
+  if (vals.out){ showLabels(vals); trayResult(verdictHTML("주사위가 트레이를 넘어갔다", "장외 — 막지 못했다!", "bad")); }
+  else { markTarget(vals); const raw = Math.max(...vals), keep = vals.indexOf(raw); ok = raw === 20 || (raw !== 1 && raw + m >= STOP_DC);
+    showLabels(vals, vals.map((v, k) => k !== keep ? "drop" : raw === 20 ? "crit" : raw === 1 ? "fumble" : "keep"));
+    trayResult(verdictHTML(`${raw} ${sgn(m)} = <strong>${raw + m}</strong> <em>vs ${STOP_DC}</em>`, ok ? "재생을 막았다!" : "막지 못했다...", ok ? "good" : "bad")); }
+  if (ok){ sfx("good"); bark(hi, "어딜 아물어!"); bmsg(`${iga(h.name)} ${f.name}의 상처를 다시 벌려 재생을 막았다!`); renderBattle(); await trayWait("계속"); trayClose(); return; }
+  sfx("bad"); await trayWait("재생량 굴리기", 2600);
+  // how much it heals
+  trayActor = null; setTarget(null); trayResult("");
+  trayHead(f.sprite, `${f.name} — 재생`, `재생량 ${f.regen.map(d => "d" + d).join("+")}`);
+  const dv = await throwDice(f.regen.map(s => ({sides:s, scheme:"foe"})), {auto:true}); showLabels(dv, dv.map(() => "keep"));
+  const amt = Math.min(dv.reduce((a, c) => a + c, 0), b.maxHp - b.hp); b.hp += amt;
+  floatFoe("+" + amt, "#7aa35a"); bmsg(`${f.name}의 상처가 꿈틀거리며 아문다. HP +${amt}.`);
+  trayResult(verdictHTML(`${dv.join(" + ")} = <strong>${amt}</strong>`, `${f.name} HP +${amt}`, "bad")); refreshStatus(); renderBattle();
+  await trayWait("계속", 2600); trayClose();
+}
 async function foeTurn(){
   const b = S.battle; if (!b || S.mode !== "battle" || busy) return; busy = true;
   const f = FOES[b.key];
-  if (f.regen && b.hp > 0 && b.hp < b.maxHp){ const r = Math.min(f.regen, b.maxHp - b.hp); b.hp += r; bmsg(`그룸의 상처가 꿈틀거리며 아문다. HP +${r}.`); floatFoe("+" + r, "#7aa35a"); refreshStatus(); renderBattle(); await sleep(500); }
+  if (await foeStatus()) return;
+  if (f.regen && b.hp > 0 && b.hp < b.maxHp) await regenPhase(f, b);
   const alive = S.party.map((h, i) => [h, i]).filter(([h]) => h.hp > 0);
   if (f.breath && b.round % 3 === 0){
     trayOpen({who:f.sprite, title:"화염 숨결!", sub:"모두 민첩 내성 DC 13 · 성공하면 피해 절반", foe:true});
@@ -3275,12 +3586,13 @@ async function foeTurn(){
     await trayWait("계속", 4200); trayClose(); busy = false; return endFoeTurn();
   }
   const [h, hi] = alive[Math.floor(Math.random() * alive.length)];
-  trayOpen({who:f.sprite, title:`${f.name} — ${f.verb}`, sub:`대상: <b>${esc(h.name)}</b> · 방어도 ${h.ac} · 명중 ${sgn(f.atk)}`, foe:true});
-  setTarget({lead:"적이 d20에서", target:h.ac, mod:f.atk, word:"나오면 맞아요", foe:true, subject:"맞을"});
+  const hac = acOf(h);
+  trayOpen({who:f.sprite, title:`${f.name} — ${f.verb}`, sub:`대상: <b>${esc(h.name)}</b> · 방어도 ${hac}${hac !== h.ac ? " (진형)" : ""} · 명중 ${sgn(f.atk)}`, foe:true});
+  setTarget({lead:"적이 d20에서", target:hac, mod:f.atk, word:"나오면 맞아요", foe:true, subject:"맞을"});
   const [raw] = await throwDice(dice(20, 1, "foe"), {auto:true}); markTarget([raw]);
-  const crit = raw === 20, hit = crit || (raw !== 1 && raw + f.atk >= h.ac);
+  const crit = raw === 20, hit = crit || (raw !== 1 && raw + f.atk >= hac);
   showLabels([raw], [crit ? "crit" : raw === 1 ? "fumble" : "keep"]);
-  const calc = `${raw} ${sgn(f.atk)} = <strong>${raw + f.atk}</strong> <em>vs AC ${h.ac}</em>`;
+  const calc = `${raw} ${sgn(f.atk)} = <strong>${raw + f.atk}</strong> <em>vs AC ${hac}</em>`;
   const fstyle = FOE_STYLE[b.key] || "claw";
   if (!hit){ FX.foeStrike(hi, fstyle, 0, false, true); bmsg(`${f.name}의 ${f.verb}! ${eun(h.name)} 가볍게 피했다.`); trayResult(verdictHTML(calc, `${eun(h.name)} 피했다!`, "good")); sfx("good");
     await trayWait("계속", 2600); trayClose(); busy = false; return endFoeTurn(); }
@@ -3294,7 +3606,7 @@ async function foeTurn(){
   trayResult(verdictHTML(r.calc + (d !== r.t ? ` <em>(혼자라서 ×0.7 → ${d})</em>` : ""), `${h.name} 피해 ${d}${h.hp === 0 ? " · 쓰러졌다!" : ""}`, "bad")); refreshStatus();
   await trayWait("계속", 3000); trayClose(); busy = false; endFoeTurn();
 }
-function endFoeTurn(){ const b = S.battle; refreshStatus(); if (S.party.every(h => h.hp <= 0)) return loseBattle(); b.round++; b.cur = -1; advanceTurn(); }
+function endFoeTurn(){ const b = S.battle; tickBuffs(); refreshStatus(); if (S.party.every(h => h.hp <= 0)) return loseBattle(); b.round++; b.cur = -1; advanceTurn(); }
 function winBattle(){
   const b = S.battle, f = FOES[b.key], win = b.win;
   S.party.forEach(h => { if (h.hp <= 0) h.hp = 1; });
@@ -3321,19 +3633,23 @@ function renderBattle(){
       html = `<p class="prompt">${esc(h.name)}의 차례 — 무엇을 할까?</p>
         <button class="choice" data-act="atk"><span>${C.atkName}</span><span class="tag">명중 ${sgn(atkMod(h))}</span><span class="tag">${C.dmg.map(d => "d" + d).join("+")}${sgn(dmgMod(h))}</span></button>
         <button class="choice" data-act="special" ${b.uses[b.cur] <= 0 ? "disabled" : ""}><span>${C.special.name}</span><span class="tag ok">${C.special.desc}</span><span class="tag">남은 ${b.uses[b.cur]}회</span></button>
+        ${(h.skills || []).map(k => { const sk = SKILLS[k], u = b.suses && b.suses[b.cur] ? b.suses[b.cur][k] || 0 : 0;
+          return `<button class="choice" data-act="skill" data-k="${k}" ${u <= 0 ? "disabled" : ""}><span>${sk.name}</span><span class="tag ok">${esc(sk.desc)}</span><span class="tag">남은 ${u}회</span></button>`; }).join("")}
         <button class="choice" data-act="potion" ${S.potions <= 0 ? "disabled" : ""}><span>회복 물약</span><span class="tag ok">2d4+2</span><span class="tag">${S.potions}개</span></button>`;
     }
   } else html = `<p class="prompt">${esc(b.name)}의 차례...</p>`;
   if (b.phase === "hero" && !mine(b.cur)) html = `<p class="prompt">${esc(S.party[b.cur].name)}의 차례 — <b>${esc(seatNick(b.cur))}</b>님이 행동을 고르는 중…</p>`;
-  $("#choices").innerHTML = html; netDirty();
+  const bf = [b.guard ? `방어도 +${b.guard.v} (${b.guard.t})` : "", b.bless ? `명중 +${b.bless.v} (${b.bless.t})` : "", b.poison && b.poison.t > 0 ? `적 중독 (${b.poison.t})` : "", b.stun ? "적 기절" : ""].filter(Boolean);
+  if (bf.length) html = `<p class="prompt buffs">${bf.map(x => `<span class="tag ok">${x}</span>`).join("")}</p>` + html;
+  $("#choices").innerHTML = html; $("#choices").classList.toggle("dense", $("#choices").querySelectorAll(".choice").length > 3); netDirty();
 }
 
 /* ---------- event pictures, branch cards, luck, loot, barks ---------- */
 let artTimer = null;
-function showArt(spec){ const w = $("#artWin"); clearInterval(artTimer);
-  if (!spec){ w.hidden = true; return; }
-  const cv = $("#artCv"); VIG.draw(cv, spec, performance.now()); $("#artCap").textContent = spec.cap || ""; w.hidden = false; w.classList.remove("on"); void w.offsetWidth; w.classList.add("on");
-  if (!REDUCED) artTimer = setInterval(() => { if (w.hidden) return clearInterval(artTimer); VIG.draw(cv, spec, performance.now()); }, 160); }
+// event effects (a trap snapping, coins, fire…) are painted straight onto the game scene instead of a picture window
+let ART_FX = null;
+function showArt(spec){ $("#artWin").hidden = true; clearInterval(artTimer); ART_FX = spec && spec.o && OVER[spec.o] ? spec : null; }
+const artOverlay = () => ART_FX && !S.battle && scene.bgKey === ART_FX.bg ? (fb, t) => OVER[ART_FX.o](fb, t) : null;
 function showCards(n, vis){
   const L = $("#cards");
   const wait = vote && curVoter() < 0;
@@ -3380,16 +3696,17 @@ function openInv(){ if (S.screen !== "game") return; $("#inv").hidden = false; S
 function closeInv(){ $("#inv").hidden = true; refreshStatus(); if (S.mode === "story" && !busy && tw.done && S.lines[S.li]) renderChoices(); }
 function renderInv(){
   const m = invSel.m, h = S.party[m]; if (!h) return;
-  $("#invTabs").innerHTML = S.party.map((p, i) => `<button class="inv-tab ${i === m ? "on" : ""}" data-act="invTab" data-i="${i}"><canvas class="px" data-spr="${p.cls}"></canvas><span>${esc(p.name)}<small>${CLASSES[p.cls].ko}</small></span></button>`).join("");
-  paintSpriteCanvas($("#invPortrait"), h.cls);
+  $("#invTabs").innerHTML = S.party.map((p, i) => `<button class="inv-tab ${i === m ? "on" : ""}" data-act="invTab" data-i="${i}"><canvas class="px" data-spr="${heroKey(p)}"></canvas><span>${esc(p.name)}<small>${CLASSES[p.cls].ko}</small></span></button>`).join("");
+  paintSpriteCanvas($("#invPortrait"), heroKey(h));
   $("#eqSlots").innerHTML = SLOTS.map(sl => { const uid = h.eq[sl], key = uid && S.items[uid] && S.items[uid].key, it = key && ITEMS[key];
     return `<button class="slot slot-${sl} ${uid && invSel.uid === uid ? "sel" : ""}" data-act="invSlot" data-s="${sl}" style="--rc:${it ? RARITY[it.r].c : "#283d55"}"><span class="slot-lab">${SLOT_KO[sl]}</span>${it ? `<canvas class="px" data-spr="it_${key}"></canvas><b style="color:${RARITY[it.r].c}">${esc(it.name)}</b>` : `<i>비어 있음</i>`}</button>`; }).join("");
   $("#invStats").innerHTML = `<div class="kv"><span>HP</span><b>${h.hp}/${h.maxHp}</b></div><div class="kv"><span>방어도</span><b>${h.ac}</b></div><div class="kv"><span>명중</span><b>${sgn(atkMod(h))}</b></div><div class="kv"><span>피해</span><b>${sgn(dmgMod(h))}</b></div><div class="kv"><span>판정</span><b>${sgn(bonus(h, "check"))}</b></div>
     <div class="abil">${STATS.map(k => { const b = bonus(h, k); return `<span>${STAT_KO[k]}<b>${statOf(h, k)}</b>${b ? `<em>+${b}</em>` : ""}</span>`; }).join("")}</div>`;
-  const n = Math.max(32, Math.ceil(S.inv.length/8)*8);
-  $("#bag").innerHTML = Array.from({length:n}, (_, k) => { const uid = S.inv[k]; if (!uid) return `<div class="cell"></div>`;
-    const key = S.items[uid].key, it = ITEMS[key], can = !it.cls || it.cls.includes(h.cls);
-    return `<button class="cell item ${invSel.uid === uid ? "sel" : ""} ${can ? "" : "no"}" data-act="invItem" data-u="${uid}" style="--rc:${RARITY[it.r].c}" aria-label="${esc(it.name)}"><canvas class="px" data-spr="it_${key}"></canvas></button>`; }).join("");
+  // bag first, then everything the party is wearing (marked with the wearer)
+  const worn = wornList(), cells = S.inv.filter(u => S.items[u]).map(u => ({uid:u, m:-1})).concat(worn), n = Math.max(32, Math.ceil(cells.length/8)*8);
+  $("#bag").innerHTML = Array.from({length:n}, (_, k) => { const c = cells[k]; if (!c) return `<div class="cell"></div>`; const uid = c.uid;
+    const key = S.items[uid].key, it = ITEMS[key], can = !it.cls || it.cls.includes(h.cls), w = c.m >= 0 ? S.party[c.m] : null;
+    return `<button class="cell item ${invSel.uid === uid ? "sel" : ""} ${can || w ? "" : "no"} ${w ? "worn" : ""}" data-act="invItem" data-u="${uid}" ${w ? `data-w="${c.m}"` : ""} style="--rc:${RARITY[it.r].c}" aria-label="${esc(it.name)}${w ? ` (${esc(w.name)} 착용 중)` : ""}"><canvas class="px" data-spr="it_${key}"></canvas>${w ? `<canvas class="px wearer" data-spr="${heroKey(w)}" title="${esc(w.name)} 착용 중"></canvas><i class="eq-mark">E</i>` : ""}</button>`; }).join("");
   $("#invMeta").innerHTML = `<span><canvas class="px" data-spr="coin"></canvas>${S.gold}</span><span><canvas class="px" data-spr="potion"></canvas>${S.potions}</span><span class="luck-ic">♣</span><span>${S.luck}</span>`;
   paintAll($("#inv")); renderDetail(h);
 }
@@ -3417,8 +3734,11 @@ function unequipU(m, uid){ const h = S.party[m]; if (!h || !uid || S.battle || b
 function equip(){ if (!mine(invSel.m)) return; if (isGuest()) return sendInput("equip", {m:invSel.m, u:invSel.uid}); equipU(invSel.m, invSel.uid); }
 function unequip(){ if (!mine(invSel.m)) return; if (isGuest()) return sendInput("unequip", {m:invSel.m, u:invSel.uid}); unequipU(invSel.m, invSel.uid); }
 // older saves: give everyone their starter kit and the new resources
-function migrate(){ S.items = S.items || {}; S.inv = S.inv || []; S.luck = S.luck ?? 1; S.chapSeen = S.chapSeen || {}; S.itemSeq = S.itemSeq || 0;
-  S.party.forEach(h => { if (!h.eq){ h.eq = {}; STARTER[h.cls].forEach(k => { h.eq[ITEMS[k].slot] = newItem(k); }); } if (h.hpBase == null) h.hpBase = h.maxHp; refreshHero(h); }); }
+function migrate(){ S.quests = S.quests || {}; if (S.world){ S.world.stage = S.world.stage || {}; } if (!S.loot) S.loot = genLoot(); S.chat = S.chat || []; S.freeBooks = S.freeBooks || 0;
+  if (!S.world){ const BG_AREA = {tavern:0, forest:1, glade:1, bridge:2, swamp:3, cave:4, camp:5, gate:6, hall:6, mirror:6, library:6, shrine:6, lair:7, dawn:7}, k = BG_AREA[S.bg] ?? 0;
+    S.world = {at:k, unlocked:k, entered:{}, cleared:{}, stage:{}}; for (let j=0;j<=k;j++){ S.world.entered[j] = true; if (j < k) S.world.cleared[j] = true; } }
+  S.items = S.items || {}; S.inv = S.inv || []; S.luck = S.luck ?? 1; S.chapSeen = S.chapSeen || {}; S.itemSeq = S.itemSeq || 0;
+  S.party.forEach(h => { h.skills = h.skills || []; if (!h.eq){ h.eq = {}; STARTER[h.cls].forEach(k => { h.eq[ITEMS[k].slot] = newItem(k); }); } if (h.hpBase == null) h.hpBase = h.maxHp; refreshHero(h); }); }
 
 /* ---------- status ---------- */
 function refreshStatus(){
@@ -3430,24 +3750,25 @@ function refreshStatus(){
   $("#lvl").textContent = `LV ${S.level}`; const lo = XP_T[S.level-1] || 0, hi = XP_T[S.level]; $("#xpFill").style.width = hi ? Math.min(100, (S.xp - lo) / (hi - lo) * 100) + "%" : "100%"; $("#xpBox").title = hi ? `경험치 ${S.xp}/${hi}` : `경험치 ${S.xp} (최고 레벨)`;
   const b = S.battle; $("#sGame").classList.toggle("battle", !!b);
   $("#foeBar").hidden = !b; $("#turnStrip").hidden = !b;
-  if (b){ $("#foeName").textContent = b.name; $("#foeHp").style.width = (100 * b.hp / b.maxHp) + "%"; $("#foeHpn").textContent = `HP ${b.hp}/${b.maxHp} · AC ${b.ac}`;
+  if (b){ $("#foeName").textContent = b.name; $("#foeHp").style.width = (100 * b.hp / b.maxHp) + "%"; $("#foeHpn").textContent = `HP ${b.hp}/${b.maxHp} · AC ${b.ac}${FOES[b.key].regen ? (b.burn ? " · 불에 그을림" : ` · 재생 ${FOES[b.key].regen.map(d => "d" + d).join("+")}`) : ""}`;
     $("#turnStrip").innerHTML = `<span class="rnd">R${b.round}</span>` + S.party.map((h, i) => `<canvas class="px ${b.phase === "hero" && b.cur === i ? "cur" : ""} ${h.hp <= 0 ? "down" : ""}" data-spr="${h.cls}" title="${esc(h.name)}"></canvas>`).join("") + `<canvas class="px foe ${b.phase === "foe" ? "cur" : ""}" data-spr="${FOES[b.key].sprite}"></canvas>`;
     paintAll($("#turnStrip")); }
   $("#party").innerHTML = S.party.map((h, i) => {
     const active = b && b.phase === "hero" && b.cur === i, pct = 100 * h.hp / h.maxHp;
-    const canDrink = !b && S.mode === "story" && S.potions > 0 && h.hp < h.maxHp && !busy && mine(i);
-    return `<div class="hero win ${active ? "active" : ""} ${h.hp <= 0 ? "down" : ""}">${online() ? `<span class="owntag ${mine(i) ? "me" : ""}">${esc(seatNick(i))}</span>` : ""}<div class="por"><canvas class="px" data-spr="${h.cls}"></canvas></div>
+    const canDrink = !b && (S.mode === "story" || S.mode === "walk") && S.potions > 0 && h.hp < h.maxHp && !busy && mine(i);
+    return `<div class="hero win ${active ? "active" : ""} ${h.hp <= 0 ? "down" : ""}">${online() ? `<span class="owntag ${mine(i) ? "me" : ""}">${esc(seatNick(i))}</span>` : ""}<div class="por"><canvas class="px" data-spr="${heroKey(h)}"></canvas></div>
       <div class="nm"><span>${esc(h.name)}</span><small>${CLASSES[h.cls].ko}</small>${h.hp <= 0 ? '<span class="downtag">DOWN</span>' : ""}</div>
       <div class="bar"><i class="${pct <= 30 ? "low" : ""}" style="width:${pct}%"></i></div>
       <div class="sub"><span>HP <b>${h.hp}/${h.maxHp}</b></span><span>AC <b>${h.ac}</b></span></div>
       ${canDrink ? `<button class="btn small drink" data-act="drink" data-i="${i}" title="회복 물약 마시기"><canvas class="px" data-spr="potion"></canvas>마시기</button>` : ""}</div>`; }).join("");
-  paintAll($("#party")); netDirty();
+  paintAll($("#party")); renderWorldBar(); renderChat(); if (SHOP.id) renderShop(); netDirty();
 }
 function renderGame(){
   refreshStatus(); scene.bgKey = S.bg || "tavern"; partyLight(); $("#chapName").textContent = CHAPTERS[S.bg] ? CHAPTERS[S.bg].join(" · ") : "";
   if (S.mode === "battle" && S.battle){ Audio8.music(S.battle.key === "drake" ? "boss" : "battle"); renderBattle(); if (S.battle.phase === "foe") setTimeout(foeTurn, 600); return; }
   Audio8.music(MUSIC[S.bg]);
   if (S.mode === "pick"){ renderPick(); return; }
+  if (S.nodeId === "hub" && (S.mode === "walk" || S.mode === "busy" || !S.lines.length)){ if (S.walk && S.walk.auto){ const [lo, hi] = S.world ? walkBounds() : [2, 2]; S.walk.auto = 0; S.walk.tx = null; S.walk.x = Math.max(lo, Math.min(hi, S.walk.x)); } startWalk(); return; }
   const L = S.lines[S.li]; if (!L) return;
   setSpeaker(L.who); $("#dlgText").className = "dlg-text" + (L.who === "sys" ? " sysl" : ""); $("#dlgText").textContent = L.text; tw.done = true;
   $("#dlgPos").textContent = S.lines.length > 1 ? `${S.li + 1}/${S.lines.length}` : ""; afterLine();
@@ -3462,7 +3783,8 @@ document.addEventListener("click", e => {
   const act = a.dataset.act, i = +a.dataset.i;
   if (act.startsWith("net") || act === "online") return netAct(act);
   if (online()){
-    const d = {i, n:+a.dataset.n || 0, c:a.dataset.c, st:a.dataset.s};
+    const d = {i, n:+a.dataset.n || 0, c:a.dataset.c, st:a.dataset.s, k:a.dataset.k};
+    if (act === "choice" || act === "poi"){ const c0 = nodeChoices(NODES[S.nodeId])[i]; if (c0 && c0.t === "shop"){ if (!busy) openShop(c0.shop); return; } }
     if (isGuest()){
       if (act === "quit"){ togglePause(false); netLeave(); return; }
       if (["new","continue","toTitle","count","start","vote"].includes(act)){ netMsg("진행은 방장이 해요"); return; }
@@ -3470,7 +3792,7 @@ document.addEventListener("click", e => {
       if (act === "roll" && !mine(i)) return;
     } else if (!LOCAL_ACTS.has(act) && !actAllowed(NET.me, act, d)) return;
   }
-  if (busy && !["sound","music","throw","autoRoll","pause","resume","vote","fullscreen","howto","closeHowto","dismissRotate","invOpen","closeInv","invTab","invItem","invSlot","closeArt"].includes(act)) return;
+  if (busy && !["sound","music","throw","autoRoll","pause","resume","vote","fullscreen","howto","closeHowto","dismissRotate","invOpen","closeInv","invTab","invItem","invSlot","closeArt","shopTab","closeShop","chatSend","chatToggle"].includes(act)) return;
   switch (act){
     case "new": S.setup = blankSetup(); sfx("select"); show("setup"); break;
     case "continue": { const s = loadSave(); if (s){ S = Object.assign(S, s); migrate(); show("game"); renderGame(); } break; }
@@ -3499,7 +3821,16 @@ document.addEventListener("click", e => {
     case "invOpen": openInv(); break;
     case "closeInv": closeInv(); break;
     case "invTab": invSel = {m:i, uid:null}; sfx("blip"); renderInv(); break;
-    case "invItem": invSel.uid = a.dataset.u; sfx("blip"); renderInv(); break;
+    case "invItem": if (invSel.uid === a.dataset.u && a.dataset.w == null && performance.now() - (invSel.t || 0) < 450){ invSel.t = 0; equip(); break; } invSel.t = performance.now(); invSel.uid = a.dataset.u; if (a.dataset.w != null) invSel.m = +a.dataset.w; sfx("blip"); renderInv(); break;
+    case "travel": travel(i); break;
+    case "poi": poiAct(i, NET.me); break;
+    case "walkGo": startWalk(); break;
+    case "skill": useSkill(a.dataset.k); break;
+    case "shopTab": SHOP.tab = a.dataset.t; sfx("blip"); renderShop(); break;
+    case "closeShop": closeShop(); break;
+    case "shopBuy": case "shopSell": case "shopLearn": case "shopSupply": { const d2 = {s:SHOP.id, k:a.dataset.k, u:a.dataset.u, m:i}; if (isGuest()) { sendInput(act, {sh:SHOP.id, k:d2.k, u:d2.u, i}); sfx("select"); } else shopAct(NET.me, act, d2); break; }
+    case "chatSend": sendChat(); break;
+    case "chatToggle": { const w = $("#chatWin"); w.classList.toggle("min"); renderChat(true); break; }
     case "invSlot": { const h = S.party[invSel.m]; invSel.uid = h.eq[a.dataset.s] || null; sfx("blip"); renderInv(); break; }
     case "equip": equip(); break;
     case "unequip": unequip(); break;
@@ -3516,10 +3847,13 @@ document.addEventListener("input", e => { if (!e.target.classList.contains("name
   if (isGuest()){ clearTimeout(NET.nmT); NET.nmT = setTimeout(() => sendInput("name", {i, v:e.target.value.slice(0, 8)}), 250); } else netDirty(); });
 document.addEventListener("keydown", e => {
   const k = e.key, tag = e.target.tagName; Audio8.unlock();
-  if (tag === "INPUT"){ if (k === "Enter"){ if (e.target.id === "netCode") netAct("netJoin"); else if (e.target.id === "netNick" && !online()) netAct("netHost"); else e.target.blur(); } return; }
+  if (tag === "INPUT"){ if (e.target.id === "chatIn"){ if (k === "Enter"){ e.preventDefault(); sendChat(); } else if (k === "Escape") e.target.blur(); return; }
+    if (k === "Enter"){ if (e.target.id === "netCode") netAct("netJoin"); else if (e.target.id === "netNick" && !online()) netAct("netHost"); else e.target.blur(); } return; }
   if (!$("#netLayer").hidden){ if (k === "Escape") netAct("netClose"); return; }
   if (k === "f" || k === "F"){ toggleFull(); return; }
-  if (k === "Escape"){ if (!$("#howto").hidden) $("#howto").hidden = true; else if (invOpen()) closeInv(); else togglePause(); return; }
+  if (k === "/" && !$("#chatWin").hidden){ e.preventDefault(); $("#chatWin").classList.remove("min"); renderChat(true); $("#chatIn").focus(); return; }
+  if (k === "Escape"){ if (!$("#howto").hidden) $("#howto").hidden = true; else if (!$("#shop").hidden) closeShop(); else if (invOpen()) closeInv(); else togglePause(); return; }
+  if (!$("#shop").hidden) return;
   if ((k === "i" || k === "I") && S.screen === "game" && $("#pause").hidden && $("#loot").hidden){ invOpen() ? closeInv() : openInv(); return; }
   if (invOpen()){ if (k === "e" || k === "E"){ const b = $('#itemDetail [data-act="equip"]'); if (b && !b.disabled) equip(); } return; }
   if (!$("#loot").hidden){ if (k === " " || k === "Enter"){ e.preventDefault(); $("#lootOk").click(); } return; }
@@ -3535,11 +3869,994 @@ document.addEventListener("keydown", e => {
     const items = [...document.querySelectorAll(".menu button:not([hidden])")], cur = items.indexOf(document.activeElement);
     const n = items[(cur + (k === "ArrowDown" ? 1 : -1) + items.length) % items.length]; n.focus(); sfx("blip"); return; }
   if (S.screen !== "game" || busy) return;
+  if (walkKey(e)) return;
   if (/^[1-9]$/.test(k)){ const b = document.querySelectorAll("#choices .choice")[+k - 1]; if (b && !b.disabled) b.click(); return; }
   if ((k === " " || k === "Enter") && S.mode === "story" && !(tag === "BUTTON" && e.target.closest("#choices"))){ e.preventDefault(); advanceDialog(); }
 });
 
-window.__dbg = {get vote(){ return vote; }, get busy(){ return busy; }, get NET(){ return NET; }, NODES, FOES, ITEMS, get S(){ return S; }, enterNode:(id) => enterNode(id), giveItem:k => giveItem(k), showLoot:k => showLoot(k), openInv:() => openInv(), FX, scene};
+window.__dbg = {get WV(){ return WV; }, get VW(){ return VW; }, travel:ai => travel(ai), get vote(){ return vote; }, get busy(){ return busy; }, get NET(){ return NET; }, NODES, FOES, ITEMS, get S(){ return S; }, enterNode:(id) => enterNode(id), giveItem:k => giveItem(k), showLoot:k => showLoot(k), openInv:() => openInv(), FX, scene};
+/* ================= WORLD: areas & travel, town, shops, skills, quests, dungeons ================= */
+
+/* ---------- more gear (mid & late game) ---------- */
+const NEW_ITEMS = {
+  battle_axe:{name:"전투 도끼", slot:"weapon", type:"axe", r:1, cls:["fighter"], fx:{dmg:2}, desc:"그란이 두드린 묵직한 도끼."},
+  silver_dagger:{name:"은빛 단검", slot:"weapon", type:"dagger", r:1, cls:["rogue"], fx:{atk:1, dmg:1}, pal:{m:"#a2a3ac", M:"#f4f2ea"}, desc:"달빛에 비추면 푸르게 빛난다."},
+  oak_staff:{name:"참나무 지팡이", slot:"weapon", type:"staff", r:1, cls:["wizard"], fx:{dmg:2}, pal:{g:"#7aa35a", G:"#dfe6d6"}, desc:"오래된 참나무 가지에 녹색 수정을 박았다."},
+  pilgrim_mace:{name:"순례자의 철퇴", slot:"weapon", type:"mace", r:1, cls:["cleric"], fx:{atk:1, heal:1}, pal:{m:"#dfe6d6", M:"#f4f2ea"}, desc:"성지 순례자들이 들고 다니던 철퇴."},
+  healer_robe:{name:"치유사의 법의", slot:"armor", type:"cloak", r:1, cls:["cleric","wizard"], fx:{ac:1, heal:1}, pal:{c:"#b6cbc0", C:"#f4f2ea", g:"#7aa35a"}, desc:"약초 냄새가 은은하게 밴 법의."},
+  guard_ring:{name:"수호의 반지", slot:"ring", type:"ring", r:2, fx:{ac:1, hp:4}, pal:{g:"#6e9198", G:"#dfe6d6"}, desc:"끼고 있으면 등 뒤가 든든하다."},
+  sage_amulet:{name:"현자의 목걸이", slot:"amulet", type:"amulet", r:2, fx:{int:1, wis:1, check:1}, pal:{m:"#344e66", M:"#557887", g:"#8a62a0", G:"#dfe6d6"}, desc:"셀린의 스승이 남긴 목걸이."},
+  wolfking_fang:{name:"잿송곳니 목걸이", slot:"amulet", type:"amulet", r:3, fx:{atk:2, dmg:1}, pal:{m:"#dfe6d6", M:"#f4f2ea", g:"#e04a3c", G:"#ffd678"}, desc:"늑대왕의 송곳니. 쥐면 사냥 본능이 깨어난다."},
+  queen_ring:{name:"거머리 여왕의 반지", slot:"ring", type:"ring", r:3, fx:{hp:8, heal:2}, pal:{m:"#5c3f72", M:"#8a62a0", g:"#7aa35a", G:"#b6cbc0"}, desc:"맥박처럼 미세하게 고동친다."},
+  foreman_blade:{name:"감독관의 대검", slot:"weapon", type:"sword", r:3, cls:["fighter"], fx:{atk:1, dmg:4}, pal:{m:"#6a6c78", M:"#a2a3ac", g:"#8fadaa"}, desc:"광산 감독관이 죽어서도 놓지 않던 대검."},
+  lamp_staff:{name:"심층 등불 지팡이", slot:"weapon", type:"staff", r:3, cls:["wizard"], fx:{atk:2, dmg:3}, pal:{g:"#ffd678", G:"#fff0b0"}, desc:"광산 가장 깊은 곳을 밝히던 등불을 끼웠다."},
+  deep_cloak:{name:"갱도의 망토", slot:"armor", type:"cloak", r:3, cls:["rogue","wizard"], fx:{ac:2, dex:1, hp:4}, pal:{c:"#283d55", C:"#426276", g:"#7fe3f0"}, desc:"어둠에 녹아드는 광부들의 비밀 망토."},
+  saint_mace:{name:"성자의 철퇴", slot:"weapon", type:"mace", r:3, cls:["cleric"], fx:{atk:2, dmg:2, heal:3}, pal:{m:"#fbb954", M:"#fff0b0", g:"#ffd678"}, desc:"성자의 유골함을 녹여 만들었다는 철퇴."},
+  orna_locket:{name:"오르나의 로켓", slot:"amulet", type:"amulet", r:2, fx:{check:2}, pal:{m:"#fbb954", M:"#fff0b0", g:"#8a62a0", G:"#dfe6d6"}, desc:"안에 빛바랜 초상화가 들어 있다."},
+  alpha_mantle:{name:"잿불 우두머리 판금", slot:"armor", type:"plate", r:4, cls:["fighter","cleric"], fx:{ac:3, hp:10, fireRes:1}, pal:{m:"#a6441f", M:"#e2762d", g:"#fbb954"}, desc:"불에 타지 않는 우두머리의 가죽을 판금에 덧댔다."},
+  ember_fang:{name:"잿불 송곳 단검", slot:"weapon", type:"dagger", r:4, cls:["rogue"], fx:{atk:3, dmg:3}, pal:{m:"#e2762d", M:"#ffd678", g:"#e04a3c"}, desc:"찌를 때마다 불씨가 튄다."},
+  phoenix_wand:{name:"불새 완드", slot:"weapon", type:"wand", r:4, cls:["wizard"], fx:{atk:2, dmg:5}, pal:{g:"#e04a3c", G:"#ffd678"}, desc:"잿불 사냥개 우두머리가 지키던 보물."},
+  flame_greatsword:{name:"불꽃 대검", slot:"weapon", type:"sword", r:4, cls:["fighter","cleric"], fx:{atk:2, dmg:5}, pal:{m:"#e2762d", M:"#ffd678", g:"#e04a3c"}, desc:"망루의 불길 속에서 벼려졌다."}
+};
+Object.assign(ITEMS, NEW_ITEMS);
+Object.keys(NEW_ITEMS).forEach(k => { const it = ITEMS[k], ic = ICONS[it.type]; SPRITE_DEFS["it_" + k] = {p:{...ic.p, ...(it.pal || {})}, g:ic.g, em:it.r >= 2 ? ["g","G"] : []}; });
+SPRITE_DEFS.skillbook = {p:{c:"#5c3f72", C:"#8a62a0", p:"#dfe6d6", g:"#ffd678", G:"#fff0b0"}, em:["g","G"], g:["....cccccc..","...cCCCCCCc.","..cCgGGgCCc.","..cCCgGCCCc.","..cCgGGgCCc.","..cCCCCCCCc.","..cCCCCCCCc.","..cCCCCCCCc.","..cppppppcc.","..cppppppc..","...cccccc...","............"]};
+SPRITE_DEFS.bounty = {p:{w:"#dfe6d6", W:"#f4f2ea", r:"#e04a3c", b:"#61291a"}, g:["..bbbbbbbb..","..bWWWWWWb..","..bWrrrrWb..","..bWWWWWWb..","..bWwwwwWb..","..bWWWWWWb..","..bWwwwWWb..","..bWWWWWWb..","..bbbbbbbb..","....b..b....","....b..b....","............"]};
+const PRICE = [12, 30, 70, 150, 300];
+const priceOf = (key, shop) => { const p = PRICE[ITEMS[key].r]; return shop === "smith" && S.flags.smithDiscount ? Math.ceil(p*0.8) : p; };
+const sellOf = key => Math.max(3, Math.floor(PRICE[ITEMS[key].r]*0.4));
+
+// harder road: tougher foes, longer growth curve
+Object.values(FOES).forEach(f => { if (f.key === undefined){ f.hp = Math.round(f.hp*1.25); f.atk += 1; } });
+FOES.drake.hp = 130;
+XP_T.push(1400, 1900, 2500);
+
+/* ---------- appearance: gear recolors the hero sprite ---------- */
+const LOOK_KEYS = {fighter:{armor:["A","a","H","h"], weapon:["W","w"]}, wizard:{armor:["O","o"], weapon:["C"]}, rogue:{armor:["G","g"], weapon:["D"]}, cleric:{armor:["W","w"], weapon:["M","m"]}};
+const LOOK = {dwarf_plate:["#e2762d","#a6441f"], alpha_mantle:["#e04a3c","#82341c"], chainmail:["#dfe6d6","#8fadaa"]};
+function lookCols(it, slot){ const p = it.pal || {}; const key = Object.keys(ITEMS).find(k => ITEMS[k] === it); if (LOOK[key]) return LOOK[key];
+  if (slot === "armor") return [p.C || p.M || "#a2a3ac", p.c || p.m || "#6a6c78"];
+  return [p.M || p.G || p.g || "#f4f2ea", p.m || p.g || p.G || "#a2a3ac"]; }
+function heroKey(h){
+  if (!h || !h.eq || !S.items) return h ? h.cls : "fighter";
+  const it = sl => { const uid = h.eq[sl], o = uid && S.items[uid]; return o ? o.key : null; };
+  const a = it("armor"), w = it("weapon");
+  const plain = k => !k || ITEMS[k].r === 0;
+  if (plain(a) && plain(w)) return h.cls;
+  const key = `hero_${h.cls}_${a || "-"}_${w || "-"}`;
+  if (!SPRITE_DEFS[key]){
+    const base = SPRITE_DEFS[h.cls], K = LOOK_KEYS[h.cls], pal = {}, em = [...(base.em || [])];
+    if (!plain(a)){ const [lt, dk] = lookCols(ITEMS[a], "armor"); K.armor.forEach((ch, n) => pal[ch] = n % 2 ? dk : lt); }
+    if (!plain(w)){ const [lt, dk] = lookCols(ITEMS[w], "weapon"); K.weapon.forEach((ch, n) => pal[ch] = n % 2 ? dk : lt); if (ITEMS[w].r >= 2) em.push(...K.weapon); }
+    SPRITE_DEFS[key] = {...base, p:{...base.p, ...pal}, em};
+  }
+  return key;
+}
+// rare rings/amulets give the wearer a faint aura
+function heroAura(h){ let best = null;
+  ["ring","amulet"].forEach(sl => { const uid = h.eq && h.eq[sl], o = uid && S.items[uid], it = o && ITEMS[o.key]; if (it && it.r >= 2 && (!best || it.r > best.r)) best = it; });
+  if (!best) return null; const c = col((best.pal && (best.pal.g || best.pal.M)) || "#fbb954"); return [11, 10, 16 + best.r*3, [c[0]/255, c[1]/255, c[2]/255]]; }
+
+/* ---------- skills (learned from books) ---------- */
+const SKILLS = {
+  whirl:{cls:"fighter", name:"회전베기", kind:"strike", extra:[6,6], hit:2, style:"heavy", uses:1, price:60, desc:"명중 +2 · 명중 시 피해 +2d6"},
+  shieldwall:{cls:"fighter", name:"방패 진형", kind:"guard", val:3, turns:2, uses:1, price:70, desc:"2라운드 동안 파티 방어도 +3"},
+  stunblow:{cls:"fighter", name:"기절의 일격", kind:"strike", extra:[6], stun:true, style:"heavy", uses:1, price:110, desc:"명중 시 피해 +1d6 · 적이 한 턴 쉰다"},
+  twinstab:{cls:"rogue", name:"연속 찌르기", kind:"strike", extra:[4,4], adv:true, style:"stab", uses:2, price:60, desc:"d20 두 개 중 높은 눈 · 명중 시 +2d4"},
+  poison:{cls:"rogue", name:"독 바르기", kind:"strike", extra:[], poison:3, style:"stab", uses:1, price:80, desc:"명중 시 3라운드 동안 매 턴 1d6 독 피해"},
+  smoke:{cls:"rogue", name:"연막탄", kind:"guard", val:4, turns:1, uses:1, price:50, desc:"1라운드 동안 파티 방어도 +4"},
+  icelance:{cls:"wizard", name:"얼음 창", kind:"auto", dice:[8,8], style:"missiles", uses:1, price:70, desc:"반드시 명중 · 2d8+피해 보정"},
+  fireball:{cls:"wizard", name:"화염구", kind:"auto", dice:[6,6,6,6], style:"firebolt", uses:1, price:130, desc:"반드시 명중 · 4d6+피해 보정"},
+  barrier:{cls:"wizard", name:"마력 방벽", kind:"guard", val:3, turns:2, uses:1, price:70, desc:"2라운드 동안 파티 방어도 +3"},
+  bless:{cls:"cleric", name:"축복", kind:"bless", val:2, turns:3, uses:1, price:60, desc:"3라운드 동안 파티 명중 +2"},
+  massheal:{cls:"cleric", name:"치유의 물결", kind:"heal", dice:[8], uses:1, price:110, desc:"파티 전원 1d8+지혜 회복 · 쓰러진 동료도 일으킨다"},
+  smite:{cls:"cleric", name:"성스러운 일격", kind:"strike", extra:[8,8], style:"smash", uses:1, price:90, desc:"명중 시 피해 +2d8"}
+};
+const acOf = h => h.ac + (S.battle && S.battle.guard && S.battle.guard.t > 0 ? S.battle.guard.v : 0);
+const blessOf = () => S.battle && S.battle.bless && S.battle.bless.t > 0 ? S.battle.bless.v : 0;
+
+/* ---------- shops ---------- */
+SPRITE_DEFS.smith = {...SPRITE_DEFS.dwarf, p:{...SPRITE_DEFS.dwarf.p, H:"#61291a", h:"#452017", B:"#344e66", b:"#283d55", A:"#82341c", a:"#61291a"}};
+SPRITE_DEFS.selin = {...SPRITE_DEFS.orna, p:{...SPRITE_DEFS.orna.p, P:"#283d55", p:"#1f2f45", F:"#7fe3f0", R:"#344e66", r:"#1f2f45"}, em:["F"]};
+Object.assign(SPEAKERS, {smith:{name:"대장장이 그란", spr:"smith"}, selin:{name:"마법상인 셀린", spr:"selin"}, board:{name:"현상금 게시판", spr:"bounty"}});
+const SHOPS = {
+  smith:{name:"대장장이 그란", spr:"smith", greet:"쇠는 거짓말을 안 하지. 골라 봐.", goods:["battle_axe","steel_sword","silver_dagger","pilgrim_mace","chainmail","leather","guard_ring","str_ring","dex_ring"], books:["whirl","shieldwall","stunblow","twinstab","poison","smoke"]},
+  mage:{name:"마법상인 셀린", spr:"selin", greet:"주문은 책에서, 힘은 지팡이에서. 둘 다 여기 있어요.", goods:["oak_staff","star_staff","fire_wand","mage_robe","healer_robe","wis_ring","sage_amulet"], books:["icelance","fireball","barrier","bless","massheal","smite"]},
+  inn:{name:"여관 카운터", spr:"orna", greet:"물약이랑 부적은 넉넉히 챙겨 가. 돌아오는 놈이 이기는 거야.", goods:[], supplies:true},
+  moro:{name:"떠돌이 상인 모로", spr:"merchant", greet:"또 만났구려! 이번엔 귀한 물건도 좀 있소.", goods:["venom_dagger","shadow_cloak","luck_ring","fairy_amulet","flame_axe"], supplies:true}
+};
+const SUPPLIES = {potion:{name:"회복 물약", price:12, desc:"2d4+2 회복"}, luck:{name:"행운 토큰", price:30, desc:"실패한 굴림을 다시 던진다"}};
+function shopHere(id){ const at = S.world && AREAS[S.world.at] && AREAS[S.world.at].id; return S.nodeId === "hub" && (at === "town" ? ["smith","mage","inn"].includes(id) : at === "forest" && id === "moro"); }
+
+/* ---------- areas ---------- */
+const AREAS = [
+  {id:"town", name:"불씨골 마을", bg:"tavern", icon:"orna"},
+  {id:"forest", name:"잿빛 숲길", bg:"forest", entry:"road", icon:"wolf"},
+  {id:"bridge", name:"트롤의 다리", bg:"bridge", entry:"bridge", icon:"troll"},
+  {id:"swamp", name:"안개 늪", bg:"swamp", entry:"swamp", icon:"leech"},
+  {id:"cave", name:"버려진 광산", bg:"cave", entry:"cave", icon:"skeleton"},
+  {id:"camp", name:"탑 아래 언덕", bg:"camp", entry:"camp", icon:"hound"},
+  {id:"tower", name:"잿빛 탑", bg:"gate", entry:"gate", icon:"gargoyle"},
+  {id:"lair", name:"잿날개의 둥지", bg:"lair", entry:"lair", icon:"drake"}
+];
+const AREA_BY_ENTRY = {}; AREAS.forEach((a, i) => { if (a.entry) AREA_BY_ENTRY[a.entry] = i; });
+const AREA_I = id => AREAS.findIndex(a => a.id === id);
+const newWorld = () => ({at:0, unlocked:0, entered:{0:true}, cleared:{}, stage:{}});
+const SEARCH = {
+  forest:{label:"덤불 속을 뒤진다", stat:"wis", dc:12, fx:{gold:20, item:"copper_ring"}, ok:"쓰러진 나무 밑동에서 사냥꾼이 숨겨 둔 주머니를 찾았다.", no:"가시에 긁히기만 하고 아무것도 찾지 못했다."},
+  bridge:{label:"다리 밑 그늘을 살핀다", stat:"int", dc:13, fx:{gold:35, potion:1}, ok:"트롤이 모아 둔 통행료 상자가 바위 틈에 끼어 있다!", no:"이끼 낀 돌뿐이다."},
+  swamp:{label:"썩은 통나무 속을 들여다본다", stat:"wis", dc:13, fx:{item:"sage_amulet"}, ok:"통나무 안에서 누군가 잃어버린 목걸이가 반짝인다.", no:"거머리 알만 잔뜩 붙어 있다. 으."},
+  cave:{label:"무너진 갱도 틈을 비춘다", stat:"int", dc:14, fx:{gold:60, luck:1}, ok:"광부들이 숨겨 둔 금화 주머니와 네잎 부적!", no:"돌가루만 쏟아진다."},
+  camp:{label:"타다 남은 짐더미를 뒤진다", stat:"wis", dc:14, fx:{item:"guard_ring", potion:1}, ok:"불에 그을린 상자 안에 반지 하나와 물약이 남아 있다.", no:"재와 숯뿐이다."},
+  tower:{label:"탑 외벽의 균열을 살핀다", stat:"int", dc:15, fx:{gold:80, luck:1}, ok:"벽돌 하나가 빠지며 오래된 금고가 드러난다!", no:"벽돌은 꿈쩍도 하지 않는다."}
+};
+Object.entries(SEARCH).forEach(([id, s]) => {
+  const bg = AREAS[AREA_I(id)].bg;
+  NODES["srch_" + id + "_ok"] = {bg, fx:{...s.fx, flag:"srch_" + id, xp:25}, art:{bg, u:P2, o:"chest", c:[60,40,200,112], cap:"숨겨진 물건"}, lines:[s.ok], next:"hub", nextLabel:"돌아간다"};
+  NODES["srch_" + id + "_no"] = {bg, fx:{flag:"srch_" + id}, lines:[s.no, "이곳에서 더 찾을 건 없어 보인다."], next:"hub", nextLabel:"돌아간다"};
+});
+const HUB_TEXT = {
+  town:["불씨골 마을 광장. 여관 「꺼진 화로」 굴뚝에서 장작 연기가 오른다.", "대장간 망치 소리와 마법상점의 풍경 소리가 섞여 들린다."],
+  forest:["잿빛 숲길. 늑대 울음은 멀어졌고 바람에 나뭇잎이 바스락거린다."],
+  bridge:["트롤의 다리. 강물 소리가 낮게 깔린다. 그룸의 몽둥이 자국이 난간에 남아 있다."],
+  swamp:["안개 늪. 널빤지 길이 안개 속으로 끝없이 이어진다."],
+  cave:["버려진 광산 입구. 갱도 안쪽에서 찬바람이 불어 나온다."],
+  camp:["탑 아래 언덕. 꺼진 모닥불 자리 너머로 잿빛 탑이 우뚝 서 있다."],
+  tower:["잿빛 탑 1층. 계단 위에서 뜨거운 바람이 내려온다."],
+  lair:["잿날개의 둥지."]
+};
+const PROGRESS_TEXT = ["", "숲길이 열렸다. 준비가 되면 오른쪽으로 출발하자.", "마을 사람들이 일행을 알아보고 손을 흔든다. 「다리를 넘었다며?」", "아이들이 일행의 무용담을 흉내 내며 뛰어논다.", "대장간 앞에 일행의 이름을 새긴 나무판이 걸렸다.", "마을 전체가 숨을 죽이고 탑 쪽을 바라본다. 모두 일행에게 기대를 건다.", "여관 주인이 일행 자리를 비워 두었다. 「돌아올 거지?」", "마지막 싸움이 남았다."];
+
+/* ---------- quests: bounties & favors ---------- */
+const QUESTS = {
+  wolfking:{kind:"bounty", name:"늑대왕 잿송곳니", area:"forest", after:"forest", gold:90, xp:160, dungeon:{label:"늑대 굴로 들어간다 (현상금)", to:"den_1"}, desc:"숲 북쪽 굴에 사는 흰 늑대. 가축 스무 마리를 물어 갔다."},
+  queen:{kind:"bounty", name:"늪의 거머리 여왕", area:"swamp", after:"swamp", gold:130, xp:220, dungeon:{label:"가라앉은 사원으로 (현상금)", to:"temple_1"}, desc:"늪 한가운데 가라앉은 사원에 사람만 한 거머리가 산다."},
+  foreman:{kind:"bounty", name:"해골 감독관 모르그", area:"cave", after:"cave", gold:170, xp:280, dungeon:{label:"깊은 갱도로 내려간다 (현상금)", to:"deep_1"}, desc:"광산 가장 깊은 곳에서 죽은 광부들을 부리는 감독관."},
+  alpha:{kind:"bounty", name:"잿불 우두머리", area:"camp", after:"camp", gold:220, xp:340, dungeon:{label:"불탄 망루에 오른다 (현상금)", to:"watch_1"}, desc:"탑 아래 망루에 둥지를 튼 거대한 잿불 사냥개."},
+  ring:{kind:"favor", giver:"orna", name:"오르나의 반지", area:"bridge", after:"forest", desc:"오르나가 젊은 시절 트롤의 다리에서 잃어버린 결혼반지."},
+  herb:{kind:"favor", giver:"selin", name:"셀린의 달빛 약초", area:"swamp", after:"bridge", desc:"안개 늪에서만 자라는 달빛 약초가 필요하다."},
+  hammer:{kind:"favor", giver:"smith", name:"그란의 망치", area:"cave", after:"swamp", desc:"광산이 무너질 때 두고 온 그란 아버지의 망치."}
+};
+const qState = q => (S.quests || {})[q];
+const qOpen = q => { const Q = QUESTS[q]; return S.world && S.world.cleared[AREA_I(Q.after)]; };
+
+/* ---------- dungeon & quest content ---------- */
+SPRITE_DEFS.alphawolf = {p:{...SPRITE_DEFS.wolf.p, g:"#dfe6d6", G:"#8fadaa", w:"#f4f2ea", e:"#e04a3c"}, em:["e"], flat:["n"], g:SPRITE_DEFS.wolf.g};
+SPRITE_DEFS.queen = {p:{...SPRITE_DEFS.leech.p, G:"#5c3f72", g:"#8a62a0", d:"#3a2850", y:"#e04a3c"}, em:["e","y"], g:SPRITE_DEFS.leech.g};
+SPRITE_DEFS.foreman = {p:{...SPRITE_DEFS.skeleton.p, W:"#b6cbc0", w:"#6a6c78", e:"#e04a3c", M:"#344e66", P:"#a2a3ac"}, em:["e","F"], flat:["k"], g:SPRITE_DEFS.skeleton.g};
+SPRITE_DEFS.alphahound = {p:{...SPRITE_DEFS.hound.p, g:"#3a2850", G:"#241a33", w:"#e04a3c", e:"#ffd678"}, em:["e","w"], flat:["n"], g:SPRITE_DEFS.wolf.g};
+Object.assign(SPR_SCALE, {alphawolf:2, queen:2, foreman:2, alphahound:2});
+Object.assign(FOES, {
+  pack:{name:"굴의 늑대 떼", sprite:"wolf", count:3, hp:34, ac:13, atk:5, dmg:[6], dmgB:2, verb:"물어뜯기", xp:90, loot:["wolf_fang","leather","silver_dagger"], intro:"어둠 속에서 늑대 세 마리가 동시에 달려든다!"},
+  wolfking:{name:"늑대왕 잿송곳니", sprite:"alphawolf", count:1, hp:66, ac:14, atk:6, dmg:[8,6], dmgB:2, verb:"송곳니 찢기", xp:200, intro:"흰 늑대가 몸을 일으킨다. 굴 전체가 낮은 울림으로 떨린다!"},
+  leech_elite:{name:"사원 거머리", sprite:"leech", count:3, hp:36, ac:12, atk:5, dmg:[6], dmgB:2, verb:"달라붙어 빨기", xp:100, loot:["wis_ring","healer_robe"], intro:"제단 아래 검은 물에서 굵은 거머리들이 솟아오른다!"},
+  queen:{name:"거머리 여왕", sprite:"queen", count:1, hp:78, ac:13, atk:6, dmg:[6,6], dmgB:2, verb:"빨대 촉수", xp:240, regen:4, intro:"제단이 무너지며 사람만 한 거머리가 몸을 일으킨다!"},
+  skel_elite:{name:"해골 광부 정예", sprite:"skeleton", count:3, hp:44, ac:14, atk:5, dmg:[8], dmgB:2, verb:"곡괭이 내려찍기", xp:120, loot:["steel_sword","chainmail","star_staff"], intro:"녹슨 투구를 쓴 해골들이 대열을 맞춰 다가온다!"},
+  foreman:{name:"해골 감독관 모르그", sprite:"foreman", count:1, hp:92, ac:16, atk:7, dmg:[8,8], dmgB:3, verb:"채찍 곡괭이", xp:300, intro:"「일해라... 영원히...」 감독관의 눈구멍에서 붉은 빛이 타오른다!"},
+  hounds_elite:{name:"망루의 사냥개", sprite:"hound", count:3, hp:44, ac:13, atk:6, dmg:[8], dmgB:2, verb:"불꽃 이빨", xp:130, loot:["fire_wand","flame_axe"], intro:"불붙은 계단 위에서 사냥개들이 짖어 댄다!"},
+  alphahound:{name:"잿불 우두머리", sprite:"alphahound", count:1, hp:110, ac:16, atk:7, dmg:[8,8], dmgB:3, verb:"용암 송곳니", xp:360, breath:true, intro:"우두머리가 아가리를 벌리자 망루 전체가 붉게 물든다!"}
+});
+// regeneration is gentler, and fire stops it (D&D trolls)
+FOES.troll.regen = [6]; FOES.queen.regen = [8];
+const FIRE_GEAR = new Set(["flame_axe", "fire_wand", "flame_greatsword", "phoenix_wand", "ember_fang"]);
+const fireHit = (h, style) => style === "firebolt" || !!(h.eq && h.eq.weapon && S.items[h.eq.weapon] && FIRE_GEAR.has(S.items[h.eq.weapon].key));
+Object.assign(FOE_STYLE, {pack:"bite", wolfking:"bite", leech_elite:"drain", queen:"drain", skel_elite:"smash", foreman:"smash", hounds_elite:"bite", alphahound:"claw"});
+Object.assign(NODES, {
+  inn_rest:{bg:"tavern", show:["orna"], fx:{heal:"full"}, lines:["따뜻한 수프와 푹신한 짚 침대. 일행은 오랜만에 깊이 잠들었다.", ["orna","잘 잤나? 얼굴이 좀 펴졌구먼."]], next:"hub", nextLabel:"광장으로 나간다"},
+  // 늑대 굴
+  den_1:{bg:"forest", art:{bg:"forest", u:[["alphawolf",200]], o:"eyes2", c:[120,50,200,112], cap:"굴 안쪽의 흰 그림자"}, lines:["숲 북쪽, 뿌리 사이로 뚫린 커다란 굴. 입구에 짐승 뼈가 수북하다.", "안쪽 어둠에서 여러 쌍의 눈이 번뜩인다."], prompt:"어떻게 들어갈까?", choices:[
+    {t:"check", label:"바람을 등지고 몰래 접근한다", stat:"dex", dc:14, pass:"den_2", fail:"den_pack"},
+    {t:"battle", label:"횃불을 들고 정면으로 쳐들어간다", foe:"pack", win:"den_2"},
+    {t:"go", label:"오늘은 물러난다", to:"hub"}]},
+  den_pack:{bg:"forest", show:["wolf","wolf","wolf"], lines:["마른 가지가 발밑에서 부러졌다! 늑대 떼가 한꺼번에 몸을 일으킨다."], choices:[{t:"battle", label:"싸운다", foe:"pack", win:"den_2"}]},
+  den_2:{bg:"forest", show:["alphawolf"], lines:["굴 가장 안쪽. 달빛이 새어 드는 바위 위에 흰 늑대가 앉아 있다.", "잿송곳니. 다른 늑대보다 두 배는 크다. 금빛 눈이 일행을 하나하나 훑는다."], prompt:"늑대왕이 일어선다.", choices:[
+    {t:"battle", label:"현상금을 받으러 왔다!", foe:"wolfking", win:"den_win"}, {t:"go", label:"뒷걸음질로 빠져나간다", to:"hub"}]},
+  den_win:{bg:"forest", fx:{gold:40, item:"wolfking_fang", qdone:"wolfking"}, art:{bg:"forest", u:P2, o:"chest", c:[60,40,200,112], cap:"늑대왕의 보물"}, lines:["잿송곳니가 길게 울부짖고 쓰러졌다.", "바위 틈에서 늑대왕이 모아 둔 반짝이는 것들을 찾았다."], next:"hub", nextLabel:"굴을 나선다"},
+  // 가라앉은 사원
+  temple_1:{bg:"swamp", art:{bg:"swamp", u:P2, o:"riddle", c:[60,40,200,112], cap:"반쯤 가라앉은 사원"}, lines:["안개를 헤치자 반쯤 물에 잠긴 사원이 나타난다. 문틀에 오래된 문자가 새겨져 있다."], prompt:"문자를 읽어 볼까?", choices:[
+    {t:"check", label:"고대 문자를 해독한다", stat:"int", dc:13, pass:"temple_2", fail:"temple_trap"},
+    {t:"go", label:"그냥 들어간다", to:"temple_trap"}, {t:"go", label:"돌아간다", to:"hub"}]},
+  temple_trap:{bg:"swamp", fx:{dmg:"2d6", who:"all"}, art:{bg:"swamp", u:P2, o:"spikes", c:[60,40,200,112], cap:"가시 함정"}, lines:["바닥 돌판이 꺼지며 녹슨 가시가 튀어나온다!"], next:"temple_2", nextLabel:"이를 악물고 나아간다"},
+  temple_2:{bg:"swamp", show:["leech","leech","leech"], lines:["제단으로 이어지는 복도. 검은 물이 출렁이더니 굵은 거머리들이 기어오른다."], choices:[{t:"battle", label:"싸운다", foe:"leech_elite", win:"temple_3"}]},
+  temple_3:{bg:"swamp", show:["queen"], lines:["무너진 제단 위, 사람만 한 거머리가 숨 쉬듯 부풀었다 줄어든다.", "여왕이다. 상처를 입어도 금세 아문다고 한다. 빠르게 끝내야 한다."], choices:[{t:"battle", label:"여왕을 친다!", foe:"queen", win:"temple_win"}, {t:"go", label:"물러난다", to:"hub"}]},
+  temple_win:{bg:"swamp", fx:{gold:60, item:"queen_ring", qdone:"queen"}, lines:["여왕이 터지듯 쪼그라들자 사원 안의 물이 맑아진다.", "제단 밑에서 여왕이 삼켰던 반지가 굴러 나왔다."], next:"hub", nextLabel:"사원을 나선다"},
+  // 깊은 갱도
+  deep_1:{bg:"cave", art:{bg:"cave", u:P2, o:"rubble", c:[60,40,200,112], cap:"무너진 갱도"}, lines:["광산 가장 깊은 곳으로 이어지는 갱도가 바위에 막혀 있다."], prompt:"어떻게 지나갈까?", choices:[
+    {t:"check", label:"바위를 들어 옮긴다", stat:"str", dc:14, pass:"deep_2", fail:"deep_rocks"},
+    {t:"check", label:"버팀목 구조를 살펴 빈틈을 찾는다", stat:"int", dc:14, pass:"deep_2", fail:"deep_rocks"},
+    {t:"go", label:"돌아간다", to:"hub"}]},
+  deep_rocks:{bg:"cave", fx:{dmg:"2d6", who:"roller"}, lines:["바위가 미끄러지며 돌무더기가 쏟아졌다! 겨우 길은 났다."], next:"deep_2", nextLabel:"먼지를 털고 나아간다"},
+  deep_2:{bg:"cave", show:["skeleton","skeleton","skeleton"], lines:["넓은 채굴장. 녹슨 투구를 쓴 해골들이 곡괭이를 멈추고 일제히 고개를 돌린다."], choices:[{t:"battle", label:"싸운다", foe:"skel_elite", win:"deep_3"}]},
+  deep_3:{bg:"cave", show:["foreman"], fx:{flag:"hammerFound"}, lines:["채굴장 끝, 거대한 해골이 녹슨 망치 하나를 깔고 앉아 있다. 손잡이에 「그란」이라고 새겨져 있다.", "「일해라... 영원히...」"], choices:[{t:"battle", label:"감독관을 쓰러뜨린다!", foe:"foreman", win:"deep_win"}, {t:"go", label:"망치만 챙겨 도망친다", to:"hub"}]},
+  deep_win:{bg:"cave", fx:{gold:80, qdone:"foreman", loot:["foreman_blade","lamp_staff","deep_cloak","saint_mace"]}, art:{bg:"cave", u:P2, o:"chest", c:[60,40,200,112], cap:"감독관의 금고"}, lines:["감독관이 무너지자 해골들도 하나둘 흙으로 돌아간다.", "감독관이 지키던 금고 안에 광산 최고의 장비가 잠들어 있었다."], next:"hub", nextLabel:"광산을 나선다"},
+  // 불탄 망루
+  watch_1:{bg:"camp", art:{bg:"camp", u:P2, o:"fire", c:[60,40,200,112], cap:"불타는 망루 계단"}, lines:["탑 아래 낡은 망루. 계단 곳곳에서 아직도 불길이 타오른다."], prompt:"불길을 어떻게 지날까?", choices:[
+    {t:"check", label:"불길 사이를 재빨리 뛰어오른다", stat:"dex", dc:14, pass:"watch_2", fail:"watch_burn"},
+    {t:"check", label:"젖은 망토를 덮고 버틴다", stat:"con", dc:14, pass:"watch_2", fail:"watch_burn"},
+    {t:"go", label:"돌아간다", to:"hub"}]},
+  watch_burn:{bg:"camp", fx:{dmg:"2d6", who:"all", fire:true}, lines:["불길이 옷자락을 핥았다! 모두 화상을 입었다."], next:"watch_2", nextLabel:"계속 오른다"},
+  watch_2:{bg:"camp", show:["hound","hound","hound"], lines:["망루 중간층. 사냥개들이 불붙은 꼬리를 흔들며 길을 막는다."], choices:[{t:"battle", label:"싸운다", foe:"hounds_elite", win:"watch_3"}]},
+  watch_3:{bg:"camp", show:["alphahound"], lines:["꼭대기. 검붉은 털의 거대한 사냥개가 숨을 몰아쉰다. 콧김마다 불꽃이 튄다.", "세 번에 한 번은 불을 뿜는다고 했다. 대비하자."], choices:[{t:"battle", label:"우두머리를 쓰러뜨린다!", foe:"alphahound", win:"watch_win"}, {t:"go", label:"물러난다", to:"hub"}]},
+  watch_win:{bg:"camp", fx:{gold:100, qdone:"alpha", loot:["alpha_mantle","ember_fang","phoenix_wand","flame_greatsword"]}, art:{bg:"camp", u:P2, o:"chest", c:[60,40,200,112], cap:"우두머리의 보물"}, lines:["우두머리가 쓰러지자 망루의 불길이 한꺼번에 사그라든다.", "잿더미 속에서 불에도 녹지 않은 장비가 모습을 드러냈다."], next:"hub", nextLabel:"망루를 내려간다"},
+  // favors
+  ring_search:{bg:"bridge", art:{bg:"bridge", u:P2, o:"glint", c:[60,40,200,112], cap:"진흙 속 반짝임"}, lines:["오르나가 말한 둘째 교각 아래. 진흙 속 어딘가에 반지가 있을 것이다."], choices:[
+    {t:"check", label:"손으로 진흙을 더듬는다", stat:"dex", dc:12, pass:"ring_found", fail:"ring_leech"}, {t:"go", label:"나중에 찾는다", to:"hub"}]},
+  ring_leech:{bg:"bridge", fx:{dmg:"1d6", who:"roller"}, lines:["진흙 속에서 무언가가 손가락을 물었다! 하지만 손끝에 둥근 것이 걸렸다."], next:"ring_found", nextLabel:"끌어올린다"},
+  ring_found:{bg:"bridge", fx:{flag:"ringFound", xp:30}, lines:["진흙을 닦아 내자 작은 금반지가 나온다. 안쪽에 「오르나에게」라고 새겨져 있다."], next:"hub", nextLabel:"반지를 챙긴다"},
+  herb_search:{bg:"swamp", art:{bg:"swamp", u:P2, o:"sparkle", c:[60,40,200,112], cap:"달빛 약초"}, lines:["안개가 걷힌 웅덩이 가장자리에 은빛으로 빛나는 풀이 보인다. 달빛 약초다."], choices:[
+    {t:"check", label:"뿌리째 조심스럽게 캔다", stat:"wis", dc:13, pass:"herb_found", fail:"herb_fight"}, {t:"go", label:"나중에 온다", to:"hub"}]},
+  herb_fight:{bg:"swamp", show:["leech","leech","leech"], lines:["뿌리를 잡아당기자 웅덩이 속 거머리들이 깨어났다!"], choices:[{t:"battle", label:"싸운다", foe:"leeches", win:"herb_found"}]},
+  herb_found:{bg:"swamp", fx:{flag:"herbFound", xp:30}, lines:["달빛 약초를 무사히 캤다. 셀린에게 가져가자."], next:"hub", nextLabel:"약초를 챙긴다"}
+});
+
+/* ---------- dynamic places: area hub, bounty board, town talks ---------- */
+function dyn(id, fn){ Object.defineProperty(NODES, id, {get:fn, enumerable:false, configurable:true}); }
+function travelChoices(ch){
+  const w = S.world, at = w.at;
+  if (at > 0) ch.push({t:"travel", to:at - 1, poi:"exitL", label:`${ro(AREAS[at-1].name)} 돌아간다`});
+  if (at > 1) ch.push({t:"travel", to:0, poi:"exitL", label:"마을로 곧장 귀환한다"});
+  if (at < w.unlocked) ch.push({t:"travel", to:at + 1, poi:"exitR", label:`${ro(AREAS[at+1].name)} 나아간다`});
+}
+const DEN_NAME = {wolfking:"늑대 굴 입구", queen:"가라앉은 사원", foreman:"깊은 갱도 입구", alpha:"불탄 망루"};
+// the area itself: the party walks it (walk.js); every choice here is tied to a spot on the street (poi)
+dyn("hub", () => {
+  const w = S.world || newWorld(), a = AREAS[w.at], ch = [];
+  if (a.id === "town"){
+    const herb = qState("herb") || qOpen("herb"), hammer = qState("hammer") || qOpen("hammer");
+    ch.push({t:"shop", shop:"smith", poi:"smith", label:"장비 · 전투 기술서 거래"});
+    if (hammer && qState("hammer") !== "claimed") ch.push({t:"go", to:"talk_town", poi:"smith", label:"그란의 부탁"});
+    ch.push({t:"go", to:"board", poi:"board", label:"현상금 쪽지를 본다"});
+    ch.push({t:"shop", shop:"mage", poi:"selin", label:"지팡이 · 마법 기술서 거래"});
+    if (herb && qState("herb") !== "claimed") ch.push({t:"go", to:"talk_town", poi:"selin", label:"셀린의 부탁"});
+    ch.push({t:"go", to:"talk_orna", poi:"inn", label:"오르나와 이야기한다"}, {t:"shop", shop:"inn", poi:"inn", label:"물약 · 행운 토큰 사기"},
+      {t:"go", to:"inn_rest", cost:10, poi:"inn", label:"하룻밤 쉰다 (HP 회복)"});
+  } else {
+    if (a.id === "forest" && (S.flags.seenMerchant || w.cleared[w.at])) ch.push({t:"shop", shop:"moro", poi:"moro", label:"수레의 물건을 본다"});
+    if (a.id === "swamp" && w.cleared[w.at]) ch.push({t:"go", to:"witch", poi:"witch", label:"그레타와 거래한다"});
+    Object.entries(QUESTS).forEach(([q, Q]) => { if (Q.area === a.id && Q.kind === "bounty" && qState(q) === "active") ch.push({t:"go", to:Q.dungeon.to, poi:"dungeon", pn:DEN_NAME[q], pd:`${Q.desc} 들어가면 쉽게 돌아 나올 수 없다.`, label:Q.dungeon.label}); });
+    if (a.id === "bridge" && qState("ring") === "active" && !S.flags.ringFound) ch.push({t:"go", to:"ring_search", poi:"spot", pn:"둘째 교각 아래", pd:"오르나가 반지를 잃어버렸다는 자리다. 진흙 속에서 무언가 반짝인다.", label:"진흙을 뒤진다 (오르나의 반지)"});
+    if (a.id === "swamp" && qState("herb") === "active" && !S.flags.herbFound) ch.push({t:"go", to:"herb_search", poi:"spot", pn:"은빛 웅덩이", pd:"안개 사이로 은빛으로 빛나는 풀이 보인다. 셀린이 말한 달빛 약초다.", label:"달빛 약초를 캔다 (셀린의 부탁)"});
+  }
+  // random finds on the road (rolled per game)
+  ((S.loot || {})[a.id] || []).forEach(o => { if (o.taken) return;
+    if (o.kind === "glint") ch.push({t:"go", to:"loot_get", poi:"loot:" + o.k, pn:o.name, pd:"길바닥에서 무언가 반짝인다. 주워 볼까?", label:"주워 본다"});
+    else ch.push({t:"check", stat:o.stat, dc:o.dc, pass:"loot_ok", fail:"loot_no", poi:"loot:" + o.k, pn:o.name, pd:"무언가 숨겨져 있을 것 같다. 잘못 건드리면 다칠 수도 있다.", label:LOOT_TRY[o.stat]}); });
+  travelChoices(ch);
+  return {bg:areaBg(w.at), show:[], noVote:true, walk:true, local:true, lines:[], prompt:a.name, choices:ch};
+});
+dyn("board", () => {
+  const ch = [], lines = ["낡은 나무 게시판에 현상금 쪽지가 빼곡하다."];
+  Object.entries(QUESTS).forEach(([q, Q]) => { if (Q.kind !== "bounty") return; const st = qState(q);
+    if (!st && qOpen(q)) ch.push({t:"quest", q, label:`[수락] ${Q.name} — 금화 ${Q.gold}`, desc:Q.desc});
+    else if (st === "active") ch.push({t:"noop", q, dis:true, label:`[진행 중] ${Q.name} — ${AREAS[AREA_I(Q.area)].name}`});
+    else if (st === "done") ch.push({t:"claim", q, label:`[보상 받기] ${Q.name} — 금화 ${Q.gold} · 경험치 ${Q.xp}`}); });
+  if (!ch.length) lines.push("지금 붙어 있는 현상금은 없다. 더 먼 곳까지 가 보면 새 쪽지가 붙을 것이다.");
+  ch.push({t:"go", to:"hub", label:"게시판을 떠난다"});
+  return {bg:"tavern", show:["orna"], noVote:true, lines, again:lines, prompt:"현상금 게시판", choices:ch};
+});
+const ORNA_TALK = [
+  ["준비는 단단히 하고 가. 늑대한테 물리면 약도 없어."],
+  ["숲을 지났다고? 허, 처음 봤을 땐 칼도 제대로 못 쥘 것 같더니.", "다리의 트롤 그룸은 배가 고프면 사납고, 배가 부르면 순해. 기억해."],
+  ["트롤을 넘었구먼! 마을에 소문이 벌써 쫙 퍼졌어.", "늪의 마녀 그레타는... 내 오랜 친구야. 겁먹지 말고 예의만 지켜."],
+  ["그레타를 만났다니. 그 노인네, 아직 살아 있었구먼.", "광산의 해골들은 원래 우리 마을 광부들이었어. 편히 쉬게 해 줘."],
+  ["너희 눈빛이 달라졌어. 처음 여관 문을 열고 들어올 때랑은 딴사람이야.", "탑 아래 언덕에서 하룻밤 묵게 될 거야. 불씨를 꺼뜨리지 마."],
+  ["탑이 코앞이야. 탑 문지기는 수수께끼를 좋아한다더군.", "올라가기 전에 그란한테 장비를 손봐 달라고 해."],
+  ["...이제 꼭대기만 남았구먼.", "살아서 돌아와. 금화 백 닢보다 그게 더 중요해."],
+  ["가거라. 불씨골이 너희를 기다린다."]
+];
+dyn("talk_orna", () => {
+  const w = S.world || newWorld(), ch = [], lines = ORNA_TALK[Math.min(ORNA_TALK.length - 1, w.unlocked)].map(t => ["orna", t]);
+  const st = qState("ring");
+  if (!st && qOpen("ring")){ lines.push(["orna","...그리고 부탁이 하나 있어. 젊을 적 트롤의 다리에서 결혼반지를 잃어버렸어. 둘째 교각 아래였지."]); ch.push({t:"quest", q:"ring", label:"[부탁] 반지를 찾아 드리겠다"}); }
+  if (st === "active") ch.push(S.flags.ringFound ? {t:"claim", q:"ring", label:"[반지를 돌려준다]"} : {t:"noop", dis:true, label:"[진행 중] 트롤의 다리에서 반지 찾기"});
+  ch.push({t:"go", to:"hub", label:"광장으로 돌아간다"});
+  return {bg:"tavern", show:["orna"], noVote:true, lines, again:lines.slice(0, 1), prompt:"오르나", choices:ch};
+});
+dyn("talk_town", () => {
+  const ch = [], lines = [];
+  const herb = qState("herb"), hammer = qState("hammer");
+  if (!herb && qOpen("herb")){ lines.push(["selin","안개 늪의 달빛 약초 좀 구해 줄래요? 대신 기술서 한 권을 공짜로 드릴게요."]); ch.push({t:"quest", q:"herb", label:"[셀린의 부탁] 달빛 약초 구하기"}); }
+  if (herb === "active") ch.push(S.flags.herbFound ? {t:"claim", q:"herb", label:"[셀린에게 약초를 건넨다]"} : {t:"noop", dis:true, label:"[진행 중] 안개 늪에서 달빛 약초 찾기"});
+  if (!hammer && qOpen("hammer")){ lines.push(["smith","광산 깊은 곳에 아버지 망치가 있어. 찾아오면 내 물건은 앞으로 2할 깎아 주지."]); ch.push({t:"quest", q:"hammer", label:"[그란의 부탁] 아버지의 망치 찾기"}); }
+  if (hammer === "active") ch.push(S.flags.hammerFound ? {t:"claim", q:"hammer", label:"[그란에게 망치를 건넨다]"} : {t:"noop", dis:true, label:"[진행 중] 버려진 광산 깊은 갱도에서 망치 찾기"});
+  if (!lines.length) lines.push(["selin","오늘은 부탁할 게 없네요. 또 들러요."]);
+  ch.push({t:"go", to:"hub", label:"광장으로 돌아간다"});
+  return {bg:"tavern", show:["smith","selin"], noVote:true, lines, again:lines, prompt:"상인들의 부탁", choices:ch};
+});
+
+/* ---------- quest actions ---------- */
+function acceptQuest(q){ const Q = QUESTS[q]; if (!Q || qState(q) || !qOpen(q)) return; S.quests[q] = "active"; sfx("good");
+  if (q === "hammer" && S.flags.hammerFound) S.flags.hammerFound = true;
+  enterNode(S.nodeId, [["sys", `퀘스트 수락: ${Q.name}${Q.kind === "bounty" ? ` — ${AREAS[AREA_I(Q.area)].name}에 입구가 생겼다` : ""}`]]); }
+function claimQuest(q){
+  const Q = QUESTS[q], st = qState(q); if (!Q) return;
+  const ok = Q.kind === "bounty" ? st === "done" : st === "active" && (q === "ring" ? S.flags.ringFound : q === "herb" ? S.flags.herbFound : S.flags.hammerFound);
+  if (!ok) return; S.quests[q] = "claimed"; const out = [];
+  if (Q.kind === "bounty"){ out.push(["sys", `현상금 수령: ${Q.name}`]); out.push(...applyFx({gold:Q.gold, xp:Q.xp})); }
+  if (q === "ring"){ out.push(["orna","...이걸 정말 찾아왔어? 고마워. 정말로."], ["orna","이 로켓을 가져가. 남편이 내게 준 거야. 이제 너희를 지켜 줄 거다."]); out.push(...applyFx({item:"orna_locket", luck:2, xp:80})); }
+  if (q === "herb"){ S.freeBooks = (S.freeBooks || 0) + 1; out.push(["selin","완벽해요! 약속대로 기술서 한 권은 공짜예요. 상점에서 골라요."], ["sys","무료 기술서 교환권 +1 (셀린의 상점)"]); out.push(...applyFx({gold:40, xp:80})); }
+  if (q === "hammer"){ out.push(["smith","...아버지 망치. 손잡이가 아직 따뜻한 것 같군."], ["smith","약속대로 내 물건은 이제 2할 싸게 주지. 그리고 이건 덤이야."]); out.push(...applyFx({flag:"smithDiscount", gold:80, xp:100})); }
+  sfx("levelup"); banner("퀘스트 완료!", "gold");
+  enterNode(S.nodeId, out);
+}
+
+function renderWorldBar(){
+  const el = $("#worldBar"); if (!el) return; const w = S.world;
+  if (!w || S.screen !== "game" || S.battle){ el.hidden = true; return; }
+  const gathered = allGathered(), can = S.nodeId === "hub" && S.mode === "walk" && !busy && !(S.walk && S.walk.auto) && gathered;
+  const n = Math.min(AREAS.length, w.unlocked + 2);
+  el.hidden = false;
+  el.innerHTML = AREAS.slice(0, n).map((a, i) => { const locked = i > w.unlocked, here = i === w.at;
+    return `${i ? `<i class="wb-road ${locked ? "lock" : ""}"></i>` : ""}<button class="wb-node ${here ? "here" : ""} ${locked ? "lock" : ""} ${w.cleared[i] ? "done" : ""}" data-act="travel" data-i="${i}" ${!can || locked || here ? "disabled" : ""} title="${esc(a.name)}"><canvas class="px" data-spr="${locked ? "bounty" : a.icon}"></canvas><span>${locked ? "???" : esc(a.name)}</span></button>`; }).join("")
+    + `<span class="wb-tip">${can ? "누르면 빠른 이동" : S.nodeId === "hub" && !gathered ? "모두 이정표에 모이면 이동" : S.nodeId === "hub" ? "" : "이 지역의 사건을 마치면 이동할 수 있어요"}</span>`;
+  paintAll(el);
+}
+
+/* ---------- shop window ---------- */
+let SHOP = {id:null, tab:"buy"};
+function openShop(id){ if (!SHOPS[id] || !shopHere(id)) return; SHOP = {id, tab:"buy"}; $("#shop").hidden = false; renderShop(); sfx("select"); }
+function closeShop(){ SHOP.id = null; $("#shop").hidden = true; sfx("select"); }
+function itemCard(key, price, act, extra){ const it = ITEMS[key];
+  return `<div class="sh-card" style="--rc:${RARITY[it.r].c}"><canvas class="px" data-spr="it_${key}"></canvas><div class="sh-info"><b style="color:${RARITY[it.r].c}">${esc(it.name)}</b>
+    <span>${RARITY[it.r].ko} · ${SLOT_KO[it.slot]}${it.cls ? " · " + it.cls.map(c => CLASSES[c].ko).join("/") : ""}</span><em>${fxLines(it.fx).join(" · ") || "&nbsp;"}</em></div>
+    <div class="sh-buy">${extra || ""}<button class="btn small primary" ${act}>${price}<canvas class="px coin" data-spr="coin"></canvas></button></div></div>`; }
+function renderShop(){
+  if (!SHOP.id || $("#shop").hidden) return; const sh = SHOPS[SHOP.id];
+  if (!shopHere(SHOP.id)){ closeShop(); return; }
+  paintSpriteCanvas($("#shopPortrait"), sh.spr); $("#shopName").textContent = sh.name; $("#shopGreet").textContent = sh.greet;
+  $("#shopGold").innerHTML = `<canvas class="px" data-spr="coin"></canvas>${S.gold}${S.freeBooks ? ` <small>무료 기술서 ${S.freeBooks}</small>` : ""}`;
+  document.querySelectorAll("#shop .sh-tab").forEach(b => b.classList.toggle("on", b.dataset.t === SHOP.tab));
+  let html = "";
+  if (SHOP.tab === "buy"){
+    if (sh.supplies) html += `<h4>소모품</h4><div class="sh-grid">` + Object.entries(SUPPLIES).map(([k, s]) => `<div class="sh-card"><canvas class="px" data-spr="${k === "potion" ? "potion" : "coin"}"></canvas><div class="sh-info"><b>${s.name}</b><span>${s.desc}</span><em>보유 ${k === "potion" ? S.potions : S.luck}</em></div><div class="sh-buy"><button class="btn small primary" data-act="shopSupply" data-k="${k}" ${S.gold < s.price ? "disabled" : ""}>${s.price}<canvas class="px coin" data-spr="coin"></canvas></button></div></div>`).join("") + `</div>`;
+    const booksHTML = !sh.books ? "" : `<h4>기술서 <small>배운 기술은 전투마다 정해진 횟수만큼 쓸 수 있어요</small></h4><div class="sh-grid">` + sh.books.map(k => { const sk = SKILLS[k], free = (S.freeBooks || 0) > 0 && SHOP.id === "mage";
+      const who = S.party.map((h, m) => h.cls !== sk.cls ? "" : (h.skills || []).includes(k) ? `<span class="sh-learned">${esc(h.name)} 습득</span>` :
+        `<button class="btn small ${free ? "primary" : "ghost"}" data-act="shopLearn" data-k="${k}" data-i="${m}" ${!mine(m) || (!free && S.gold < sk.price) ? "disabled" : ""}>${esc(h.name)} ${free ? "무료" : sk.price}</button>`).join("");
+      return `<div class="sh-card book"><canvas class="px" data-spr="skillbook"></canvas><div class="sh-info"><b>${sk.name}</b><span>${CLASSES[sk.cls].ko} 전용 · 전투당 ${sk.uses}회</span><em>${sk.desc}</em></div><div class="sh-buy">${who || `<span class="sh-learned">배울 수 있는 동료가 없어요</span>`}</div></div>`; }).join("") + `</div>`;
+    html += booksHTML;
+    if (sh.goods.length) html += `<h4>장비 ${SHOP.id === "smith" && S.flags.smithDiscount ? "<small>그란의 2할 할인 적용</small>" : ""}</h4><div class="sh-grid">` + sh.goods.map(k => itemCard(k, priceOf(k, SHOP.id), `data-act="shopBuy" data-k="${k}" ${S.gold < priceOf(k, SHOP.id) ? "disabled" : ""}`)).join("") + `</div>`;
+  } else {
+    const list = S.inv.filter(u => S.items[u]);
+    html += list.length ? `<h4>가방 속 장비 <small>착용 중인 장비는 팔 수 없어요</small></h4><div class="sh-grid">` + list.map(u => itemCard(S.items[u].key, sellOf(S.items[u].key), `data-act="shopSell" data-u="${u}"`, `<span class="sh-sell">판매</span>`)).join("") + `</div>` : `<p class="sh-empty">팔 수 있는 물건이 없어요.</p>`;
+  }
+  $("#shopBody").innerHTML = html; paintAll($("#shop"));
+}
+function shopAct(peer, a, d){
+  const sh = SHOPS[d.s]; if (!sh || !shopHere(d.s) || busy || S.battle) return false;
+  if (a === "shopSupply"){ const s = SUPPLIES[d.k]; if (!s || !sh.supplies || S.gold < s.price) return false; S.gold -= s.price; if (d.k === "potion") S.potions++; else S.luck++; sfx("good"); }
+  else if (a === "shopBuy"){ if (!sh.goods.includes(d.k)) return false; const p = priceOf(d.k, d.s); if (S.gold < p) return false; S.gold -= p; giveItem(d.k); sfx("good"); itemToast(d.k); }
+  else if (a === "shopSell"){ const u = d.u, o = S.items[u]; if (!o || !S.inv.includes(u)) return false; S.inv = S.inv.filter(x => x !== u); delete S.items[u]; S.gold += sellOf(o.key); sfx("good"); }
+  else if (a === "shopLearn"){ const sk = SKILLS[d.k], h = S.party[d.m]; if (!sk || !sh.books || !sh.books.includes(d.k) || !h || h.cls !== sk.cls || ownerPeer(d.m) !== peer && online()) return false;
+    h.skills = h.skills || []; if (h.skills.includes(d.k)) return false;
+    if ((S.freeBooks || 0) > 0 && d.s === "mage") S.freeBooks--; else { if (S.gold < sk.price) return false; S.gold -= sk.price; }
+    h.skills.push(d.k); sfx("levelup"); banner(`${h.name}: ${sk.name} 습득!`, "gold"); }
+  else return false;
+  save(); refreshStatus(); renderShop(); if (invOpen()) renderInv(); return true;
+}
+
+/* ---------- skills in battle ---------- */
+async function useSkill(k){
+  const b = S.battle; if (!b || busy || b.phase !== "hero") return; const i = b.cur, h = S.party[i], sk = SKILLS[k], f = FOES[b.key];
+  if (!sk || !(h.skills || []).includes(k) || !b.suses || !b.suses[i] || !(b.suses[i][k] > 0)) return;
+  b.suses[i][k]--; busy = true; S.mode = "battle";
+  if (sk.kind === "guard" || sk.kind === "bless"){
+    if (sk.kind === "guard") b.guard = {v:sk.val, t:sk.turns}; else b.bless = {v:sk.val, t:sk.turns};
+    FX.aura(sk.kind === "guard" ? "#6e9198" : "#ffd678"); banner(sk.name, "gold");
+    bmsg(`${h.name}의 ${sk.name}! ${sk.kind === "guard" ? `${sk.turns}라운드 동안 파티 방어도 +${sk.val}` : `${sk.turns}라운드 동안 파티 명중 +${sk.val}`}.`);
+    refreshStatus(); await sleep(700); busy = false; return endHeroTurn();
+  }
+  if (sk.kind === "heal"){
+    const w = mod(statOf(h, "wis")) + bonus(h, "heal");
+    trayOpen({who:h.cls, seat:i, title:`${h.name} — ${sk.name}`, sub:`파티 전원 1d8${sgn(w)} 회복`});
+    const vals = await throwDice(dice(8, 1, h.cls)); showLabels(vals, ["keep"]);
+    const r = sumRoll(vals, w); const lines = S.party.map((p, j) => { const was = p.hp; p.hp = Math.min(p.maxHp, p.hp + r.t); if (p.hp > was) FX.heal(j, p.hp - was); return `${esc(p.name)} +${p.hp - was}`; });
+    bmsg(`${h.name}의 ${sk.name}! 모두 HP +${r.t}.`); trayResult(verdictHTML(r.calc, lines.join(" · "), "good")); refreshStatus();
+    await trayWait("계속"); trayClose(); busy = false; return endHeroTurn();
+  }
+  if (sk.kind === "auto"){
+    const db = dmgMod(h);
+    trayOpen({who:h.cls, seat:i, title:`${h.name} — ${sk.name}`, sub:`${esc(f.name)}에게 · 반드시 명중 · ${sk.dice.map(d => "d" + d).join("+")}${sgn(db)}`});
+    const vals = await throwDice(sk.dice.map(s => ({sides:s, scheme:h.cls}))); showLabels(vals, vals.map(() => "keep"));
+    const r = sumRoll(vals, db); dmgFoe(r.t); if (fireHit(h, sk.style)) S.battle.burn = true; FX.strike(i, sk.style, r.t, false, false); bmsg(`${h.name}의 ${sk.name}! 피해 ${r.t}.`);
+    trayResult(verdictHTML(r.calc, `피해 ${r.t}!`, "good")); refreshStatus();
+    await trayWait("계속"); trayClose(); busy = false; return endHeroTurn();
+  }
+  // strike: attack roll, extra damage dice, rider effects
+  const am = atkMod(h) + (sk.hit || 0), adv = !!sk.adv;
+  trayOpen({who:h.cls, seat:i, title:`${h.name} — ${sk.name}`, sub:`${esc(f.name)} · 방어도 <b>${b.ac}</b> · 명중 <b>${sgn(am)}</b>${adv ? " · d20 두 개 중 높은 눈" : ""}`});
+  setTarget({lead:"d20에서", target:b.ac, mod:am, word:"나오면 명중", adv});
+  let vals, raw, crit, miss, calc, skipWait = false;
+  for (;;){
+    vals = await throwDice(dice(20, adv ? 2 : 1, h.cls), {outPolicy:"fail"});
+    if (vals.out){ showLabels(vals); trayResult(verdictHTML("주사위가 트레이를 넘어갔다", "장외 — 빗나감!", "bad")); sfx("bad"); miss = true; raw = 0; }
+    else { markTarget(vals); raw = Math.max(...vals); const keepI = vals.indexOf(raw); crit = raw === 20; miss = raw === 1 || (!crit && raw + am < b.ac);
+      showLabels(vals, vals.map((v, j) => j !== keepI ? "drop" : crit ? "crit" : raw === 1 ? "fumble" : "keep"));
+      calc = `${raw} ${sgn(am)} = <strong>${raw + am}</strong> <em>vs AC ${b.ac}</em>`;
+      if (miss){ trayResult(verdictHTML(calc, "빗나갔다!", "bad")); sfx("bad"); } }
+    if (!miss) break; const a = await askLuck(); if (a === "luck"){ trayResult(""); continue; } skipWait = a === "skip"; break;
+  }
+  const style = sk.style || HERO_STYLE[h.cls][0];
+  if (miss){ FX.strike(i, style, 0, false, true); bmsg(`${h.name}의 ${sk.name}! 빗나갔다.`); bark(i, pickLine(BARK.miss)); if (!skipWait) await trayWait("계속"); trayClose(); busy = false; return endHeroTurn(); }
+  if (crit){ banner("CRITICAL!", "gold"); sfx("crit"); } else sfx("good");
+  trayResult(verdictHTML(calc, crit ? "치명타! 피해 주사위가 두 배" : "명중!", crit ? "crit" : "good"));
+  const dl = [...CLASSES[h.cls].dmg, ...sk.extra], all = crit ? dl.concat(dl) : dl;
+  await trayWait("피해 굴리기"); setTarget(null);
+  const dv = await throwDice(all.map(s => ({sides:s, scheme:h.cls})), {hint:"피해 주사위를 던지세요"}); showLabels(dv, dv.map(() => "keep"));
+  const r = sumRoll(dv, dmgMod(h)); dmgFoe(r.t); if (fireHit(h, style)) S.battle.burn = true; FX.strike(i, style, r.t, crit, false);
+  let rider = ""; if (sk.stun && b.hp > 0){ b.stun = true; rider = " 적이 기절했다!"; } if (sk.poison && b.hp > 0){ b.poison = {t:sk.poison}; rider = ` 독이 퍼진다! (${sk.poison}라운드)`; }
+  bmsg(`${h.name}의 ${sk.name}! ${crit ? "치명타! " : ""}피해 ${r.t}.${rider}`);
+  trayResult(verdictHTML(r.calc, `피해 ${r.t}!${rider}`, crit ? "crit" : "good")); refreshStatus();
+  await trayWait("계속"); trayClose(); busy = false; endHeroTurn();
+}
+// start of the foe's turn: poison ticks, stun skips the attack
+async function foeStatus(){
+  const b = S.battle, f = FOES[b.key];
+  if (b.poison && b.poison.t > 0 && b.hp > 0){ const d = rnd(6); b.hp = Math.max(0, b.hp - d); b.poison.t--; floatFoe("-" + d, "#7aa35a"); bmsg(`독이 퍼진다! ${f.name} −${d}.`); refreshStatus(); renderBattle(); await sleep(600);
+    if (b.hp <= 0){ busy = false; winBattle(); return true; } }
+  if (b.stun){ b.stun = false; floatFoe("기절", "#ffd678"); bmsg(`${f.name}${hasB(f.name) ? "이" : "가"} 기절해서 움직이지 못한다!`); refreshStatus(); renderBattle(); await sleep(900); busy = false; endFoeTurn(); return true; }
+  return false;
+}
+function tickBuffs(){ const b = S.battle; if (!b) return; ["guard","bless"].forEach(k => { if (b[k]){ b[k].t--; if (b[k].t <= 0) delete b[k]; } }); }
+
+/* ---------- party chat ---------- */
+function pushChat(nick, text, seat){ const t = String(text || "").replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, 120); if (!t) return;
+  S.chat = (S.chat || []).concat([{n:cleanNick(nick), t, k:seat ?? -1}]).slice(-40); renderChat(true); netDirty(); }
+function sendChat(){ const el = $("#chatIn"), v = el.value.trim(); if (!v) return; el.value = "";
+  if (isGuest()) sendInput("chat", {v: v.slice(0, 120)}); else pushChat(NET.nick || "방장", v, 0); }
+let chatSeen = 0;
+function renderChat(bump){
+  const win = $("#chatWin"); if (!win) return; const on = online() && (S.screen === "game" || S.screen === "setup");
+  win.hidden = !on; if (!on) return;
+  const list = S.chat || [], box = $("#chatLog"), atEnd = box.scrollTop + box.clientHeight >= box.scrollHeight - 8;
+  box.innerHTML = list.map(m => `<p class="${m.k >= 0 && mine(m.k) && m.n === cleanNick(NET.nick) ? "me" : ""}"><b>${esc(m.n)}</b>${esc(m.t)}</p>`).join("") || `<p class="sys">파티원과 대화해 보세요. <span class="key">/</span> 키로 바로 입력할 수 있어요.</p>`;
+  if (atEnd || bump) box.scrollTop = box.scrollHeight;
+  const unread = win.classList.contains("min") ? list.length - chatSeen : 0; $("#chatBadge").hidden = unread <= 0; $("#chatBadge").textContent = unread;
+  if (!win.classList.contains("min")) chatSeen = list.length;
+}
+
+/* ---------- inventory: who wears what ---------- */
+function wornList(){ const out = []; S.party.forEach((h, m) => SLOTS.forEach(sl => { const uid = h.eq && h.eq[sl]; if (uid && S.items[uid]) out.push({uid, m}); })); return out; }
+FX.aura = function(color){ S.party.forEach((h, i) => { if (h.hp <= 0) return; const [x, y] = FX.heroCenter(i); scene.burst(x, y + 6, 14, [color, "#f4f2ea"], 30, {up:24}); }); scene.light(70, 140, 90, [0.8, 0.95, 1.1], 0.6); sfx("magic"); };
+window.__dbg.W = {travel:i => travel(i), openShop:id => openShop(id), shopAct:(a, d) => shopAct(NET.me, a, d), useSkill:k => useSkill(k), SKILLS, AREAS, QUESTS, heroKey:h => heroKey(h)};
+
+/* ================= WALKING (Darkest Dungeon style side-scrolling) =================
+   In every area the party walks a long strip left and right. Things to do stand along the way (POIs):
+   merchants, the bounty board, search spots, dungeon doors and the exits at both ends.
+   Walking up to one shows its actions in the dialog box. An area's story event waits ahead as a
+   dark silhouette — reaching it starts the event, and the path beyond opens only once it is done.
+   Online: the host owns the position. Anyone may walk the party; guests send their input and
+   predict the movement locally so it stays smooth. */
+
+/* ---------- props ---------- */
+Object.assign(SPRITE_DEFS, {
+  cache:{p:{b:"#61291a", B:"#82341c", d:"#2e1712", s:"#a2a3ac", y:"#fff0b0", g:"#2f5e3e"}, em:["y"], g:[
+    "........y.....",
+    ".......yyy....",
+    "........y.....",
+    "..dddddddddd..",
+    "..dBBBBBBBBd..",
+    "..dBbbbbbbBd..",
+    "..ddddsddddd..",
+    "..dBBBsBBBBd..",
+    "..dBbbbbbbBd..",
+    "..dBBBBBBBBd..",
+    "gddddddddddddg"]},
+  den:{p:{s:"#6a6c78", S:"#3d3f4a", k:"#07090f", m:"#2f5e3e", e:"#e04a3c"}, em:["e"], flat:["k"], g:[
+    "......ssssssss......",
+    "....ssSSSSSSSSss....",
+    "...sSSkkkkkkkkSSs...",
+    "..sSSkkkkkkkkkkSSs..",
+    "..sSkkkkkkkkkkkkSs..",
+    ".sSSkkkkkkkkkkkkSSs.",
+    ".sSkkkkkkkkkkkkkkSs.",
+    ".sSkkkkekkkkekkkkSs.",
+    ".sSkkkkkkkkkkkkkkSs.",
+    ".sSkkkkkkkkkkkkkkSs.",
+    ".sSkkkkkkkkkkkkkkSs.",
+    ".sSkkkkkkkkkkkkkkSs.",
+    "ssSkkkkkkkkkkkkkkSss",
+    "sSSkkkkkkkkkkkkkkSSs",
+    "mmSSmkkkkkkkkkkmSSmm"]},
+  sign:{p:{w:"#61291a", W:"#82341c", d:"#452017", t:"#dfe6d6"}, g:[
+    ".wwwwwwwww...",
+    "wWWWWWWWWWw..",
+    "wWtttttttWWw.",
+    "wWWWWWWWWWWWw",
+    "wWtttttWWWWw.",
+    "wWWWWWWWWWw..",
+    ".wwwwwwwww...",
+    ".....dd......",
+    ".....dd......",
+    ".....dd......",
+    ".....dd......",
+    ".....dd......",
+    "....dddd....."]}
+});
+
+SPR_SCALE.den = 2;
+/* ---------- the village street (one 960px picture, no tiling) ---------- */
+BGS.village = {w:960, ground:156, amb:[0.3,0.38,0.56], shadowFrom:1,
+  lights:[{x:120,y:40,r:170,c:[0.2,0.28,0.42],f:0}, {x:211,y:138,r:96,c:[1.5,0.72,0.32],f:0.3}, {x:338,y:128,r:36,c:[1.1,0.75,0.4],f:0.1},
+    {x:552,y:112,r:84,c:[0.55,0.62,1.15],f:0.12}, {x:604,y:104,r:46,c:[0.55,1.1,1.1],f:0.3},
+    {x:737,y:120,r:62,c:[1.35,0.78,0.38],f:0.16}, {x:779,y:120,r:62,c:[1.35,0.78,0.38],f:0.16}, {x:812,y:96,r:72,c:[1.1,0.72,0.4],f:0.06},
+    {x:921,y:116,r:54,c:[1.3,0.8,0.4],f:0.14}, {x:110,y:126,r:30,c:[1.1,0.75,0.4],f:0.08}],
+  draw(fb, r){
+    const W = fb.w, B = 148;
+    fb.vgrad(0, 132, ["#07090f","#0c111c","#121a29","#1f2f45","#283d55"]);
+    for (let i=0;i<190;i++) fb.px(Math.floor(r()*W), Math.floor(r()*96), r() < 0.2 ? "#dfe6d6" : "#557887", r() < 0.3 ? 1 : 0);
+    for (let y=-9;y<=9;y++){ const w = Math.floor(Math.sqrt(81-y*y)); fb.rect(120-w, 40+y, w*2, 1, "#dfe6d6", 1, 1); }
+    fb.rect(116,36,4,3,"#b6cbc0",1,1); fb.rect(123,44,3,2,"#b6cbc0",1,1);
+    // far hills, and the ash tower on the horizon — where the road leads
+    for (let x=0;x<W;x++){ const h = 16 + Math.round(Math.sin(x/61)*7 + Math.sin(x/19 + 1)*3); fb.rect(x, 126 - h, 1, h + 6, "#121a29"); }
+    fb.rect(893,58,12,52,"#0c111c"); fb.rect(889,54,20,5,"#0c111c"); for (let k=0;k<4;k++) fb.rect(889 + k*6, 50, 3, 4, "#0c111c"); fb.rect(897,64,4,5,"#e04a3c",1,1);
+    for (let x=-8;x<W+8;x+=15) pine(fb, x + Math.floor(r()*7), 136, 18 + Math.floor(r()*16), "#0c111c");
+    // cobbled street
+    fb.rect(0, B - 2, W, SH - B + 2, "#1f2f45"); fb.rect(0, B - 2, W, 1, "#344e66");
+    for (let y=B; y<SH; y+=6) for (let x = ((y/6)%2)*6 - 6; x < W; x += 12) fb.rect(x, y, 11, 5, r() < 0.5 ? "#283d55" : "#182337");
+    const roof = (cx, top, hw, h, c1, c2) => { for (let y=0;y<h;y++){ const w = Math.round(hw*(y+1)/h); fb.rect(cx - w, top - h + y, w*2, 1, y % 3 === 2 ? c2 : c1); } };
+    const win = (x, y, lit) => { fb.rect(x-1, y-1, 10, 11, "#1c0f0c"); fb.rect(x, y, 8, 9, lit ? "#ffd678" : "#182337", 1, lit ? 1 : 0); if (lit) fb.rect(x, y+6, 8, 3, "#fbb954", 1, 1); fb.rect(x+3, y, 2, 9, "#452017"); fb.rect(x, y+4, 8, 1, "#452017"); };
+    const timber = (x, y, w, h, wall, beam) => { fb.rect(x, y, w, h, wall); fb.rect(x, y, w, 2, beam); fb.rect(x, y + h - 2, w, 2, beam); for (let k=x; k<x+w; k+=14) fb.rect(k, y, 2, h, beam); fb.rect(x+w-2, y, 2, h, beam); };
+    const door = (x, w, h, c) => { fb.rect(x-1, B - h - 1, w + 2, h + 1, "#1c0f0c"); fb.rect(x, B - h, w, h, c || "#452017"); fb.rect(x + Math.floor(w/2), B - h, 1, h, "#2e1712"); fb.px(x + w - 3, B - Math.floor(h/2), "#fbb954"); };
+    // west palisade
+    for (let x=0;x<58;x+=6){ const h = 40 + (x % 12 ? 0 : 4); fb.rect(x, B - h, 5, h, "#2e1712"); fb.rect(x+1, B - h, 1, h, "#452017"); fb.rect(x+1, B - h - 2, 3, 2, "#2e1712"); }
+    fb.rect(0, B - 30, 58, 3, "#1c0f0c");
+    // cottage
+    timber(66, 112, 60, 36, "#344e66", "#2e1712"); roof(96, 112, 38, 22, "#4a1420", "#2e1712"); win(76, 122, false); win(106, 122, true); door(92, 10, 16);
+    // smithy: stone, forge mouth, anvil, chimney
+    bricks(fb, 150, 104, 150, 44, 10, 5, "#3d3f4a", "#283d55", r);
+    roof(225, 104, 84, 22, "#283d55", "#182337");
+    fb.rect(170, 62, 14, 30, "#3d3f4a"); fb.rect(168, 60, 18, 4, "#283d55");
+    for (let y=112; y<B; y++){ const tt = y < 124 ? Math.sqrt(Math.max(0, 1 - ((124 - y)/12)**2)) : 1; const w = Math.round(22*tt); fb.rect(211 - w, y, w*2, 1, "#0c111c"); }
+    fb.rect(192, 140, 38, 8, "#2e1712"); fb.rect(194, 138, 34, 2, "#452017");
+    fb.rect(256, 140, 22, 4, "#6a6c78"); fb.rect(256, 140, 22, 1, "#a2a3ac"); fb.rect(252, 140, 5, 2, "#6a6c78"); fb.rect(262, 144, 10, 4, "#3d3f4a"); fb.rect(258, 148, 18, 3, "#3d3f4a");
+    win(160, 118, true); win(276, 114, false);
+    fb.rect(286, 98, 18, 2, "#2e1712"); fb.rect(302, 98, 2, 6, "#2e1712"); fb.rect(292, 104, 18, 14, "#61291a"); fb.rect(292, 104, 18, 1, "#82341c");
+    fb.rect(296, 107, 10, 3, "#a2a3ac"); fb.rect(300, 110, 2, 6, "#82341c");
+    // small house
+    timber(316, 116, 48, 32, "#283d55", "#1c0f0c"); roof(340, 116, 30, 18, "#61291a", "#2e1712"); win(334, 124, true); door(320, 9, 15);
+    // bounty board
+    fb.rect(388, 114, 3, 34, "#2e1712"); fb.rect(409, 114, 3, 34, "#2e1712");
+    fb.rect(382, 110, 36, 3, "#452017"); fb.rect(380, 108, 40, 2, "#61291a");
+    fb.rect(384, 114, 32, 20, "#61291a"); fb.rect(384, 114, 32, 1, "#82341c");
+    [[387,117,7,6,"#dfe6d6"],[396,116,8,7,"#b6cbc0"],[406,118,7,5,"#dfe6d6"],[389,125,9,6,"#e04a3c"],[401,125,8,6,"#dfe6d6"]].forEach(([x,y,w,h,c]) => { fb.rect(x,y,w,h,c); fb.px(x + (w>>1), y, "#a6441f"); });
+    // well
+    fb.rect(442, 136, 22, 12, "#3d3f4a"); fb.rect(442, 136, 22, 2, "#6a6c78"); for (let x=444;x<462;x+=5) fb.rect(x, 140, 1, 8, "#283d55");
+    fb.rect(443, 114, 2, 22, "#452017"); fb.rect(461, 114, 2, 22, "#452017"); roof(453, 114, 14, 6, "#61291a", "#2e1712");
+    fb.rect(452, 116, 1, 10, "#a2a3ac"); fb.rect(450, 126, 5, 4, "#61291a");
+    // magic shop: violet walls, tall roof, round window, banners
+    fb.rect(486, 98, 132, 50, "#3a2850"); for (let y=101;y<B;y+=6) fb.rect(486, y, 132, 1, "#241a33"); fb.rect(486, 98, 132, 3, "#241a33");
+    roof(552, 98, 74, 30, "#5c3f72", "#3a2850"); fb.rect(550, 56, 4, 14, "#5c3f72"); fb.px(551, 54, "#b6cbc0", 1);
+    for (let y=-6;y<=6;y++){ const w = Math.floor(Math.sqrt(36-y*y)); fb.rect(552-w, 108+y, w*2, 1, "#b6cbc0", 1, 1); } fb.rect(551, 102, 2, 13, "#5c3f72"); fb.rect(546, 108, 13, 1, "#5c3f72");
+    door(545, 14, 22, "#241a33");
+    [500, 588].forEach(x => { fb.rect(x-1, 113, 12, 18, "#241a33"); fb.rect(x, 114, 10, 16, "#6e9198", 1, 1); fb.rect(x+4, 114, 2, 16, "#3a2850"); fb.rect(x, 121, 10, 1, "#3a2850"); });
+    [520, 574].forEach(x => { fb.rect(x, 100, 9, 22, "#283d55"); for (let k=0;k<3;k++) fb.px(x + 2 + k*2, 106 + k*4, "#ffd678", 1); fb.rect(x, 122, 3, 3, "#283d55"); fb.rect(x + 6, 122, 3, 3, "#283d55"); });
+    fb.rect(596, 94, 20, 2, "#2e1712"); fb.rect(604, 96, 1, 4, "#6a6c78");
+    // cottage
+    timber(628, 114, 48, 34, "#344e66", "#2e1712"); roof(652, 114, 30, 18, "#4a1420", "#2e1712"); win(646, 124, false);
+    // the inn 「꺼진 화로」: two storeys, warm windows, lanterns, chimney
+    timber(688, 82, 178, 66, "#61291a", "#2e1712"); fb.rect(688, 114, 178, 3, "#2e1712");
+    roof(777, 82, 100, 26, "#7a1f2a", "#4a1420");
+    fb.rect(830, 40, 14, 30, "#3d3f4a"); fb.rect(828, 38, 18, 4, "#283d55");
+    [700, 724, 798, 822, 846].forEach(x => win(x, 90, true)); win(760, 90, false);
+    [704, 806, 832].forEach(x => { fb.rect(x-1, 121, 18, 15, "#1c0f0c"); fb.rect(x, 122, 16, 13, "#ffd678", 1, 1); fb.rect(x, 131, 16, 4, "#fbb954", 1, 1); fb.rect(x+7, 122, 2, 13, "#452017"); fb.rect(x, 128, 16, 1, "#452017"); });
+    door(750, 14, 24, "#452017"); fb.rect(748, B - 26, 18, 2, "#2e1712");
+    fb.rect(742, 100, 30, 10, "#452017"); fb.rect(742, 100, 30, 1, "#82341c"); fb.rect(755, 102, 4, 6, "#e2762d", 1, 1); fb.rect(756, 101, 2, 2, "#fbb954", 1, 1);
+    [737, 779].forEach(x => { fb.rect(x - 4, 112, 6, 1, "#2e1712"); fb.rect(x, 113, 1, 3, "#6a6c78"); fb.rect(x - 2, 116, 6, 2, "#2e1712"); fb.rect(x - 1, 118, 4, 5, "#452017"); fb.rect(x - 2, 123, 6, 1, "#2e1712"); });
+    [846, 858].forEach(x => { fb.rect(x, 136, 11, 12, "#61291a"); fb.rect(x, 139, 11, 1, "#2e1712"); fb.rect(x, 144, 11, 1, "#2e1712"); fb.rect(x, 136, 11, 1, "#82341c"); });
+    // east road: fence and signpost to the forest
+    for (let x=874; x<W; x+=8) fb.rect(x, 134, 2, 14, "#452017"); fb.rect(874, 137, W - 874, 2, "#61291a"); fb.rect(874, 143, W - 874, 2, "#61291a");
+    fb.rect(929, 104, 3, 44, "#452017"); fb.rect(918, 104, 26, 8, "#61291a"); fb.rect(918, 104, 26, 1, "#82341c"); fb.rect(944, 105, 2, 6, "#61291a"); fb.px(946, 107, "#61291a"); fb.rect(922, 107, 16, 1, "#2e1712");
+    fb.rect(921, 112, 1, 3, "#6a6c78"); fb.rect(919, 115, 5, 6, "#452017");
+  },
+  anim(fb, t, ox){
+    const X = x => x - ox, vis = (x, m) => X(x) > -m && X(x) < SW + m;
+    if (vis(211, 30)) flame(fb, X(199), 146, 24, 13, t, 2);
+    [737, 779].forEach((x, i) => { if (!vis(x, 8)) return; const on = Math.sin(t/110 + i*2) > -0.4; fb.rect(X(x), 119, 2, 3, on ? FIRE1 : FIRE2, 1, 1); fb.px(X(x), 118, GLOW, 1); });
+    if (vis(604, 12)){ const p = 0.5 + 0.5*Math.sin(t/330); fb.rect(X(604) - 3, 100, 7, 8, p > 0.5 ? "#b6cbc0" : "#6e9198", 1, 1); fb.rect(X(604) - 1, 98, 3, 12, "#dfe6d6", 1, 1); }
+    if (vis(921, 6)){ fb.rect(X(920), 116, 3, 4, Math.sin(t/140) > -0.3 ? FIRE1 : FIRE2, 1, 1); fb.px(X(921), 115, GLOW, 1); }
+  },
+  emit(t, sc, ox){
+    if (Math.random() < 0.3) sc.spawn({x:Math.random()*SW, y:-2, vx:3 + Math.random()*4, vy:8 + Math.random()*6, life:14, c:"#8fadaa", em:0, ash:1});
+    const fx = 211 - ox; if (fx > -20 && fx < SW + 20 && Math.random() < 0.4) sc.spawn({x:fx - 8 + Math.random()*16, y:134, vx:(Math.random()-0.5)*14, vy:-18 - Math.random()*14, life:0.9, c:Math.random() < 0.5 ? FIRE1 : FIRE2, em:1, g:30});
+    [[177, 60], [837, 38]].forEach(([x, y]) => { const sx = x - ox; if (sx > -20 && sx < SW + 20 && Math.random() < 0.12) sc.spawn({x:sx + Math.random()*6 - 3, y, vx:2 + Math.random()*3, vy:-5 - Math.random()*3, life:4, c:"#344e66", em:0}); });
+  }
+};
+MUSIC.village = "tavern";
+// landmarks that must not repeat when an area's 320px picture tiles along the strip: [x, y, w, h, copy-from dx]
+BGS.forest.uniq = [[182, 58, 30, 28, -64]];
+BGS.bridge.uniq = [[178, 46, 26, 66, -40]];
+BGS.camp.uniq = [[252, 42, 34, 74, -64]];
+const ro = s => { const c = s.charCodeAt(s.length - 1), b = c >= 0xac00 && c <= 0xd7a3 ? (c - 0xac00) % 28 : 0; return s + (b && b !== 8 ? "으로" : "로"); };
+AREAS[0].bg = "village";
+// town talks happen out on the street now; area-side quest scenes stay where the party stands
+["board", "talk_orna", "talk_town"].forEach(id => { const d = Object.getOwnPropertyDescriptor(NODES, id); const get = d.get;
+  Object.defineProperty(NODES, id, {get:() => ({...get(), bg:"village", local:true}), enumerable:false, configurable:true}); });
+Object.keys(NODES).forEach(id => { if (/^srch_|^ring_|^herb_(search|found)$/.test(id)) NODES[id].local = true; });
+
+SPRITE_DEFS.trapjaw = {p:{m:"#6a6c78", M:"#a2a3ac", r:"#61291a"}, g:["M.M.M.M.M.M", "mMmMmMmMmMm", "mmmmmmmmmmm", "r.........r"]};
+
+/* ---------- area layout: length, story events placed along the road, the tower's two faces ---------- */
+const AREA_LEN = {town:960, tower:800};
+const areaLen = ai => AREA_LEN[AREAS[ai] && AREAS[ai].id] || 640;
+// each area's story is cut into encounters that wait at points on the road (x = where the party's front must reach).
+// "end" = the far right edge: forks appear only when the party walks there.
+const STAGES = {
+  forest:[{node:"road", x:200, mark:"?", spr:"trapjaw"}, {node:"wolves", x:380, spr:"wolf", n:2, sil:1, mark:"!"}, {node:"fork_forest", x:"end", fork:"갈림길"}],
+  bridge:[{node:"bridge", x:330, spr:"troll", sil:1, mark:"!"}],
+  swamp:[{node:"swamp", x:200, mark:"?"}, {node:"swamp_leech", x:350, spr:"leech", n:2, sil:1, mark:"!"}, {node:"witch", x:500, spr:"witch", mark:"?"}],
+  cave:[{node:"cave", x:200, mark:"?"}, {node:"mine_skel", x:350, spr:"skeleton", n:2, sil:1, mark:"!"}, {node:"dwarf", x:500, spr:"dwarf", sil:1, mark:"?"}],
+  camp:[{node:"camp", x:300, mark:"?"}],
+  tower:[{node:"gate", x:190, mark:"?"}, {node:"hall", x:330, spr:"goblin", n:3, sil:1, mark:"!"}, {node:"mirror", x:470, spr:"shadow", sil:1, mark:"!"}, {node:"corridor", x:610, mark:"?", spr:"trapjaw"}, {node:"cross", x:"end", fork:"나선 계단"}],
+  lair:[{node:"lair", x:330, spr:"drake", sil:1, mark:"!"}]
+};
+// the tower is walked outside until the gate opens, then inside
+AREAS[AREA_I("tower")].bgAt = () => { const ai = AREA_I("tower"), w = S.world; return w && (((w.stage || {})[ai] || 0) > 0 || w.cleared[ai]) ? "hall" : "gate"; };
+const areaBg = ai => { const a = AREAS[ai]; return a.bgAt ? a.bgAt() : a.bg; };
+const stageList = ai => (AREAS[ai] && STAGES[AREAS[ai].id]) || null;
+const stageX = (st, ai) => st.x === "end" ? areaLen(ai) - 4 : st.x;
+function remainingStages(ai){ const w = S.world, L = stageList(ai); if (!w || !L || w.cleared[ai]) return [];
+  const i0 = (w.stage || {})[ai] || 0; return L.slice(i0).map((s, j) => ({...s, i:i0 + j, sx:stageX(s, ai)})); }
+const pendingStage = ai => remainingStages(ai)[0] || null;
+// called from enterNode: the story reached the next encounter's first scene → back to walking; it waits on the road
+function stageBreak(id, extra){
+  const w = S.world, L = w && stageList(w.at); if (!L) return false;
+  const j = L.findIndex(s => s.node === id); if (j < 0) return false;
+  if (S.stageGo === id){ S.stageGo = null; return false; }
+  w.stage = w.stage || {}; if (j <= (w.stage[w.at] || 0)) return false;
+  w.stage[w.at] = j; enterNode("hub", extra); return true;
+}
+
+/* ---------- random finds: rolled once per new game ---------- */
+const LOOT_NAMES = {
+  town:{glint:["돌바닥 틈의 반짝임", "우물가에 떨어진 동전"]},
+  forest:{glint:["덤불 속 반짝임", "풀숲에 떨어진 주머니"], cache:["쓰러진 나무 밑동", "사냥꾼의 은닉처", "속이 빈 고목"]},
+  bridge:{glint:["난간 틈의 반짝임", "교각 옆 진흙 속 반짝임"], cache:["트롤이 숨긴 자루", "부서진 짐수레"]},
+  swamp:{glint:["물웅덩이 속 반짝임", "널빤지 위 꾸러미"], cache:["썩은 통나무", "반쯤 가라앉은 상자"]},
+  cave:{glint:["레일 위의 반짝임", "광석 부스러기 더미"], cache:["무너진 갱도 틈", "버려진 광부 상자"]},
+  camp:{glint:["재 속의 반짝임", "천막 옆 꾸러미"], cache:["타다 남은 짐더미", "망가진 보급 상자"]},
+  tower:{glint:["바닥 돌 틈의 반짝임", "떨어진 금속 조각"], cache:["벽감 속 상자", "고블린의 보물 단지"]}
+};
+const LOOT_TRY = {wis:"주의 깊게 살핀다", int:"구조를 따져 보고 연다", dex:"조심스럽게 손을 넣는다", str:"힘으로 뜯어 연다"};
+const LOOT_UNIQUE = new Set(["fairy_amulet","witch_charm","dwarf_plate","ember_scale","archmage_staff","wolfking_fang","queen_ring","foreman_blade","lamp_staff","deep_cloak","saint_mace","orna_locket","alpha_mantle","ember_fang","phoenix_wand","flame_greatsword"]);
+const FIXED_X = {town:[240, 400, 452, 552, 752], forest:[300, 548, 200, 380], bridge:[300, 330], swamp:[300, 470, 548, 200, 350, 500], cave:[548, 200, 350, 500], camp:[548, 300], tower:[190, 330, 470, 610]};
+const pick = a => a[Math.floor(Math.random()*a.length)], rint = (a, b) => a + Math.floor(Math.random()*(b - a + 1));
+function lootItem(maxR){
+  const cls = S.party.map(h => h.cls), pool = Object.keys(ITEMS).filter(k => { const it = ITEMS[k]; return it.r >= 1 && it.r <= maxR && !LOOT_UNIQUE.has(k) && (!it.cls || it.cls.some(c => cls.includes(c))); });
+  if (!pool.length) return null; const tot = pool.reduce((a, k) => a + RARITY[ITEMS[k].r].w, 0); let r = Math.random()*tot;
+  for (const k of pool){ r -= RARITY[ITEMS[k].r].w; if (r <= 0) return k; } return pool[0]; }
+function genLoot(){
+  const out = {};
+  AREAS.forEach((a, ai) => { const names = LOOT_NAMES[a.id]; if (!names) return;
+    const L = areaLen(ai), tier = Math.max(1, ai), list = [], n = a.id === "town" ? 1 : rint(2, 3), taken = (FIXED_X[a.id] || []).slice();
+    for (let k = 0; k < n; k++){
+      let x = 0; for (let t = 0; t < 60; t++){ x = rint(90, L - 90); if (taken.every(f => Math.abs(f - x) > 44)) break; } taken.push(x);
+      const kind = !names.cache || (k > 0 && Math.random() < 0.4) ? "glint" : "cache", fx = {};
+      if (kind === "glint"){ const r = Math.random();
+        if (r < 0.55) fx.gold = rint(4 + tier*3, 10 + tier*6); else if (r < 0.8) fx.potion = 1; else { const it = lootItem(Math.min(2, 1 + Math.floor(tier/3))); if (it) fx.item = it; else fx.gold = rint(8, 20); } }
+      else { fx.gold = rint(12 + tier*8, 25 + tier*15); const r = Math.random();
+        if (r < 0.55){ const it = lootItem(Math.min(3, 1 + Math.floor(tier/2))); if (it) fx.item = it; } else if (r < 0.75) fx.luck = 1; else fx.potion = rint(1, 2); }
+      const stat = pick(["wis","int","dex","str"]);
+      list.push({k:`${a.id}${k}`, x, kind, name:pick(names[kind]), stat, dc:10 + Math.floor(tier/2) + rint(0, 2), fx, trap:kind === "cache" && Math.random() < 0.4 ? (tier <= 3 ? "1d6" : "2d6") : null, taken:false});
+    }
+    out[a.id] = list; });
+  return out;
+}
+const curLoot = () => { const id = AREAS[S.world.at].id; return ((S.loot || {})[id] || []).find(o => o.k === S.lootCur) || null; };
+function lootFx(base){ const o = curLoot(); return o ? {...base, take:o.k} : base; }
+dyn("loot_get", () => { const o = curLoot(), bg = areaBg(S.world.at);
+  return {bg, local:true, fx:o ? {...o.fx, take:o.k, xp:10} : {}, lines:[o ? `${o.name} — 쓸 만한 걸 주웠다!` : "아무것도 없었다."], next:"hub", nextLabel:"챙긴다"}; });
+dyn("loot_ok", () => { const o = curLoot(), bg = areaBg(S.world.at);
+  return {bg, local:true, fx:o ? {...o.fx, take:o.k, xp:25} : {}, art:{bg, u:P2, o:"chest", c:[60,40,200,112], cap:"숨겨진 물건"}, lines:[o ? `${o.name}에서 숨겨진 물건을 찾아냈다!` : "아무것도 없었다."], next:"hub", nextLabel:"챙긴다"}; });
+dyn("loot_no", () => { const o = curLoot(), bg = areaBg(S.world.at);
+  return {bg, local:true, fx:o ? (o.trap ? {take:o.k, dmg:o.trap, who:"roller"} : {take:o.k}) : {},
+    lines:o && o.trap ? ["딸깍! 숨겨진 함정이 튀어 올랐다!", "허탕이다. 이곳에서 더 찾을 건 없어 보인다."] : ["샅샅이 뒤졌지만 아무것도 찾지 못했다.", "이곳에서 더 찾을 건 없어 보인다."], next:"hub", nextLabel:"돌아간다"}; });
+
+/* ---------- walking state ---------- */
+const GAP = 26, WALK_SPEED = 66, HW = 22;
+const partyW = () => Math.max(0, S.party.length - 1)*GAP + HW;
+const evPending = ai => !!pendingStage(ai);
+const defaultWalk = ai => ({area:ai, x:AREAS[ai].id === "town" ? 690 : 40, dir:0, tx:null, auto:0, face:1});
+const WV = {x:0, hx:[], hmov:[], cam:0, snap:true, pois:[], moving:false, sentT:0, wasMoving:false, area:-1, held:{"-1":false, "1":false}, tagKey:"", allIn:false};
+const WUI = {key:""};
+// in town, online, everyone walks their own hero; elsewhere (and offline) the party walks as one, Darkest Dungeon style
+const indMode = () => !!(S.walk && S.walk.ind && S.walk.h);
+const wantInd = () => !!(S.world && AREAS[S.world.at].id === "town" && online() && new Set(S.party.map((_, k) => ownerPeer(k))).size > 1);
+function syncInd(){
+  const W = S.walk; if (!W || isGuest() || W.auto || W.area !== S.world.at) return; const want = wantInd();
+  if (want && !W.ind){ W.h = S.party.map((_, k) => ({x:W.x + k*GAP, dir:0, tx:null, face:W.face || 1})); W.ind = true; netDirty(); }
+  else if (!want && W.ind){ W.x = Math.min(...W.h.map(h => h.x)); W.ind = false; delete W.h; W.dir = 0; W.tx = null; netDirty(); }
+}
+function walkBounds(){ const ai = S.world.at, L = areaLen(ai), pw = partyW(); let hi = L - pw - 2; const st = pendingStage(ai); if (st) hi = Math.min(hi, st.sx - pw); return [2, hi]; }
+function stepMover(o, dt, lo, hi, auto){
+  let v = 0;
+  if (o.tx != null){ const d = o.tx - o.x; if (Math.abs(d) < 0.5){ o.x = o.tx; o.tx = null; return false; } v = Math.sign(d); }
+  else v = o.dir || 0;
+  if (!v) return false;
+  o.face = v;
+  let nx = o.x + v*WALK_SPEED*(auto ? 1.25 : 1)*dt;
+  if (o.tx != null && (v > 0 ? nx > o.tx : nx < o.tx)) nx = o.tx;
+  if (!auto){ nx = Math.max(lo, Math.min(hi, nx)); if (Math.abs(nx - o.x) < 1e-3){ o.tx = null; return false; } }
+  o.x = nx; return true;
+}
+// advance S.walk by dt; returns true if anyone moved
+function walkStep(dt){
+  const W = S.walk; if (!W || !S.world || W.area !== S.world.at) return false;
+  if (W.ind && W.h){ const L = areaLen(S.world.at); let any = false;
+    W.h.forEach((h, k) => { const m = stepMover(h, dt, 2, L - HW - 2, W.auto); WV.hmov[k] = m; if (m) any = true; });
+    if (W.auto && W.h.every(h => h.tx == null)) W.auto = 0;
+    return any; }
+  const [lo, hi] = walkBounds(), m = stepMover(W, dt, lo, hi, W.auto);
+  if (W.auto && W.tx == null) W.auto = 0;
+  return m;
+}
+const heroX = k => indMode() ? (WV.hx[k] ?? S.walk.h[k].x) : WV.x + k*GAP;
+const myHeroes = () => S.party.map((_, k) => k).filter(k => mine(k));
+function spanOf(ks){ if (!indMode()) return [WV.x, WV.x + partyW()]; const xs = ks.map(heroX); return xs.length ? [Math.min(...xs), Math.max(...xs) + HW] : [0, 0]; }
+// host-side check uses the authoritative positions of that player's heroes
+function peerSpan(peer){ const W = S.walk; if (!W.ind || !W.h) return [W.x, W.x + partyW()];
+  const ks = S.party.map((_, k) => k).filter(k => ownerPeer(k) === peer), xs = (ks.length ? ks : S.party.map((_, k) => k)).map(k => W.h[k].x); return [Math.min(...xs), Math.max(...xs) + HW]; }
+const exitZone = (p, x) => p.id === "exitR" ? x + HW >= areaLen(S.world.at) - 70 : x <= 48;
+function gatherCount(id){ const W = S.walk; if (!W || !W.ind || !W.h) return S.party.length; const p = {id}; return W.h.filter(h => exitZone(p, h.x)).length; }
+
+/* ---------- points of interest: built from the hub's choices ---------- */
+const POI_AT = {
+  smith:{x:240, name:"대장간 · 그란", spr:"smith", npc:1, desc:"모루 위에서 벌건 쇠가 식어 간다. 그란이 망치를 내려놓고 고개를 든다."},
+  board:{x:400, name:"현상금 게시판", por:"bounty", desc:"마을 사람들이 붙인 현상금 쪽지가 밤바람에 펄럭인다."},
+  selin:{x:552, name:"마법상점 · 셀린", spr:"selin", npc:1, desc:"문틈으로 향 냄새와 푸른 빛이 새어 나온다. 셀린이 손짓한다."},
+  inn:{x:752, name:"여관 「꺼진 화로」", spr:"orna", npc:1, desc:"문 앞에서 오르나가 지팡이에 기대어 일행을 기다린다. 안에서 수프 냄새가 난다."},
+  moro:{x:300, name:"떠돌이 상인 모로", spr:"merchant", npc:1, desc:"진흙을 털어 낸 수레 옆에서 모로가 손을 흔든다. 「또 만났구려!」"},
+  witch:{x:470, name:"늪의 마녀 그레타", spr:"witch", npc:1, desc:"오두막 앞에서 그레타가 솥을 젓는다. 「또 왔느냐? 거래가 남았나 보지?」"},
+  spot:{x:300, name:"부탁받은 물건", por:"skillbook", desc:""},
+  dungeon:{x:548, name:"현상금 표적의 은신처", spr:"den", por:"bounty", desc:"어둠 속에서 무언가 숨 쉬는 소리가 들린다."},
+  exitL:{x:8, sign:1, desc:"지나온 길로 돌아간다."},
+  exitR:{x:-8, sign:1, desc:"이 길을 따라 더 나아간다."}
+};
+function buildPois(){
+  const w = S.world, n = NODES.hub; if (!w || !n) return [];
+  const L = areaLen(w.at), P = {}, loots = (S.loot || {})[AREAS[w.at].id] || [];
+  visibleChoices(n).forEach(([c, i]) => { if (!c.poi) return; let def = POI_AT[c.poi];
+    if (c.poi.startsWith("loot:")){ const o = loots.find(q => q.k === c.poi.slice(5)); if (!o) return; def = {x:o.x, spr:o.kind === "cache" ? "cache" : null, glint:o.kind === "glint", front:1, por:o.kind === "cache" ? "cache" : "coin"}; }
+    def = def || {};
+    const p = P[c.poi] || (P[c.poi] = {id:c.poi, ...def, x:def.x < 0 ? L + def.x : def.x, acts:[]});
+    if (c.pn) p.name = c.pn; if (c.pd) p.desc = c.pd; if (c.pp) p.por = c.pp;
+    p.acts.push([c, i]); });
+  const out = Object.values(P);
+  out.forEach(p => { if (p.id === "exitL"){ p.name = `◀ ${AREAS[w.at - 1].name}`; p.por = AREAS[w.at - 1].icon; }
+    if (p.id === "exitR"){ p.name = `${AREAS[w.at + 1].name} ▶`; p.por = w.entered[w.at + 1] ? AREAS[w.at + 1].icon : "sign"; if (!w.entered[w.at + 1]) p.desc = "아직 가 보지 않은 길이다. 준비가 되었다면 나아가자."; }
+    if (p.sign && indMode()){ const g = gatherCount(p.id), n = S.party.length; p.gather = g; p.desc = g >= n ? "모두 모였다! 함께 출발할 수 있다." : `모두 여기 모이면 함께 출발할 수 있다. (지금 ${g}/${n}명)`; } });
+  return out;
+}
+function nearPoi(){ const [a, b] = spanOf(myHeroes()), x0 = a - 14, x1 = b + 14, pc = (a + b)/2; let best = null, bd = 1e9;
+  for (const p of WV.pois){ if ((p.x < x0 || p.x > x1) && !(p.sign && indMode() && myHeroes().some(k => exitZone(p, heroX(k))))) continue; const d = Math.abs(p.x - pc); if (d < bd){ bd = d; best = p; } }
+  return best; }
+function areaDesc(){ const w = S.world, a = AREAS[w.at], out = [...(HUB_TEXT[a.id] || [])];
+  if (a.id === "town" && PROGRESS_TEXT[w.unlocked]) out.push(PROGRESS_TEXT[w.unlocked]);
+  const st = pendingStage(w.at);
+  if (st) out.push(st.fork ? "길 끝에서 길이 여러 갈래로 나뉜다. 끝까지 걸어가 보자." : "앞쪽에서 무언가 기다리고 있다. 다가가면 일이 벌어진다.");
+  else if (a.id !== "town" && w.at < w.unlocked && !w.entered[w.at + 1]) out.push(`길이 열렸다 — 오른쪽 끝에서 ${ro(AREAS[w.at + 1].name)} 갈 수 있다.`);
+  else if (a.id !== "town") out.push("이곳의 사건은 모두 끝났다. 자유롭게 오갈 수 있다.");
+  if (indMode()) out.push("마을에서는 각자 자기 캐릭터로 돌아다녀요. 떠날 때는 모두 오른쪽 끝 이정표에 모이세요.");
+  return out.join(" "); }
+
+/* ---------- entering / leaving walk mode ---------- */
+function startWalk(){
+  const w = S.world; if (!w || S.nodeId !== "hub") return;
+  if (!S.walk || S.walk.area !== w.at) S.walk = defaultWalk(w.at);
+  S.mode = "walk"; S.lines = []; S.li = 0; S.pick = null; vote = null;
+  clearInterval(tw.t); tw.done = true; hideCards(); WUI.key = ""; syncInd(); WV.pois = buildPois();
+  renderWalkUI(true); refreshStatus(); save();
+  // a fork at the road's end was answered with "onward": keep walking into the next area
+  if (S.walk.go != null && !isGuest()){ const g = S.walk.go; S.walk.go = null; setTimeout(() => travel(g, true), 450); }
+}
+function renderWalkUI(force){
+  if (S.mode !== "walk" || S.screen !== "game" || !S.world) return;
+  const p = VW_ready() ? nearPoi() : null, a = AREAS[S.world.at], auto = !!(S.walk && S.walk.auto);
+  const key = [p ? p.id : "", p ? p.acts.map(x => x[1]).join(",") : "", p ? p.gather : "", S.gold, busy ? 1 : 0, auto ? 1 : 0, S.world.at, S.world.unlocked, p ? p.desc : "", indMode() ? 1 : 0].join("|");
+  if (!force && key === WUI.key) return; WUI.key = key;
+  $("#speaker").textContent = p ? (p.name || a.name) : SPEAKERS.narr.name; paintSpriteCanvas($("#portrait"), p ? (p.por || p.spr || a.icon) : SPEAKERS.narr.spr);
+  $("#dlgPos").textContent = ""; $("#dlgMore").hidden = true;
+  const el = $("#dlgText"); el.className = "dlg-text walkt"; el.textContent = p ? p.desc : areaDesc();
+  let html = `<div class="walkpad"><button class="wbtn" data-walk="-1" aria-label="왼쪽으로 걷기">◀</button><span>${auto ? "이동 중…" : "← → 또는 A · D로 걷기"}</span><button class="wbtn" data-walk="1" aria-label="오른쪽으로 걷기">▶</button></div>`;
+  if (p && !auto) p.acts.forEach(([c, i], k) => { let {tag, dis} = choiceTag(c);
+    if (c.t === "travel" && indMode() && p.gather < S.party.length){ dis = true; tag += `<span class="tag">${p.gather}/${S.party.length} 모임</span>`; }
+    html += `<button class="choice" data-act="poi" data-i="${i}" ${dis || busy ? "disabled" : ""}><span>${esc(c.label)}</span>${tag}${k === 0 && !dis ? '<span class="key">E</span>' : ""}</button>`; });
+  else { const st = pendingStage(S.world.at);
+    html += `<p class="prompt walkhint">${st ? (st.fork ? "▶ 길 끝까지 가면 갈 곳을 고를 수 있어요" : "▶ 앞으로 나아가면 무언가 일어나요") : "가까이 가면 할 수 있는 일이 보여요 · 화면을 눌러도 그쪽으로 걸어가요"}</p>`; }
+  $("#choices").innerHTML = html; $("#choices").classList.remove("dense", "dense2");
+  netDirty();
+}
+// a player may act on a point only when their hero stands there (a little slack for guests' lag)
+function poiAct(i, peer){
+  if (S.mode !== "walk" || busy || !S.walk || S.walk.auto) return;
+  peer = peer || NET.me;
+  const p = buildPois().find(q => q.acts.some(x => x[1] === i)); if (!p) return;
+  const [a, b] = peerSpan(peer), slack = peer !== NET.me ? 48 : 16;
+  if ((p.x < a - slack || p.x > b + slack) && !(p.sign && indMode() && S.walk.h.some((h, k) => ownerPeer(k) === peer && exitZone(p, h.x - (peer !== NET.me ? 24 : 0))))) return;
+  const c = nodeChoices(NODES.hub)[i]; if (!c) return;
+  if (c.t === "travel" && indMode() && gatherCount(p.id) < S.party.length){ netMsg("모두 이정표 앞에 모여야 출발할 수 있어요"); return; }
+  if (c.t === "shop"){ if (peer === NET.me) openShop(c.shop); return; }
+  if (S.walk.ind && S.walk.h) S.walk.h.forEach(h => { h.dir = 0; h.tx = null; }); else { S.walk.dir = 0; S.walk.tx = null; }
+  if (p.id.startsWith("loot:")) S.lootCur = p.id.slice(5);
+  doChoice(i);
+}
+function triggerStage(st){
+  const W = S.walk; W.dir = 0; W.tx = null; WV.held = {"-1":false, "1":false};
+  S.stageGo = st.node; sfx(st.mark === "!" ? "hit" : "select"); enterNode(st.node);
+}
+// input → walking. Guests also predict it locally so their screen moves at once.
+function applyWalk(peer, o){
+  const W = S.walk;
+  if (W.ind && W.h){ const own = S.party.map((_, k) => k).filter(k => ownerPeer(k) === peer);
+    own.forEach((k, j) => { const h = W.h[k]; if (o.tx != null){ h.tx = Math.round(o.tx + j*GAP); h.dir = 0; } else { h.dir = o.d; h.tx = null; } }); return; }
+  if (o.tx != null){ W.tx = Math.round(o.tx); W.dir = 0; } else { W.dir = o.d; W.tx = null; }
+}
+function walkInput(o){
+  if (S.mode !== "walk" || busy || !S.walk || S.walk.auto) return;
+  applyWalk(NET.me, o);
+  if (isGuest()) sendInput("walk", o.tx != null ? {tx:Math.round(o.tx)} : {d:o.d}); else netDirty();
+}
+function heldDir(){ return (WV.held["1"] ? 1 : 0) - (WV.held["-1"] ? 1 : 0); }
+function setHeld(d, on){ if (WV.held[String(d)] === on) return; WV.held[String(d)] = on; walkInput({d:heldDir()}); }
+function hostWalkInput(peer, m){
+  if (S.mode !== "walk" || busy || !S.walk || S.walk.auto) return;
+  if (typeof m.tx === "number" && isFinite(m.tx)) applyWalk(peer, {tx:Math.max(-50, Math.min(1100, m.tx))});
+  else applyWalk(peer, {d:m.d > 0 ? 1 : m.d < 0 ? -1 : 0});
+  netDirty();
+}
+
+/* ---------- travel: walk off the edge, fade, walk in on the other side ---------- */
+const until = (f, ms) => new Promise(res => { const t0 = performance.now(), iv = setInterval(() => { if (f() || performance.now() - t0 > ms){ clearInterval(iv); res(); } }, 40); });
+const allGathered = () => !indMode() || gatherCount("exitR") >= S.party.length || gatherCount("exitL") >= S.party.length;
+async function travel(ai, force){
+  const w = S.world; if (busy || !w || S.nodeId !== "hub" || S.mode !== "walk" || ai < 0 || ai > w.unlocked || ai === w.at) return;
+  if (!force && !allGathered()){ netMsg("모두 이정표 앞에 모여야 출발할 수 있어요"); return; }
+  busy = true; S.mode = "busy"; closeShopQuiet(); renderWalkUI(true); $("#choices").innerHTML = ""; refreshStatus();
+  const dir = ai > w.at ? 1 : -1, W = S.walk, L = areaLen(w.at), pw = partyW();
+  W.auto = 1;
+  if (W.ind && W.h) W.h.forEach((h, k) => { h.dir = 0; h.tx = dir > 0 ? L + 16 + k*GAP : -HW - 16 - k*GAP; });
+  else { W.dir = 0; W.tx = dir > 0 ? L + 16 : -pw - 16; }
+  netDirty(); sfx("door");
+  await until(() => !S.walk.auto, 1300);
+  scene.fadeTo = 1; await sleep(REDUCED ? 80 : 380);
+  w.at = ai; w.entered[ai] = true; const L2 = areaLen(ai);
+  S.walk = {area:ai, x:dir > 0 ? -pw - 6 : L2 + 6, dir:0, tx:dir > 0 ? 40 : L2 - pw - 40, auto:1, face:dir}; WV.snap = true; WV.hx = [];
+  busy = false; enterNode("hub");
+}
+function closeShopQuiet(){ if (SHOP.id){ SHOP.id = null; $("#shop").hidden = true; } }
+function arriveFrontier(ai, extra){
+  const w = S.world, L = stageList(w.at), cur = L && L[(w.stage || {})[w.at] || 0], atEnd = !!(cur && cur.x === "end");
+  w.cleared[w.at] = true; w.unlocked = Math.max(w.unlocked, ai); w.stage = w.stage || {}; if (L) w.stage[w.at] = L.length;
+  S.objective = `오른쪽 끝까지 걸어가 ${ro(AREAS[ai].name)}`;
+  sfx("good"); banner(`길이 열렸다: ${AREAS[ai].name}`, "gold");
+  if (atEnd && S.walk && S.walk.area === w.at) S.walk.go = ai;
+  return enterNode("hub", (extra || []).concat([["sys", atEnd ? `${AREAS[w.at].name}을 지나 ${ro(AREAS[ai].name)} 향한다.` : `${AREAS[w.at].name}의 사건을 마쳤다. 이제 좌우로 걸어 자유롭게 오갈 수 있다.`]]));
+}
+
+/* ---------- per-frame: movement, camera, view switch, labels ---------- */
+// world view = the scrolling road with points of interest; classic view = the fixed stage (story scenes, dungeons, battles)
+function wantWorld(){
+  if (S.screen !== "game" || S.battle || !S.walk || !S.world || S.walk.area !== S.world.at) return false;
+  const n = NODES[S.nodeId]; if (!n || !n.local) return false;
+  if (scene.bgKey !== areaBg(S.world.at)) return null;   // a background change is fading: hold the current view
+  return true;
+}
+const VW = {world:false, sw:0};
+const VW_ready = () => VW.world && !VW.sw;
+function viewTick(t){
+  if (S.screen !== "game"){ VW.world = false; VW.sw = 0; return; }
+  const want = wantWorld();
+  if (want !== null && want !== VW.world){
+    if (!VW.sw){ VW.sw = t; scene.fadeTo = 1; }
+    else if (t - VW.sw > (REDUCED ? 60 : 300)){ VW.world = want; VW.sw = 0; scene.fadeTo = 0; WV.snap = true; WUI.key = ""; if (want && S.mode === "walk") renderWalkUI(true); }
+  } else if (VW.sw && want === VW.world){ VW.sw = 0; scene.fadeTo = 0; }
+}
+// the host's simulation: movement, network updates, encounters, the town gathering
+function hostWalkTick(dt, t){
+  if (S.screen !== "game" || !S.walk || !S.world) return;
+  if (S.mode === "walk" && !busy) syncInd();
+  const moved = walkStep(dt), W = S.walk;
+  WV.hostMoving = moved;
+  if (isHost() && NET.room){ if (moved && t - WV.sentT > 220){ WV.sentT = t; netDirty(); } if (!moved && WV.wasMoving) netDirty(); }
+  if (!moved && WV.wasMoving) save();
+  WV.wasMoving = moved;
+  if (!!W.auto !== WV.autoWas){ WV.autoWas = !!W.auto; renderWorldBar(); }
+  // an encounter waits ahead: walking into it starts it
+  const st = !W.ind && pendingStage(S.world.at);
+  if (st && S.mode === "walk" && !busy && !W.auto && W.x + partyW() >= st.sx - 0.5 && VW_ready()) triggerStage(st);
+  // everyone gathered at the town's exit
+  if (W.ind && W.h){ const all = allGathered(); if (all !== WV.allIn){ WV.allIn = all; renderWorldBar(); if (all && S.mode === "walk"){ banner("모두 모였다!", "gold"); sfx("good"); } } }
+}
+let simT = performance.now();
+setInterval(() => { const t = performance.now(), dt = Math.min(1, (t - simT)/1000); simT = t; viewTick(t); if (!isGuest()) hostWalkTick(dt, t); }, 33);
+// per frame: guests' prediction, smoothing, camera, labels
+function worldTick(dt, t){
+  if (S.screen !== "game"){ scene.camX = 0; hideTags(); return; }
+  if (!S.walk || !S.world){ scene.camX = 0; hideTags(); return; }
+  const W = S.walk, guest = isGuest(), moved = guest ? walkStep(dt) : WV.hostMoving, ease = (cur, tgt) => cur == null || Math.abs(tgt - cur) > 90 || WV.snap ? tgt : cur + (tgt - cur)*Math.min(1, dt*12);
+  WV.x = guest ? ease(WV.x, W.x) : W.x;
+  if (W.ind && W.h) W.h.forEach((h, k) => { WV.hx[k] = guest ? ease(WV.hx[k], h.x) : h.x; });
+  WV.moving = moved || (!W.ind && Math.abs(W.x - WV.x) > 0.6);
+  if (guest && !!W.auto !== WV.autoWas){ WV.autoWas = !!W.auto; renderWorldBar(); }
+  // camera follows my own hero in town, the party elsewhere
+  const L = areaLen(S.world.at), [s0, s1] = spanOf(myHeroes()), face = (W.ind && W.h ? (W.h[myHeroes()[0] ?? 0] || {}).face : W.face) || 1, target = Math.max(0, Math.min(L - SW, (s0 + s1)/2 - SW*(face > 0 ? 0.33 : 0.67)));
+  if (WV.snap || WV.area !== S.world.at){ WV.cam = target; WV.snap = false; WV.area = S.world.at; }
+  else WV.cam += (target - WV.cam)*Math.min(1, dt*3);
+  scene.camX = VW.world ? Math.round(WV.cam) : 0;
+  if (VW.world){ WV.pois = buildPois(); if (S.mode === "walk") renderWalkUI(); renderTags(); } else hideTags();
+}
+const poiSprite = p => p.spr || (p.sign && !BGS[scene.bgKey].w ? "sign" : null);
+function worldUnits(t){
+  const bg = BGS[scene.bgKey], G = bg.ground, cam = scene.camX, units = [], front = [], W = S.walk, [s0, s1] = spanOf(myHeroes()), pc = (s0 + s1)/2;
+  for (const p of WV.pois){ const k = poiSprite(p); if (!k) continue; const sp = spr(k);
+    const x = p.sign ? (p.id === "exitL" ? 10 : areaLen(S.world.at) - 10 - sp.w) : p.x - sp.w/2, sx = Math.round(x - cam); if (sx > SW + 4 || sx + sp.w < -4) continue;
+    const flip = p.npc ? pc > p.x : p.id === "exitL", bob = p.npc && !REDUCED ? Math.floor(t/620 + p.x*0.37) % 2 : 0;
+    const u = {sp, x:sx, y:G - sp.h - bob - (p.npc || p.sign ? 4 : 0), flip}; if (p.front){ u.y = G - sp.h + 4; front.push(u); } else units.push(u); }
+  // encounters still waiting on this road
+  for (const st of remainingStages(S.world.at)){ if (!st.spr) continue; const sp = spr(st.spr), n = st.n || 1;
+    for (let j = 0; j < n; j++){ const sx = Math.round(st.sx + 6 + j*(sp.w - 4) - cam); if (sx > SW + 4 || sx + sp.w < -4) continue;
+      if (st.spr === "trapjaw") front.push({sp, x:sx, y:G - sp.h + 3, alpha:0.85});
+      else units.push({sp, x:sx, y:G - sp.h - (j % 2 ? 2 : 0), flash:st.sil ? "#241a33" : null, alpha:st.sil ? 0.92 : 1}); } }
+  LAST.heroes = []; LAST.foe = null;
+  S.party.forEach((h, i) => { const hk = heroKey(h), down = h.hp <= 0, sp = down ? sprLying(hk) : spr(hk), mov = W.ind ? WV.hmov[i] : WV.moving;
+    const bob = down || REDUCED ? 0 : Math.floor(t/(mov ? 140 : 460) + i*0.5) % 2;
+    const px = Math.round(heroX(i) - cam), py = G - sp.h - bob - (mov && !REDUCED && Math.floor(t/140 + i) % 2 ? 1 : 0);
+    const u = {sp, x:px, y:py, flip:(W.ind && W.h ? W.h[i].face : W.face) < 0, alpha:down ? 0.65 : 1};
+    if (h.cls === "wizard" && !down) u.glow = [20, 2, 26, [0.3,0.6,0.6]];
+    if (h.cls === "cleric" && !down) u.glow = [11, 9, 18, [0.6,0.5,0.25]];
+    const aura = !down && heroAura(h); if (aura) u.glow = aura;
+    units.push(u); LAST.heroes[i] = {x:px, y:py, w:sp.w, h:sp.h}; });
+  const pl = scene.dyn.find(l => l.party); if (pl) pl.x = pc - cam;
+  return units.concat(front);
+}
+function worldOverlay(fb, t){
+  const cam = scene.camX, G = BGS[scene.bgKey].ground;
+  for (const st of remainingStages(S.world.at)){ if (!st.mark) continue; const h = st.spr ? spr(st.spr).h : 0, w = st.spr ? spr(st.spr).w*(st.n || 1) : 12;
+    const x = Math.round(st.sx + 6 + w/2 - cam), y = G - Math.max(h, 10) - 18 - (REDUCED ? 0 : Math.round(Math.abs(Math.sin(t/300 + st.sx))*3)); if (x < -10 || x > SW + 10) continue;
+    fb.textOutlined(st.mark, x, y, st.mark === "!" ? (Math.floor(t/400) % 2 ? "#ffd678" : "#fbb954") : "#b6cbc0", st.mark === "!" ? 4 : 3); }
+  for (const p of WV.pois){ if (p.id !== "spot" && !p.glint && p.spr !== "cache") continue; const x = Math.round(p.x - cam); if (x < -10 || x > SW + 10) continue;
+    for (let k=0;k<3;k++){ const ph = (t/500 + k*0.33 + p.x*0.01) % 1; if (ph > 0.5) continue; const a = ph*2*Math.PI;
+      fb.px(x - 6 + k*6, G - (p.glint ? 4 : 14) - k*3 - Math.round(Math.sin(a)*3), k % 2 ? "#ffd678" : "#f4f2ea", 1); } }
+}
+/* name tags over the scene (DOM, crisp text): places, the fork ahead, and in town every player's name */
+function hideTags(){ const el = $("#poiTags"); if (el && !el.hidden){ el.hidden = true; WV.tagKey = ""; } }
+function renderTags(){
+  const el = $("#poiTags"); if (!el) return;
+  if (S.mode !== "walk" || VW.sw || (S.walk && S.walk.auto && busy)){ hideTags(); return; }
+  const near = nearPoi(), G = BGS[scene.bgKey].ground, cam = scene.camX, L = areaLen(S.world.at), list = [];
+  WV.pois.forEach(p => { const k = poiSprite(p), h = (k ? spr(k).h : 10) + (p.npc || p.sign ? 4 : 0);
+    const x = p.sign ? (p.id === "exitL" ? 22 : L - 22) : p.x, nm = (p.name || "") + (p.sign && indMode() ? ` (${p.gather}/${S.party.length})` : "");
+    list.push({id:p.id, x, y:G - h - 7, nm, cls:(near === p ? "on " : "") + (p.sign ? "exit" : "")}); });
+  remainingStages(S.world.at).forEach(st => { if (st.fork) list.push({id:"fork", x:L - 22, y:G - 30, nm:st.fork + " ▶", cls:"exit"}); });
+  if (indMode()) S.party.forEach((h, k) => { const sp = spr(heroKey(h)); list.push({id:"h" + k, x:heroX(k) + sp.w/2, y:G - sp.h - 5, nm:seatNick(k), cls:"who " + (mine(k) ? "me" : "")}); });
+  const key = list.map(o => o.id + o.nm + o.cls).join("|");
+  if (key !== WV.tagKey){ WV.tagKey = key; el.innerHTML = list.map(o => `<div class="poi-tag ${o.cls}" data-p="${o.id}">${o.cls.startsWith("on") ? '<span class="key">E</span>' : ""}${esc(o.nm)}</div>`).join(""); }
+  el.hidden = false;
+  const tags = el.children; list.forEach((o, j) => { const d = tags[j]; if (!d) return; const sx = (o.x - cam)*6, sy = o.y*6 - 192;
+    d.style.transform = `translate(${Math.round(sx)}px,${Math.round(sy)}px) translate(-50%,-100%)`; d.style.visibility = sx < -200 || sx > 2120 ? "hidden" : "visible"; });
+}
+/* pointer: tap the street to walk there; hold the pad buttons to walk */
+function stagePoint(e){ const r = $("#stage").getBoundingClientRect(); return [(e.clientX - r.left)/r.width*1920/6, ((e.clientY - r.top)/r.height*1080 + 192)/6]; }
+document.addEventListener("pointerdown", e => {
+  const b = e.target.closest && e.target.closest("[data-walk]");
+  if (b){ e.preventDefault(); const d = +b.dataset.walk; setHeld(d, true); const up = () => { setHeld(d, false); window.removeEventListener("pointerup", up); window.removeEventListener("pointercancel", up); }; window.addEventListener("pointerup", up); window.addEventListener("pointercancel", up); return; }
+  if (S.screen !== "game" || S.mode !== "walk" || !VW_ready()) return;
+  const g = $("#sGame"); if (e.target !== g && !(e.target.classList && e.target.classList.contains("hud-shade")) && e.target.id !== "poiTags" && !(e.target.closest && e.target.closest(".poi-tag"))) return;
+  const [sx, sy] = stagePoint(e); if (sy > 170) return;
+  walkInput({tx:sx + scene.camX - (indMode() ? HW/2 : partyW()/2)});
+});
+window.addEventListener("blur", () => { if (WV.held["1"] || WV.held["-1"]){ WV.held = {"-1":false, "1":false}; walkInput({d:0}); } });
+document.addEventListener("keyup", e => { const k = e.key;
+  if (k === "ArrowLeft" || k === "a" || k === "A") setHeld(-1, false);
+  if (k === "ArrowRight" || k === "d" || k === "D") setHeld(1, false); });
+// keydown part, called from the main handler; returns true when the key was used for walking
+function walkKey(e){
+  if (S.mode !== "walk" || !VW_ready()) return false; const k = e.key;
+  if (k === "ArrowLeft" || k === "a" || k === "A"){ e.preventDefault(); if (!e.repeat) setHeld(-1, true); return true; }
+  if (k === "ArrowRight" || k === "d" || k === "D"){ e.preventDefault(); if (!e.repeat) setHeld(1, true); return true; }
+  if (k === "e" || k === "E" || k === " " || k === "Enter"){ e.preventDefault(); const b = document.querySelector('#choices .choice[data-act="poi"]:not(:disabled)'); if (b) b.click(); return true; }
+  return false;
+}
+
 /* ================= ONLINE PLAY =================
    Host-authoritative: the host's page runs the whole game. Everyone else mirrors it.
    host → guests : room topic "g" — state diffs (top-level keys of S) + view events (banners, FX, tray windows)
@@ -3678,12 +4995,13 @@ function guestRender(){
   if (S.screen !== "game"){ renderNetPanel(); return; }
   if (!S.party || !S.party.length) return;
   guestBg(S.bg);
-  Audio8.music(S.battle ? (S.battle.key === "drake" ? "boss" : "battle") : MUSIC[S.bg] || "night");
+  Audio8.music(S.battle ? (S.battle.key === "drake" ? "boss" : "battle") : MUSIC[S.bg] || "ashen");
   refreshStatus(); if (invOpen()) renderInv();
   const k = [S.enterSeq, S.mode, S.li, S.pick].join("|"), [pe, , pl] = NET.gk.split("|"), vj = JSON.stringify(vote);
   if (S.mode === "battle" && S.battle) renderBattle();
   else if (S.mode === "busy"){ if (k !== NET.gk) $("#choices").innerHTML = ""; }
   else if (S.mode === "pick"){ if (k !== NET.gk) renderPick(); }
+  else if (S.mode === "walk") renderWalkUI(k !== NET.gk);
   else if (S.lines && S.lines[S.li]){
     if (k !== NET.gk){
       if (String(S.enterSeq) !== pe){ hideCards(); typeLine(); }
@@ -3701,16 +5019,17 @@ function sendInput(a, extra = {}){
   while (NET.inp.length > 6 || JSON.stringify(NET.inp).length > 2400) NET.inp.shift();
   NET.room.presence({inp:NET.inp}).catch(() => {});
 }
-const GUEST_SEND = new Set(["choice", "pickHero", "cancelPick", "atk", "special", "potion", "potionTo", "cancelPotion", "drink", "cls", "swap"]);
+const GUEST_SEND = new Set(["poi", "walkGo", "travel", "skill", "choice", "pickHero", "cancelPick", "atk", "special", "potion", "potionTo", "cancelPotion", "drink", "cls", "swap"]);
 const LOCAL_ACTS = new Set(["sound", "music", "fullscreen", "howto", "closeHowto", "dismissRotate", "invOpen", "closeInv", "invTab", "invItem", "invSlot", "closeArt", "pause", "resume", "throw", "autoRoll"]);
 function actAllowed(peer, act, d){
   const b = S.battle, i = d.i;
   switch (act){
-    case "atk": case "special": case "potion": case "potionTo": case "cancelPotion": return !!b && b.phase === "hero" && ownerPeer(b.cur) === peer;
+    case "atk": case "special": case "potion": case "potionTo": case "cancelPotion": case "skill": return !!b && b.phase === "hero" && ownerPeer(b.cur) === peer;
     case "drink": return ownerPeer(i) === peer;
     case "cls": case "swap": case "roll": case "name": case "stats": return S.screen === "setup" && i >= 0 && i < 4 && ownerPeer(i) === peer;
     case "equip": case "unequip": return ownerPeer(d.m) === peer;
-    case "choice": case "pickHero": case "cancelPick": case "adv": return true;
+    case "choice": case "pickHero": case "cancelPick": case "adv": case "travel": case "walk": case "poi": case "walkGo": case "chat": case "shopBuy": case "shopSell": case "shopSupply": return true;
+    case "shopLearn": return ownerPeer(i) === peer;
     default: return peer === NET.me;
   }
 }
@@ -3718,12 +5037,14 @@ function setCls(i, c){ const h = S.setup.heroes[i]; if (!h || !CLASSES[c]) retur
 function doSwap(i, st){ const h = S.setup.heroes[i]; if (!h || !h.stats || !STATS.includes(st)) return false;
   if (!h.sel) h.sel = st; else if (h.sel === st) h.sel = null; else { [h.stats[h.sel], h.stats[st]] = [h.stats[st], h.stats[h.sel]]; [h.dice[h.sel], h.dice[st]] = [h.dice[st], h.dice[h.sel]]; h.sel = null; }
   rerenderCard(i); return true; }
-function cancelPick(){ if (S.mode !== "pick") return; S.mode = "story"; S.pick = null; renderChoices(); setSpeaker(S.lines[S.li].who); $("#dlgText").textContent = S.lines[S.li].text; save(); }
+function cancelPick(){ if (S.mode !== "pick") return; if (S.nodeId === "hub"){ S.pick = null; return startWalk(); } S.mode = "story"; S.pick = null; renderChoices(); setSpeaker(S.lines[S.li].who); $("#dlgText").textContent = S.lines[S.li].text; save(); }
 function hostInput(peer, m){
   const a = String(m.a || ""), i = Number.isInteger(m.i) ? m.i : -1;
   if (a === "dice") return remoteDice(peer, m);
   if (a === "w"){ const W = NET.W; if (W && W.id === m.id && (W.seat == null || ownerPeer(W.seat) === peer)) W.fin(m.v === "luck" ? "luck" : "next"); return; }
   if (a === "loot"){ if (NET.LW && NET.LW.id === m.id) NET.LW.fin(false); return; }
+  if (a === "chat"){ const k = NET.seats.findIndex(s => s && s.peer === peer); pushChat(peerNick(peer), m.v, k); return; }
+  if (a.startsWith("shop")){ if (actAllowed(peer, a, {i})) shopAct(peer, a, {s:String(m.sh || ""), k:String(m.k || ""), u:String(m.u || ""), m:i}); return; }
   const d = {i, m:Number.isInteger(m.m) ? m.m : -1};
   if (!actAllowed(peer, a, d)) return;
   if (a === "name"){ const h = S.setup.heroes[i]; if (h){ h.name = String(m.v ?? "").replace(/[\u0000-\u001f\u007f]/g, "").slice(0, 8); rerenderCard(i); } return; }
@@ -3736,21 +5057,26 @@ function hostInput(peer, m){
   switch (a){
     case "choice": if (S.screen === "game" && S.mode === "story" && m.e === S.enterSeq) choose(i, peer); break;
     case "pickHero": if (S.mode === "pick" && S.party[i]) doCheck(i); break;
+    case "travel": travel(i); break;
+    case "walk": hostWalkInput(peer, m); break;
+    case "poi": poiAct(i, peer); break;
+    case "walkGo": if (S.nodeId === "hub" && S.mode === "story" && S.li >= S.lines.length - 1) startWalk(); break;
+    case "skill": useSkill(String(m.k || "")); break;
     case "cancelPick": cancelPick(); break;
     case "atk": heroAct("attack"); break;
     case "special": heroAct("special"); break;
     case "potion": heroAct("potion"); break;
     case "potionTo": if (S.party[i]) usePotion(i, true); break;
     case "cancelPotion": S.battle.picking = null; renderBattle(); break;
-    case "drink": if (S.party[i] && !S.battle && S.mode === "story") usePotion(i, false); break;
+    case "drink": if (S.party[i] && !S.battle && (S.mode === "story" || S.mode === "walk")) usePotion(i, false); break;
   }
 }
 function remoteStats(i, raw){
   const h = S.setup.heroes[i]; if (!h || !Array.isArray(raw) || raw.length !== 6) return;
   const ok = raw.every(r => r && Array.isArray(r.d) && r.d.length === 4 && r.d.every(x => Number.isInteger(x) && x >= 1 && x <= 6));
   if (!ok) return; if (h.stats){ if (h.rerolls <= 0) return; h.rerolls--; }
-  h.raw = raw.map(r => { const d = r.d.slice(), low = Math.min(...d); return {v:d.reduce((a, b) => a + b, 0) - low, d}; });
-  assignByClass(h); rerenderCard(i);
+  h.raw = raw.map(r => { const d = r.d.slice(), low = Math.min(...d); return {v:d.reduce((a, b) => a + b, 0) - low, d, st:STATS.includes(r.st) ? r.st : undefined}; });
+  assignRolled(h); rerenderCard(i);
 }
 
 /* ---------- dice over the network ---------- */
