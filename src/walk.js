@@ -155,15 +155,12 @@ Object.keys(NODES).forEach(id => { if (/^srch_|^ring_|^herb_(search|found)$/.tes
 SPRITE_DEFS.trapjaw = {p:{m:"#6a6c78", M:"#a2a3ac", r:"#61291a"}, g:["M.M.M.M.M.M", "mMmMmMmMmMm", "mmmmmmmmmmm", "r.........r"]};
 
 /* ---------- area layout: length, story events placed along the road, the tower's two faces ---------- */
-const AREA_LEN = {town:960, tower:800};
+const AREA_LEN = {town:960, tower:800, warren:800};
 const areaLen = ai => AREA_LEN[AREAS[ai] && AREAS[ai].id] || 640;
 // each area's story is cut into encounters that wait at points on the road (x = where the party's front must reach).
 // "end" = the far right edge: forks appear only when the party walks there.
 const STAGES = {
   forest:[{node:"road", x:200, mark:"?", spr:"trapjaw"}, {node:"wolves", x:380, spr:"wolf", n:2, sil:1, mark:"!"}, {node:"fork_forest", x:"end", fork:"갈림길"}],
-  bridge:[{node:"bridge", x:330, spr:"troll", sil:1, mark:"!"}],
-  swamp:[{node:"swamp", x:200, mark:"?"}, {node:"swamp_leech", x:350, spr:"leech", n:2, sil:1, mark:"!"}, {node:"witch", x:500, spr:"witch", mark:"?"}],
-  cave:[{node:"cave", x:200, mark:"?"}, {node:"mine_skel", x:350, spr:"skeleton", n:2, sil:1, mark:"!"}, {node:"dwarf", x:500, spr:"dwarf", sil:1, mark:"?"}],
   camp:[{node:"camp", x:300, mark:"?"}],
   tower:[{node:"gate", x:190, mark:"?"}, {node:"hall", x:330, spr:"goblin", n:3, sil:1, mark:"!"}, {node:"mirror", x:470, spr:"shadow", sil:1, mark:"!"}, {node:"corridor", x:610, mark:"?", spr:"trapjaw"}, {node:"cross", x:"end", fork:"나선 계단"}],
   lair:[{node:"lair", x:330, spr:"drake", sil:1, mark:"!"}]
@@ -189,15 +186,19 @@ function stageBreak(id, extra){
 const LOOT_NAMES = {
   town:{glint:["돌바닥 틈의 반짝임", "우물가에 떨어진 동전"]},
   forest:{glint:["덤불 속 반짝임", "풀숲에 떨어진 주머니"], cache:["쓰러진 나무 밑동", "사냥꾼의 은닉처", "속이 빈 고목"]},
-  bridge:{glint:["난간 틈의 반짝임", "교각 옆 진흙 속 반짝임"], cache:["트롤이 숨긴 자루", "부서진 짐수레"]},
   swamp:{glint:["물웅덩이 속 반짝임", "널빤지 위 꾸러미"], cache:["썩은 통나무", "반쯤 가라앉은 상자"]},
-  cave:{glint:["레일 위의 반짝임", "광석 부스러기 더미"], cache:["무너진 갱도 틈", "버려진 광부 상자"]},
+  roots:{glint:["뿌리에 걸린 반짝임", "검은 물속의 동전"], cache:["뿌리에 휘감긴 궤짝", "망자의 배낭"]},
+  mine:{glint:["레일 위의 반짝임", "광석 부스러기 더미"], cache:["버려진 광부 상자", "무너진 돌집의 찬장"]},
+  warren:{glint:["고블린이 흘린 동전", "뼈다귀 더미 속 반짝임"], cache:["고블린의 보물 단지", "약탈품 자루"]},
+  eyewood:{glint:["낙엽 속 반짝임", "부서진 도끼 옆 주머니"], cache:["무너진 오두막의 궤짝", "속이 빈 고목"]},
+  trollcave:{glint:["뼈 더미 속 반짝임"], cache:["트롤이 숨긴 자루"]},
   camp:{glint:["재 속의 반짝임", "천막 옆 꾸러미"], cache:["타다 남은 짐더미", "망가진 보급 상자"]},
   tower:{glint:["바닥 돌 틈의 반짝임", "떨어진 금속 조각"], cache:["벽감 속 상자", "고블린의 보물 단지"]}
 };
 const LOOT_TRY = {wis:"주의 깊게 살핀다", int:"구조를 따져 보고 연다", dex:"조심스럽게 손을 넣는다", str:"힘으로 뜯어 연다"};
 const LOOT_UNIQUE = new Set(["fairy_amulet","witch_charm","dwarf_plate","ember_scale","archmage_staff","wolfking_fang","queen_ring","foreman_blade","lamp_staff","deep_cloak","saint_mace","orna_locket","alpha_mantle","ember_fang","phoenix_wand","flame_greatsword"]);
-const FIXED_X = {town:[240, 400, 452, 552, 752], forest:[300, 548, 200, 380], bridge:[300, 330], swamp:[300, 470, 548, 200, 350, 500], cave:[548, 200, 350, 500], camp:[548, 300], tower:[190, 330, 470, 610]};
+const FIXED_X = {town:[240, 400, 452, 552, 752], forest:[300, 548, 200, 380], swamp:[170, 330, 470, 548, 300], roots:[170, 330, 470, 590], mine:[170, 330, 480, 548], warren:[170, 320, 470, 570, 660, 750],
+  eyewood:[170, 330, 480, 300], trollcave:[170, 320, 470, 560], camp:[548, 300], tower:[190, 330, 470, 610]};
 const pick = a => a[Math.floor(Math.random()*a.length)], rint = (a, b) => a + Math.floor(Math.random()*(b - a + 1));
 function lootItem(maxR){
   const cls = S.party.map(h => h.cls), pool = Object.keys(ITEMS).filter(k => { const it = ITEMS[k]; return it.r >= 1 && it.r <= maxR && !LOOT_UNIQUE.has(k) && (!it.cls || it.cls.some(c => cls.includes(c))); });
@@ -206,7 +207,7 @@ function lootItem(maxR){
 function genLoot(){
   const out = {};
   AREAS.forEach((a, ai) => { const names = LOOT_NAMES[a.id]; if (!names) return;
-    const L = areaLen(ai), tier = Math.max(1, ai), list = [], n = a.id === "town" ? 1 : rint(2, 3), taken = (FIXED_X[a.id] || []).slice();
+    const L = areaLen(ai), tier = Math.max(1, a.tier ?? ai), list = [], n = a.id === "town" ? 1 : rint(2, 3), taken = (FIXED_X[a.id] || []).slice();
     for (let k = 0; k < n; k++){
       let x = 0; for (let t = 0; t < 60; t++){ x = rint(90, L - 90); if (taken.every(f => Math.abs(f - x) > 44)) break; } taken.push(x);
       const kind = !names.cache || (k > 0 && Math.random() < 0.4) ? "glint" : "cache", fx = {};
@@ -218,6 +219,8 @@ function genLoot(){
       list.push({k:`${a.id}${k}`, x, kind, name:pick(names[kind]), stat, dc:10 + Math.floor(tier/2) + rint(0, 2), fx, trap:kind === "cache" && Math.random() < 0.4 ? (tier <= 3 ? "1d6" : "2d6") : null, taken:false});
     }
     out[a.id] = list; });
+  // the goblin chief hides in one of three side tunnels — a different one every game
+  out.tunnels = ["grak", "nest", "collapse"].sort(() => Math.random() - 0.5);
   return out;
 }
 const curLoot = () => { const id = AREAS[S.world.at].id; return ((S.loot || {})[id] || []).find(o => o.k === S.lootCur) || null; };
@@ -300,8 +303,10 @@ function buildPois(){
     if (c.pn) p.name = c.pn; if (c.pd) p.desc = c.pd; if (c.pp) p.por = c.pp;
     p.acts.push([c, i]); });
   const out = Object.values(P);
-  out.forEach(p => { if (p.id === "exitL"){ p.name = `◀ ${AREAS[w.at - 1].name}`; p.por = AREAS[w.at - 1].icon; }
-    if (p.id === "exitR"){ p.name = `${AREAS[w.at + 1].name} ▶`; p.por = w.entered[w.at + 1] ? AREAS[w.at + 1].icon : "sign"; if (!w.entered[w.at + 1]) p.desc = "아직 가 보지 않은 길이다. 준비가 되었다면 나아가자."; }
+  out.forEach(p => { if (p.id === "exitL"){ const pa = parentOf(w.at); p.name = `◀ ${AREAS[pa].name}`; p.por = AREAS[pa].icon; }
+    if (p.id === "exitR"){ const kids = p.acts.map(([c]) => c.to), one = kids.length === 1 ? kids[0] : -1;
+      if (one >= 0){ p.name = `${AREAS[one].name} ▶`; p.por = w.entered[one] ? AREAS[one].icon : "sign"; if (!w.entered[one]) p.desc = "아직 가 보지 않은 길이다. 준비가 되었다면 나아가자."; }
+      else { p.name = "갈림길 이정표 ▶"; p.por = "sign"; p.desc = "이정표 화살표가 여러 방향을 가리킨다. " + kids.map(k => `${AREAS[k].name}${w.cleared[k] ? " (다녀옴)" : ""}`).join(" · "); } }
     if (p.sign && indMode()){ const g = gatherCount(p.id), n = S.party.length; p.gather = g; p.desc = g >= n ? "모두 모였다! 함께 출발할 수 있다." : `모두 여기 모이면 함께 출발할 수 있다. (지금 ${g}/${n}명)`; } });
   return out;
 }
@@ -309,10 +314,12 @@ function nearPoi(){ const [a, b] = spanOf(myHeroes()), x0 = a - 14, x1 = b + 14,
   for (const p of WV.pois){ if ((p.x < x0 || p.x > x1) && !(p.sign && indMode() && myHeroes().some(k => exitZone(p, heroX(k))))) continue; const d = Math.abs(p.x - pc); if (d < bd){ bd = d; best = p; } }
   return best; }
 function areaDesc(){ const w = S.world, a = AREAS[w.at], out = [...(HUB_TEXT[a.id] || [])];
-  if (a.id === "town" && PROGRESS_TEXT[w.unlocked]) out.push(PROGRESS_TEXT[w.unlocked]);
+  if (a.id === "town" && PROGRESS_TEXT[relicCount()]) out.push(PROGRESS_TEXT[relicCount()]);
   const st = pendingStage(w.at);
-  if (st) out.push(st.fork ? "길 끝에서 길이 여러 갈래로 나뉜다. 끝까지 걸어가 보자." : "앞쪽에서 무언가 기다리고 있다. 다가가면 일이 벌어진다.");
-  else if (a.id !== "town" && w.at < w.unlocked && !w.entered[w.at + 1]) out.push(`길이 열렸다 — 오른쪽 끝에서 ${ro(AREAS[w.at + 1].name)} 갈 수 있다.`);
+  const fresh = a.id === "town" ? [] : childrenOf(w.at).filter(c => isOpen(c) && !w.entered[c]);
+  if (st) out.push(st.fork ? `오른쪽 끝에 「${st.fork}」 표식이 보인다. 끝까지 걸어가 보자.` : "앞쪽에서 무언가 기다리고 있다.");
+  else if (fresh.length) out.push(`길이 열렸다 — 오른쪽 끝 이정표에서 갈 수 있다: ${fresh.map(c => AREAS[c].name).join(", ")}.`);
+  else if (a.hint && a.hint()) out.push(a.hint());
   else if (a.id !== "town") out.push("이곳의 사건은 모두 끝났다. 자유롭게 오갈 수 있다.");
   if (indMode()) out.push("마을에서는 각자 자기 캐릭터로 돌아다녀요. 떠날 때는 모두 오른쪽 끝 이정표에 모이세요.");
   return out.join(" "); }
@@ -330,17 +337,16 @@ function startWalk(){
 function renderWalkUI(force){
   if (S.mode !== "walk" || S.screen !== "game" || !S.world) return;
   const p = VW_ready() ? nearPoi() : null, a = AREAS[S.world.at], auto = !!(S.walk && S.walk.auto);
-  const key = [p ? p.id : "", p ? p.acts.map(x => x[1]).join(",") : "", p ? p.gather : "", S.gold, busy ? 1 : 0, auto ? 1 : 0, S.world.at, S.world.unlocked, p ? p.desc : "", indMode() ? 1 : 0].join("|");
+  const key = [p ? p.id : "", p ? p.acts.map(x => x[1]).join(",") : "", p ? p.gather : "", S.gold, busy ? 1 : 0, auto ? 1 : 0, S.world.at, Object.keys(S.world.open || {}).length, p ? p.desc : "", indMode() ? 1 : 0].join("|");
   if (!force && key === WUI.key) return; WUI.key = key;
   $("#speaker").textContent = p ? (p.name || a.name) : SPEAKERS.narr.name; paintSpriteCanvas($("#portrait"), p ? (p.por || p.spr || a.icon) : SPEAKERS.narr.spr);
   $("#dlgPos").textContent = ""; $("#dlgMore").hidden = true;
   const el = $("#dlgText"); el.className = "dlg-text walkt"; el.textContent = p ? p.desc : areaDesc();
-  let html = `<div class="walkpad"><button class="wbtn" data-walk="-1" aria-label="왼쪽으로 걷기">◀</button><span>${auto ? "이동 중…" : "← → 또는 A · D로 걷기"}</span><button class="wbtn" data-walk="1" aria-label="오른쪽으로 걷기">▶</button></div>`;
+  let html = `<div class="walkpad ${auto ? "busy" : ""}"><button class="wbtn" data-walk="-1" aria-label="왼쪽으로 걷기"></button><button class="wbtn" data-walk="1" aria-label="오른쪽으로 걷기"></button><span class="wlab"><b>${auto ? "이동 중" : "이동"}</b><small>A D · ← →</small></span></div>`;
   if (p && !auto) p.acts.forEach(([c, i], k) => { let {tag, dis} = choiceTag(c);
     if (c.t === "travel" && indMode() && p.gather < S.party.length){ dis = true; tag += `<span class="tag">${p.gather}/${S.party.length} 모임</span>`; }
     html += `<button class="choice" data-act="poi" data-i="${i}" ${dis || busy ? "disabled" : ""}><span>${esc(c.label)}</span>${tag}${k === 0 && !dis ? '<span class="key">E</span>' : ""}</button>`; });
-  else { const st = pendingStage(S.world.at);
-    html += `<p class="prompt walkhint">${st ? (st.fork ? "▶ 길 끝까지 가면 갈 곳을 고를 수 있어요" : "▶ 앞으로 나아가면 무언가 일어나요") : "가까이 가면 할 수 있는 일이 보여요 · 화면을 눌러도 그쪽으로 걸어가요"}</p>`; }
+
   $("#choices").innerHTML = html; $("#choices").classList.remove("dense", "dense2");
   netDirty();
 }
@@ -387,10 +393,10 @@ function hostWalkInput(peer, m){
 const until = (f, ms) => new Promise(res => { const t0 = performance.now(), iv = setInterval(() => { if (f() || performance.now() - t0 > ms){ clearInterval(iv); res(); } }, 40); });
 const allGathered = () => !indMode() || gatherCount("exitR") >= S.party.length || gatherCount("exitL") >= S.party.length;
 async function travel(ai, force){
-  const w = S.world; if (busy || !w || S.nodeId !== "hub" || S.mode !== "walk" || ai < 0 || ai > w.unlocked || ai === w.at) return;
+  const w = S.world; if (busy || !w || S.nodeId !== "hub" || S.mode !== "walk" || ai < 0 || !isOpen(ai) || ai === w.at) return;
   if (!force && !allGathered()){ netMsg("모두 이정표 앞에 모여야 출발할 수 있어요"); return; }
   busy = true; S.mode = "busy"; closeShopQuiet(); renderWalkUI(true); $("#choices").innerHTML = ""; refreshStatus();
-  const dir = ai > w.at ? 1 : -1, W = S.walk, L = areaLen(w.at), pw = partyW();
+  const dir = ai === parentOf(w.at) || ai === 0 ? -1 : 1, W = S.walk, L = areaLen(w.at), pw = partyW();
   W.auto = 1;
   if (W.ind && W.h) W.h.forEach((h, k) => { h.dir = 0; h.tx = dir > 0 ? L + 16 + k*GAP : -HW - 16 - k*GAP; });
   else { W.dir = 0; W.tx = dir > 0 ? L + 16 : -pw - 16; }
@@ -404,7 +410,7 @@ async function travel(ai, force){
 function closeShopQuiet(){ if (SHOP.id){ SHOP.id = null; $("#shop").hidden = true; } }
 function arriveFrontier(ai, extra){
   const w = S.world, L = stageList(w.at), cur = L && L[(w.stage || {})[w.at] || 0], atEnd = !!(cur && cur.x === "end");
-  w.cleared[w.at] = true; w.unlocked = Math.max(w.unlocked, ai); w.stage = w.stage || {}; if (L) w.stage[w.at] = L.length;
+  w.cleared[w.at] = true; w.open[ai] = true; openFrom(w.at); w.stage = w.stage || {}; if (L) w.stage[w.at] = L.length;
   S.objective = `오른쪽 끝까지 걸어가 ${ro(AREAS[ai].name)}`;
   sfx("good"); banner(`길이 열렸다: ${AREAS[ai].name}`, "gold");
   if (atEnd && S.walk && S.walk.area === w.at) S.walk.go = ai;
@@ -460,7 +466,9 @@ function worldTick(dt, t){
   const L = areaLen(S.world.at), [s0, s1] = spanOf(myHeroes()), face = (W.ind && W.h ? (W.h[myHeroes()[0] ?? 0] || {}).face : W.face) || 1, target = Math.max(0, Math.min(L - SW, (s0 + s1)/2 - SW*(face > 0 ? 0.33 : 0.67)));
   if (WV.snap || WV.area !== S.world.at){ WV.cam = target; WV.snap = false; WV.area = S.world.at; }
   else WV.cam += (target - WV.cam)*Math.min(1, dt*3);
-  scene.camX = VW.world ? Math.round(WV.cam) : 0;
+  // story scenes on a wide background keep the camera where the party stood, so the event happens on that spot
+  const wide = BGS[scene.bgKey] && BGS[scene.bgKey].w && scene.bgKey === areaBg(S.world.at) && S.world.at !== 0;
+  scene.camX = VW.world || wide ? Math.round(WV.cam) : ((BGS[scene.bgKey] || {}).camAt || 0);
   if (VW.world){ WV.pois = buildPois(); if (S.mode === "walk") renderWalkUI(); renderTags(); } else hideTags();
 }
 const poiSprite = p => p.spr || (p.sign && !BGS[scene.bgKey].w ? "sign" : null);

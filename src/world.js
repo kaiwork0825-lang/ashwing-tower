@@ -92,24 +92,36 @@ const SUPPLIES = {potion:{name:"회복 물약", price:12, desc:"2d4+2 회복"}, 
 function shopHere(id){ const at = S.world && AREAS[S.world.at] && AREAS[S.world.at].id; return S.nodeId === "hub" && (at === "town" ? ["smith","mage","inn"].includes(id) : at === "forest" && id === "moro"); }
 
 /* ---------- areas ---------- */
+// the world branches: past the forest fork lie three regions (a field, then its dungeon), each guarding one relic.
+// par = the area you came from (left exit); opens = areas that open when this one is cleared
 const AREAS = [
-  {id:"town", name:"불씨골 마을", bg:"tavern", icon:"orna"},
-  {id:"forest", name:"잿빛 숲길", bg:"forest", entry:"road", icon:"wolf"},
-  {id:"bridge", name:"트롤의 다리", bg:"bridge", entry:"bridge", icon:"troll"},
-  {id:"swamp", name:"안개 늪", bg:"swamp", entry:"swamp", icon:"leech"},
-  {id:"cave", name:"버려진 광산", bg:"cave", entry:"cave", icon:"skeleton"},
-  {id:"camp", name:"탑 아래 언덕", bg:"camp", entry:"camp", icon:"hound"},
-  {id:"tower", name:"잿빛 탑", bg:"gate", entry:"gate", icon:"gargoyle"},
-  {id:"lair", name:"잿날개의 둥지", bg:"lair", entry:"lair", icon:"drake"}
+  {id:"town", name:"불씨골 마을", bg:"tavern", icon:"orna", tier:0},
+  {id:"forest", name:"잿빛 숲길", bg:"forest", entry:"road", icon:"wolf", par:"town", tier:1, opens:["swamp","mine","eyewood"]},
+  {id:"swamp", name:"악취나는 늪", bg:"bog", entry:"bog_enter", icon:"leech", par:"forest", tier:2, region:"shield"},
+  {id:"roots", name:"썩은 뿌리 굴", bg:"roots", entry:"root_maze", icon:"wraith", par:"swamp", tier:3, region:"shield", dungeon:1},
+  {id:"mine", name:"드워프 광산", bg:"mtn", entry:"mine_road", icon:"thorin", par:"forest", tier:2, region:"sword"},
+  {id:"warren", name:"고블린 갱도", bg:"warren", entry:"war_trap", icon:"grak", par:"mine", tier:3, region:"sword", dungeon:1},
+  {id:"eyewood", name:"외눈박이 숲", bg:"eyewood", entry:"eye_totem", icon:"woodcutter", par:"forest", tier:2, region:"eye"},
+  {id:"trollcave", name:"트롤 굴", bg:"trollcave", entry:"tc_bones", icon:"bat", par:"eyewood", tier:3, region:"eye", dungeon:1},
+  {id:"camp", name:"탑 아래 언덕", bg:"camp", entry:"camp", icon:"hound", par:"forest", tier:5},
+  {id:"tower", name:"잿빛 탑", bg:"gate", entry:"gate", icon:"gargoyle", par:"camp", tier:6},
+  {id:"lair", name:"잿날개의 둥지", bg:"lair", entry:"lair", icon:"drake", par:"tower", tier:7}
 ];
 const AREA_BY_ENTRY = {}; AREAS.forEach((a, i) => { if (a.entry) AREA_BY_ENTRY[a.entry] = i; });
 const AREA_I = id => AREAS.findIndex(a => a.id === id);
-const newWorld = () => ({at:0, unlocked:0, entered:{0:true}, cleared:{}, stage:{}});
+const parentOf = ai => AREAS[ai] && AREAS[ai].par ? AREA_I(AREAS[ai].par) : -1;
+const childrenOf = ai => AREAS.map((a, i) => i).filter(i => parentOf(i) === ai);
+const isOpen = ai => !!(S.world && S.world.open && S.world.open[ai]);
+const newWorld = () => ({at:0, open:{0:true}, entered:{0:true}, cleared:{}, stage:{}});
+// the three relics: owning all of them opens the road to the tower
+const RELICS = ["relic_shield", "relic_sword", "relic_eye"];
+const relicCount = () => RELICS.filter(k => S.flags && S.flags[k]).length;
+// clearing an area opens the roads it leads to
+function openFrom(ai){ const w = S.world; (AREAS[ai].opens || []).forEach(id => { w.open[AREA_I(id)] = true; }); }
 const SEARCH = {
   forest:{label:"덤불 속을 뒤진다", stat:"wis", dc:12, fx:{gold:20, item:"copper_ring"}, ok:"쓰러진 나무 밑동에서 사냥꾼이 숨겨 둔 주머니를 찾았다.", no:"가시에 긁히기만 하고 아무것도 찾지 못했다."},
-  bridge:{label:"다리 밑 그늘을 살핀다", stat:"int", dc:13, fx:{gold:35, potion:1}, ok:"트롤이 모아 둔 통행료 상자가 바위 틈에 끼어 있다!", no:"이끼 낀 돌뿐이다."},
   swamp:{label:"썩은 통나무 속을 들여다본다", stat:"wis", dc:13, fx:{item:"sage_amulet"}, ok:"통나무 안에서 누군가 잃어버린 목걸이가 반짝인다.", no:"거머리 알만 잔뜩 붙어 있다. 으."},
-  cave:{label:"무너진 갱도 틈을 비춘다", stat:"int", dc:14, fx:{gold:60, luck:1}, ok:"광부들이 숨겨 둔 금화 주머니와 네잎 부적!", no:"돌가루만 쏟아진다."},
+  mine:{label:"무너진 갱도 틈을 비춘다", stat:"int", dc:14, fx:{gold:60, luck:1}, ok:"광부들이 숨겨 둔 금화 주머니와 네잎 부적!", no:"돌가루만 쏟아진다."},
   camp:{label:"타다 남은 짐더미를 뒤진다", stat:"wis", dc:14, fx:{item:"guard_ring", potion:1}, ok:"불에 그을린 상자 안에 반지 하나와 물약이 남아 있다.", no:"재와 숯뿐이다."},
   tower:{label:"탑 외벽의 균열을 살핀다", stat:"int", dc:15, fx:{gold:80, luck:1}, ok:"벽돌 하나가 빠지며 오래된 금고가 드러난다!", no:"벽돌은 꿈쩍도 하지 않는다."}
 };
@@ -121,24 +133,28 @@ Object.entries(SEARCH).forEach(([id, s]) => {
 const HUB_TEXT = {
   town:["불씨골 마을 광장. 여관 「꺼진 화로」 굴뚝에서 장작 연기가 오른다.", "대장간 망치 소리와 마법상점의 풍경 소리가 섞여 들린다."],
   forest:["잿빛 숲길. 늑대 울음은 멀어졌고 바람에 나뭇잎이 바스락거린다."],
-  bridge:["트롤의 다리. 강물 소리가 낮게 깔린다. 그룸의 몽둥이 자국이 난간에 남아 있다."],
-  swamp:["안개 늪. 널빤지 길이 안개 속으로 끝없이 이어진다."],
-  cave:["버려진 광산 입구. 갱도 안쪽에서 찬바람이 불어 나온다."],
+  swamp:["악취나는 늪. 썩은 거품이 터질 때마다 누런 안개가 피어오른다."],
+  roots:["썩은 뿌리 굴. 뼈 풍경이 바람도 없이 달그락거린다."],
+  mine:["드워프 광산 마을 무쇠골. 빈 돌집들 사이로 찬 산바람이 분다."],
+  warren:["고블린 갱도. 멀리서 킥킥대는 소리와 물방울 소리가 섞여 울린다."],
+  eyewood:["외눈박이 숲. 나무마다 새겨진 외눈이 일행을 내려다본다."],
+  trollcave:["트롤 굴. 비릿한 냄새와 축축한 한기가 뼛속까지 스민다."],
   camp:["탑 아래 언덕. 꺼진 모닥불 자리 너머로 잿빛 탑이 우뚝 서 있다."],
   tower:["잿빛 탑 1층. 계단 위에서 뜨거운 바람이 내려온다."],
   lair:["잿날개의 둥지."]
 };
-const PROGRESS_TEXT = ["", "숲길이 열렸다. 준비가 되면 오른쪽으로 출발하자.", "마을 사람들이 일행을 알아보고 손을 흔든다. 「다리를 넘었다며?」", "아이들이 일행의 무용담을 흉내 내며 뛰어논다.", "대장간 앞에 일행의 이름을 새긴 나무판이 걸렸다.", "마을 전체가 숨을 죽이고 탑 쪽을 바라본다. 모두 일행에게 기대를 건다.", "여관 주인이 일행 자리를 비워 두었다. 「돌아올 거지?」", "마지막 싸움이 남았다."];
+// what the town says, by how many relics the party holds
+const PROGRESS_TEXT = ["", "마을 사람들이 일행을 알아보고 손을 흔든다. 「유물을 찾았다며?」", "아이들이 일행의 무용담을 흉내 내며 뛰어논다. 나무 막대가 용살의 검이란다.", "대장간 앞에 일행의 이름을 새긴 나무판이 걸렸다. 마을 전체가 숨을 죽이고 탑 쪽을 바라본다."];
 
 /* ---------- quests: bounties & favors ---------- */
 const QUESTS = {
   wolfking:{kind:"bounty", name:"늑대왕 잿송곳니", area:"forest", after:"forest", gold:90, xp:160, dungeon:{label:"늑대 굴로 들어간다 (현상금)", to:"den_1"}, desc:"숲 북쪽 굴에 사는 흰 늑대. 가축 스무 마리를 물어 갔다."},
   queen:{kind:"bounty", name:"늪의 거머리 여왕", area:"swamp", after:"swamp", gold:130, xp:220, dungeon:{label:"가라앉은 사원으로 (현상금)", to:"temple_1"}, desc:"늪 한가운데 가라앉은 사원에 사람만 한 거머리가 산다."},
-  foreman:{kind:"bounty", name:"해골 감독관 모르그", area:"cave", after:"cave", gold:170, xp:280, dungeon:{label:"깊은 갱도로 내려간다 (현상금)", to:"deep_1"}, desc:"광산 가장 깊은 곳에서 죽은 광부들을 부리는 감독관."},
+  foreman:{kind:"bounty", name:"해골 감독관 모르그", area:"mine", after:"mine", gold:170, xp:280, dungeon:{label:"깊은 갱도로 내려간다 (현상금)", to:"deep_1"}, desc:"광산 가장 깊은 곳에서 죽은 광부들을 부리는 감독관."},
   alpha:{kind:"bounty", name:"잿불 우두머리", area:"camp", after:"camp", gold:220, xp:340, dungeon:{label:"불탄 망루에 오른다 (현상금)", to:"watch_1"}, desc:"탑 아래 망루에 둥지를 튼 거대한 잿불 사냥개."},
-  ring:{kind:"favor", giver:"orna", name:"오르나의 반지", area:"bridge", after:"forest", desc:"오르나가 젊은 시절 트롤의 다리에서 잃어버린 결혼반지."},
-  herb:{kind:"favor", giver:"selin", name:"셀린의 달빛 약초", area:"swamp", after:"bridge", desc:"안개 늪에서만 자라는 달빛 약초가 필요하다."},
-  hammer:{kind:"favor", giver:"smith", name:"그란의 망치", area:"cave", after:"swamp", desc:"광산이 무너질 때 두고 온 그란 아버지의 망치."}
+  ring:{kind:"favor", giver:"orna", name:"오르나의 반지", area:"eyewood", after:"forest", desc:"오르나가 젊은 시절 외눈박이 숲 개울가에서 잃어버린 결혼반지."},
+  herb:{kind:"favor", giver:"selin", name:"셀린의 달빛 약초", area:"swamp", after:"forest", desc:"악취나는 늪에서만 자라는 달빛 약초가 필요하다."},
+  hammer:{kind:"favor", giver:"smith", name:"그란의 망치", area:"mine", after:"mine", desc:"광산이 무너질 때 두고 온 그란 아버지의 망치."}
 };
 const qState = q => (S.quests || {})[q];
 const qOpen = q => { const Q = QUESTS[q]; return S.world && S.world.cleared[AREA_I(Q.after)]; };
@@ -202,25 +218,26 @@ Object.assign(NODES, {
   watch_3:{bg:"camp", show:["alphahound"], lines:["꼭대기. 검붉은 털의 거대한 사냥개가 숨을 몰아쉰다. 콧김마다 불꽃이 튄다.", "세 번에 한 번은 불을 뿜는다고 했다. 대비하자."], choices:[{t:"battle", label:"우두머리를 쓰러뜨린다!", foe:"alphahound", win:"watch_win"}, {t:"go", label:"물러난다", to:"hub"}]},
   watch_win:{bg:"camp", fx:{gold:100, qdone:"alpha", loot:["alpha_mantle","ember_fang","phoenix_wand","flame_greatsword"]}, art:{bg:"camp", u:P2, o:"chest", c:[60,40,200,112], cap:"우두머리의 보물"}, lines:["우두머리가 쓰러지자 망루의 불길이 한꺼번에 사그라든다.", "잿더미 속에서 불에도 녹지 않은 장비가 모습을 드러냈다."], next:"hub", nextLabel:"망루를 내려간다"},
   // favors
-  ring_search:{bg:"bridge", art:{bg:"bridge", u:P2, o:"glint", c:[60,40,200,112], cap:"진흙 속 반짝임"}, lines:["오르나가 말한 둘째 교각 아래. 진흙 속 어딘가에 반지가 있을 것이다."], choices:[
+  ring_search:{bg:"eyewood", art:{bg:"eyewood", u:P2, o:"glint", c:[60,40,200,112], cap:"진흙 속 반짝임"}, lines:["오르나가 말한 개울가 둑 아래. 진흙 속 어딘가에 반지가 있을 것이다."], choices:[
     {t:"check", label:"손으로 진흙을 더듬는다", stat:"dex", dc:12, pass:"ring_found", fail:"ring_leech"}, {t:"go", label:"나중에 찾는다", to:"hub"}]},
-  ring_leech:{bg:"bridge", fx:{dmg:"1d6", who:"roller"}, lines:["진흙 속에서 무언가가 손가락을 물었다! 하지만 손끝에 둥근 것이 걸렸다."], next:"ring_found", nextLabel:"끌어올린다"},
-  ring_found:{bg:"bridge", fx:{flag:"ringFound", xp:30}, lines:["진흙을 닦아 내자 작은 금반지가 나온다. 안쪽에 「오르나에게」라고 새겨져 있다."], next:"hub", nextLabel:"반지를 챙긴다"},
-  herb_search:{bg:"swamp", art:{bg:"swamp", u:P2, o:"sparkle", c:[60,40,200,112], cap:"달빛 약초"}, lines:["안개가 걷힌 웅덩이 가장자리에 은빛으로 빛나는 풀이 보인다. 달빛 약초다."], choices:[
+  ring_leech:{bg:"eyewood", fx:{dmg:"1d6", who:"roller"}, lines:["진흙 속에서 무언가가 손가락을 물었다! 하지만 손끝에 둥근 것이 걸렸다."], next:"ring_found", nextLabel:"끌어올린다"},
+  ring_found:{bg:"eyewood", fx:{flag:"ringFound", xp:30}, lines:["진흙을 닦아 내자 작은 금반지가 나온다. 안쪽에 「오르나에게」라고 새겨져 있다."], next:"hub", nextLabel:"반지를 챙긴다"},
+  herb_search:{bg:"bog", art:{bg:"bog", u:P2, o:"sparkle", c:[60,40,200,112], cap:"달빛 약초"}, lines:["안개가 걷힌 웅덩이 가장자리에 은빛으로 빛나는 풀이 보인다. 달빛 약초다."], choices:[
     {t:"check", label:"뿌리째 조심스럽게 캔다", stat:"wis", dc:13, pass:"herb_found", fail:"herb_fight"}, {t:"go", label:"나중에 온다", to:"hub"}]},
-  herb_fight:{bg:"swamp", show:["leech","leech","leech"], lines:["뿌리를 잡아당기자 웅덩이 속 거머리들이 깨어났다!"], choices:[{t:"battle", label:"싸운다", foe:"leeches", win:"herb_found"}]},
-  herb_found:{bg:"swamp", fx:{flag:"herbFound", xp:30}, lines:["달빛 약초를 무사히 캤다. 셀린에게 가져가자."], next:"hub", nextLabel:"약초를 챙긴다"}
+  herb_fight:{bg:"bog", show:["leech","leech","leech"], lines:["뿌리를 잡아당기자 웅덩이 속 거머리들이 깨어났다!"], choices:[{t:"battle", label:"싸운다", foe:"leeches", win:"herb_found"}]},
+  herb_found:{bg:"bog", fx:{flag:"herbFound", xp:30}, lines:["달빛 약초를 무사히 캤다. 셀린에게 가져가자."], next:"hub", nextLabel:"약초를 챙긴다"}
 });
 
 /* ---------- dynamic places: area hub, bounty board, town talks ---------- */
 function dyn(id, fn){ Object.defineProperty(NODES, id, {get:fn, enumerable:false, configurable:true}); }
 function travelChoices(ch){
-  const w = S.world, at = w.at;
-  if (at > 0) ch.push({t:"travel", to:at - 1, poi:"exitL", label:`${ro(AREAS[at-1].name)} 돌아간다`});
-  if (at > 1) ch.push({t:"travel", to:0, poi:"exitL", label:"마을로 곧장 귀환한다"});
-  if (at < w.unlocked) ch.push({t:"travel", to:at + 1, poi:"exitR", label:`${ro(AREAS[at+1].name)} 나아간다`});
+  const w = S.world, at = w.at, p = parentOf(at);
+  if (p >= 0) ch.push({t:"travel", to:p, poi:"exitL", label:`${ro(AREAS[p].name)} 돌아간다`});
+  if (p > 0) ch.push({t:"travel", to:0, poi:"exitL", label:"마을로 곧장 귀환한다"});
+  childrenOf(at).filter(isOpen).forEach(c => ch.push({t:"travel", to:c, poi:"exitR", label:`${ro(AREAS[c].name)} ${w.entered[c] ? "간다" : "처음 가 본다"}`}));
 }
 const DEN_NAME = {wolfking:"늑대 굴 입구", queen:"가라앉은 사원", foreman:"깊은 갱도 입구", alpha:"불탄 망루"};
+const regionHub = [];   // regions.js adds the region-specific spots (Greta, Bron, the side tunnels…)
 // the area itself: the party walks it (walk.js); every choice here is tied to a spot on the street (poi)
 dyn("hub", () => {
   const w = S.world || newWorld(), a = AREAS[w.at], ch = [];
@@ -235,9 +252,9 @@ dyn("hub", () => {
       {t:"go", to:"inn_rest", cost:10, poi:"inn", label:"하룻밤 쉰다 (HP 회복)"});
   } else {
     if (a.id === "forest" && (S.flags.seenMerchant || w.cleared[w.at])) ch.push({t:"shop", shop:"moro", poi:"moro", label:"수레의 물건을 본다"});
-    if (a.id === "swamp" && w.cleared[w.at]) ch.push({t:"go", to:"witch", poi:"witch", label:"그레타와 거래한다"});
     Object.entries(QUESTS).forEach(([q, Q]) => { if (Q.area === a.id && Q.kind === "bounty" && qState(q) === "active") ch.push({t:"go", to:Q.dungeon.to, poi:"dungeon", pn:DEN_NAME[q], pd:`${Q.desc} 들어가면 쉽게 돌아 나올 수 없다.`, label:Q.dungeon.label}); });
-    if (a.id === "bridge" && qState("ring") === "active" && !S.flags.ringFound) ch.push({t:"go", to:"ring_search", poi:"spot", pn:"둘째 교각 아래", pd:"오르나가 반지를 잃어버렸다는 자리다. 진흙 속에서 무언가 반짝인다.", label:"진흙을 뒤진다 (오르나의 반지)"});
+    if (a.id === "eyewood" && qState("ring") === "active" && !S.flags.ringFound) ch.push({t:"go", to:"ring_search", poi:"spot", pn:"개울가 둑 아래", pd:"오르나가 반지를 잃어버렸다는 자리다. 진흙 속에서 무언가 반짝인다.", label:"진흙을 뒤진다 (오르나의 반지)"});
+    regionHub.forEach(fn => fn(a, w, ch));
     if (a.id === "swamp" && qState("herb") === "active" && !S.flags.herbFound) ch.push({t:"go", to:"herb_search", poi:"spot", pn:"은빛 웅덩이", pd:"안개 사이로 은빛으로 빛나는 풀이 보인다. 셀린이 말한 달빛 약초다.", label:"달빛 약초를 캔다 (셀린의 부탁)"});
   }
   // random finds on the road (rolled per game)
@@ -257,31 +274,29 @@ dyn("board", () => {
   ch.push({t:"go", to:"hub", label:"게시판을 떠난다"});
   return {bg:"tavern", show:["orna"], noVote:true, lines, again:lines, prompt:"현상금 게시판", choices:ch};
 });
-const ORNA_TALK = [
-  ["준비는 단단히 하고 가. 늑대한테 물리면 약도 없어."],
-  ["숲을 지났다고? 허, 처음 봤을 땐 칼도 제대로 못 쥘 것 같더니.", "다리의 트롤 그룸은 배가 고프면 사납고, 배가 부르면 순해. 기억해."],
-  ["트롤을 넘었구먼! 마을에 소문이 벌써 쫙 퍼졌어.", "늪의 마녀 그레타는... 내 오랜 친구야. 겁먹지 말고 예의만 지켜."],
-  ["그레타를 만났다니. 그 노인네, 아직 살아 있었구먼.", "광산의 해골들은 원래 우리 마을 광부들이었어. 편히 쉬게 해 줘."],
-  ["너희 눈빛이 달라졌어. 처음 여관 문을 열고 들어올 때랑은 딴사람이야.", "탑 아래 언덕에서 하룻밤 묵게 될 거야. 불씨를 꺼뜨리지 마."],
-  ["탑이 코앞이야. 탑 문지기는 수수께끼를 좋아한다더군.", "올라가기 전에 그란한테 장비를 손봐 달라고 해."],
-  ["...이제 꼭대기만 남았구먼.", "살아서 돌아와. 금화 백 닢보다 그게 더 중요해."],
-  ["가거라. 불씨골이 너희를 기다린다."]
-];
+// Orna's advice follows the hunt for the relics
+const ORNA_TALK = {
+  road:["준비는 단단히 하고 가. 숲길 늑대한테 물리면 약도 없어.", "숲길 끝 이정표에서 길이 셋으로 갈라져. 늪, 광산, 외눈박이 숲. 순서는 너희 마음이야."],
+  0:["세 갈래 길에 닿았다며? 어디부터 갈지 정했나?", "늪의 그레타는 내 오랜 친구야. 겁먹지 말고 예의만 지켜. 시험은... 각오해 두고."],
+  1:["하나를 손에 넣었구먼! 마을에 소문이 벌써 쫙 퍼졌어.", "브론 영감은 고집이 세지만 은혜는 잊지 않아. 외눈박이는... 해가 있을 때와 밤이 전혀 다른 놈이라더군."],
+  2:["둘이나! 처음 여관 문을 열고 들어올 때랑은 딴사람들이야.", "하나 남았어. 서두르되, 서두르진 마. 무슨 말인지 알지?"],
+  3:["세 유물이 다 모였구먼... 백 년 만이야.", "숲길 갈림길에서 북쪽 언덕으로 가. 탑이 기다리고 있어. 살아서 돌아와. 금화 백 닢보다 그게 더 중요해."]
+};
 dyn("talk_orna", () => {
-  const w = S.world || newWorld(), ch = [], lines = ORNA_TALK[Math.min(ORNA_TALK.length - 1, w.unlocked)].map(t => ["orna", t]);
+  const w = S.world || newWorld(), ch = [], lines = ORNA_TALK[w.cleared[AREA_I("forest")] ? relicCount() : "road"].map(t => ["orna", t]);
   const st = qState("ring");
-  if (!st && qOpen("ring")){ lines.push(["orna","...그리고 부탁이 하나 있어. 젊을 적 트롤의 다리에서 결혼반지를 잃어버렸어. 둘째 교각 아래였지."]); ch.push({t:"quest", q:"ring", label:"[부탁] 반지를 찾아 드리겠다"}); }
-  if (st === "active") ch.push(S.flags.ringFound ? {t:"claim", q:"ring", label:"[반지를 돌려준다]"} : {t:"noop", dis:true, label:"[진행 중] 트롤의 다리에서 반지 찾기"});
+  if (!st && qOpen("ring")){ lines.push(["orna","...그리고 부탁이 하나 있어. 젊을 적 외눈박이 숲 개울가에서 결혼반지를 잃어버렸어. 그땐 그 숲도 평화로웠지."]); ch.push({t:"quest", q:"ring", label:"[부탁] 반지를 찾아 드리겠다"}); }
+  if (st === "active") ch.push(S.flags.ringFound ? {t:"claim", q:"ring", label:"[반지를 돌려준다]"} : {t:"noop", dis:true, label:"[진행 중] 외눈박이 숲 개울가에서 반지 찾기"});
   ch.push({t:"go", to:"hub", label:"광장으로 돌아간다"});
   return {bg:"tavern", show:["orna"], noVote:true, lines, again:lines.slice(0, 1), prompt:"오르나", choices:ch};
 });
 dyn("talk_town", () => {
   const ch = [], lines = [];
   const herb = qState("herb"), hammer = qState("hammer");
-  if (!herb && qOpen("herb")){ lines.push(["selin","안개 늪의 달빛 약초 좀 구해 줄래요? 대신 기술서 한 권을 공짜로 드릴게요."]); ch.push({t:"quest", q:"herb", label:"[셀린의 부탁] 달빛 약초 구하기"}); }
-  if (herb === "active") ch.push(S.flags.herbFound ? {t:"claim", q:"herb", label:"[셀린에게 약초를 건넨다]"} : {t:"noop", dis:true, label:"[진행 중] 안개 늪에서 달빛 약초 찾기"});
+  if (!herb && qOpen("herb")){ lines.push(["selin","악취나는 늪의 달빛 약초 좀 구해 줄래요? 대신 기술서 한 권을 공짜로 드릴게요."]); ch.push({t:"quest", q:"herb", label:"[셀린의 부탁] 달빛 약초 구하기"}); }
+  if (herb === "active") ch.push(S.flags.herbFound ? {t:"claim", q:"herb", label:"[셀린에게 약초를 건넨다]"} : {t:"noop", dis:true, label:"[진행 중] 악취나는 늪에서 달빛 약초 찾기"});
   if (!hammer && qOpen("hammer")){ lines.push(["smith","광산 깊은 곳에 아버지 망치가 있어. 찾아오면 내 물건은 앞으로 2할 깎아 주지."]); ch.push({t:"quest", q:"hammer", label:"[그란의 부탁] 아버지의 망치 찾기"}); }
-  if (hammer === "active") ch.push(S.flags.hammerFound ? {t:"claim", q:"hammer", label:"[그란에게 망치를 건넨다]"} : {t:"noop", dis:true, label:"[진행 중] 버려진 광산 깊은 갱도에서 망치 찾기"});
+  if (hammer === "active") ch.push(S.flags.hammerFound ? {t:"claim", q:"hammer", label:"[그란에게 망치를 건넨다]"} : {t:"noop", dis:true, label:"[진행 중] 드워프 광산 깊은 갱도에서 망치 찾기"});
   if (!lines.length) lines.push(["selin","오늘은 부탁할 게 없네요. 또 들러요."]);
   ch.push({t:"go", to:"hub", label:"광장으로 돌아간다"});
   return {bg:"tavern", show:["smith","selin"], noVote:true, lines, again:lines, prompt:"상인들의 부탁", choices:ch};
@@ -307,10 +322,12 @@ function renderWorldBar(){
   const el = $("#worldBar"); if (!el) return; const w = S.world;
   if (!w || S.screen !== "game" || S.battle){ el.hidden = true; return; }
   const gathered = allGathered(), can = S.nodeId === "hub" && S.mode === "walk" && !busy && !(S.walk && S.walk.auto) && gathered;
-  const n = Math.min(AREAS.length, w.unlocked + 2);
   el.hidden = false;
-  el.innerHTML = AREAS.slice(0, n).map((a, i) => { const locked = i > w.unlocked, here = i === w.at;
-    return `${i ? `<i class="wb-road ${locked ? "lock" : ""}"></i>` : ""}<button class="wb-node ${here ? "here" : ""} ${locked ? "lock" : ""} ${w.cleared[i] ? "done" : ""}" data-act="travel" data-i="${i}" ${!can || locked || here ? "disabled" : ""} title="${esc(a.name)}"><canvas class="px" data-spr="${locked ? "bounty" : a.icon}"></canvas><span>${locked ? "???" : esc(a.name)}</span></button>`; }).join("")
+  // show what is open, plus the next unknown step from it; regions sit side by side after the forest
+  const shown = AREAS.map((a, i) => i).filter(i => isOpen(i) || (parentOf(i) >= 0 && isOpen(parentOf(i)) && !AREAS[i].dungeon && AREAS[i].id !== "camp" && w.cleared[parentOf(i)]) || (i === 1));
+  el.innerHTML = shown.map((i, k) => { const a = AREAS[i], locked = !isOpen(i), here = i === w.at, prev = shown[k - 1];
+    const join = k === 0 ? "" : prev === parentOf(i) ? `<i class="wb-road ${locked ? "lock" : ""}"></i>` : `<i class="wb-gap"></i>`;
+    return `${join}<button class="wb-node ${here ? "here" : ""} ${locked ? "lock" : ""} ${w.cleared[i] ? "done" : ""}" data-act="travel" data-i="${i}" ${!can || locked || here ? "disabled" : ""} title="${esc(a.name)}"><canvas class="px" data-spr="${locked ? "bounty" : a.icon}"></canvas><span>${locked ? "???" : esc(a.name)}</span></button>`; }).join("")
     + `<span class="wb-tip">${can ? "누르면 빠른 이동" : S.nodeId === "hub" && !gathered ? "모두 이정표에 모이면 이동" : S.nodeId === "hub" ? "" : "이 지역의 사건을 마치면 이동할 수 있어요"}</span>`;
   paintAll(el);
 }
@@ -339,7 +356,7 @@ function renderShop(){
     html += booksHTML;
     if (sh.goods.length) html += `<h4>장비 ${SHOP.id === "smith" && S.flags.smithDiscount ? "<small>그란의 2할 할인 적용</small>" : ""}</h4><div class="sh-grid">` + sh.goods.map(k => itemCard(k, priceOf(k, SHOP.id), `data-act="shopBuy" data-k="${k}" ${S.gold < priceOf(k, SHOP.id) ? "disabled" : ""}`)).join("") + `</div>`;
   } else {
-    const list = S.inv.filter(u => S.items[u]);
+    const list = S.inv.filter(u => S.items[u] && !ITEMS[S.items[u].key].relic);
     html += list.length ? `<h4>가방 속 장비 <small>착용 중인 장비는 팔 수 없어요</small></h4><div class="sh-grid">` + list.map(u => itemCard(S.items[u].key, sellOf(S.items[u].key), `data-act="shopSell" data-u="${u}"`, `<span class="sh-sell">판매</span>`)).join("") + `</div>` : `<p class="sh-empty">팔 수 있는 물건이 없어요.</p>`;
   }
   $("#shopBody").innerHTML = html; paintAll($("#shop"));
@@ -348,7 +365,7 @@ function shopAct(peer, a, d){
   const sh = SHOPS[d.s]; if (!sh || !shopHere(d.s) || busy || S.battle) return false;
   if (a === "shopSupply"){ const s = SUPPLIES[d.k]; if (!s || !sh.supplies || S.gold < s.price) return false; S.gold -= s.price; if (d.k === "potion") S.potions++; else S.luck++; sfx("good"); }
   else if (a === "shopBuy"){ if (!sh.goods.includes(d.k)) return false; const p = priceOf(d.k, d.s); if (S.gold < p) return false; S.gold -= p; giveItem(d.k); sfx("good"); itemToast(d.k); }
-  else if (a === "shopSell"){ const u = d.u, o = S.items[u]; if (!o || !S.inv.includes(u)) return false; S.inv = S.inv.filter(x => x !== u); delete S.items[u]; S.gold += sellOf(o.key); sfx("good"); }
+  else if (a === "shopSell"){ const u = d.u, o = S.items[u]; if (!o || !S.inv.includes(u) || ITEMS[o.key].relic) return false; S.inv = S.inv.filter(x => x !== u); delete S.items[u]; S.gold += sellOf(o.key); sfx("good"); }
   else if (a === "shopLearn"){ const sk = SKILLS[d.k], h = S.party[d.m]; if (!sk || !sh.books || !sh.books.includes(d.k) || !h || h.cls !== sk.cls || ownerPeer(d.m) !== peer && online()) return false;
     h.skills = h.skills || []; if (h.skills.includes(d.k)) return false;
     if ((S.freeBooks || 0) > 0 && d.s === "mage") S.freeBooks--; else { if (S.gold < sk.price) return false; S.gold -= sk.price; }
@@ -402,7 +419,7 @@ async function useSkill(k){
   if (miss){ FX.strike(i, style, 0, false, true); bmsg(`${h.name}의 ${sk.name}! 빗나갔다.`); bark(i, pickLine(BARK.miss)); if (!skipWait) await trayWait("계속"); trayClose(); busy = false; return endHeroTurn(); }
   if (crit){ banner("CRITICAL!", "gold"); sfx("crit"); } else sfx("good");
   trayResult(verdictHTML(calc, crit ? "치명타! 피해 주사위가 두 배" : "명중!", crit ? "crit" : "good"));
-  const dl = [...CLASSES[h.cls].dmg, ...sk.extra], all = crit ? dl.concat(dl) : dl;
+  const dl = [...CLASSES[h.cls].dmg, ...sk.extra, ...slayerDice(h)], all = crit ? dl.concat(dl) : dl;
   await trayWait("피해 굴리기"); setTarget(null);
   const dv = await throwDice(all.map(s => ({sides:s, scheme:h.cls})), {hint:"피해 주사위를 던지세요"}); showLabels(dv, dv.map(() => "keep"));
   const r = sumRoll(dv, dmgMod(h)); dmgFoe(r.t); if (fireHit(h, style)) S.battle.burn = true; FX.strike(i, style, r.t, crit, false);

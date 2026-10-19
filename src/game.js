@@ -132,9 +132,11 @@ const FOES = {
 };
 const HP_SCALE = [0.5, 1, 1.35, 1.7];
 // chapter cards appear once, when the story first reaches these places
-const CHAPTERS = {tavern:["프롤로그","꺼진 화로"], forest:["1장","잿빛 숲길"], bridge:["2장","트롤의 다리"], cave:["3장","버려진 광산"], camp:["4장","잿빛 탑 아래"], hall:["5장","탑의 심장"], lair:["6장","잿날개"], dawn:["에필로그","새벽"]};
-const OBJECTIVES = {tavern:"오르나의 이야기를 듣고 길을 나서자", forest:"숲을 지나 강가의 다리로", bridge:"다리를 건너 늪을 지나자", cave:"폐광을 지나 탑으로 가는 지름길을 찾자", camp:"탑 아래에서 하룻밤을 버티자", hall:"탑 꼭대기로 오르자", lair:"잿날개 바르쿠스를 쓰러뜨려라", dawn:"모험 완료!"};
-const MUSIC = {tavern:"tavern", forest:"ashen", glade:"ashen", bridge:"ashen", swamp:"ashen", cave:"ashen", camp:"tavern", gate:"ashen", hall:"ashen", mirror:"ashen", library:"ashen", shrine:"ashen", lair:"ashen", dawn:"dawn"};
+const CHAPTERS = {tavern:["프롤로그","꺼진 화로"], forest:["1장","잿빛 숲길"], bog:["재의 방패","악취나는 늪"], roots:["재의 방패","썩은 뿌리 굴"], mtn:["용살의 검","드워프 광산"], warren:["용살의 검","고블린 갱도"],
+  eyewood:["진실의 눈","외눈박이 숲"], trollcave:["진실의 눈","트롤 굴"], camp:["2장","잿빛 탑 아래"], hall:["3장","탑의 심장"], lair:["4장","잿날개"], dawn:["에필로그","새벽"]};
+const OBJECTIVES = {tavern:"오르나의 이야기를 듣고 길을 나서자", forest:"숲길 끝 갈림길까지 — 세 유물을 찾아라", bog:"늪을 지나 마녀 그레타를 찾아라", roots:"뿌리 굴 끝, 그레타의 오두막으로", mtn:"광산 마을을 지나 갱도로 — 브론을 찾아라", warren:"브론을 찾아 용살의 검을 되살려라",
+  eyewood:"외눈 트롤의 흔적을 쫓아라", trollcave:"소리를 내지 말고 잠든 트롤에게 다가가라", camp:"탑 아래에서 하룻밤을 버티자", hall:"탑 꼭대기로 오르자", lair:"잿날개 바르쿠스를 쓰러뜨려라", dawn:"모험 완료!"};
+const MUSIC = {tavern:"tavern", forest:"ashen", glade:"ashen", bridge:"ashen", swamp:"ashen", cave:"ashen", bog:"ashen", roots:"ashen", mtn:"ashen", warren:"ashen", eyewood:"ashen", eyewood_n:"ashen", trollcave:"ashen", camp:"tavern", gate:"ashen", hall:"ashen", mirror:"ashen", library:"ashen", shrine:"ashen", lair:"ashen", dawn:"dawn"};
 
 /* ================= STORY ================= */
 const FLAG_TXT = {
@@ -156,11 +158,13 @@ const NODES = {
     ["orna","왔구먼, 젊은 것들. 앉아. 시간이 없으니 짧게 말하지."],
     ["orna","북쪽 잿빛 탑에 잠들어 있던 용이 깨어났어. 이름은 바르쿠스. 사람들은 「잿날개」라고 부르지."],
     ["orna","그 뒤로 밤마다 재가 비처럼 내려. 우물이 탁해지고 아이들이 기침을 해. 탑 꼭대기의 불씨를 꺼야 해."],
-    ["orna","가는 길은 멀어. 숲과 강, 늪과 폐광을 지나야 탑이 나와. 마을이 모은 금화 백 닢이 보수야."]
+    ["orna","백 년 전 그놈을 탑에 잠재운 건 세 용사였어. 그들이 남긴 유물이 셋 — 재의 방패, 용살의 검, 진실의 눈. 그게 없으면 탑 꼭대기에 닿기도 전에 재가 될 거야."],
+    ["orna","방패는 악취나는 늪의 마녀 그레타가 지키고 있어. 부러진 검은 드워프 광산의 브론 집안에 내려온다더군. 눈은... 외눈박이 숲의 괴물이 삼켰다는 소문이야."],
+    ["orna","숲길 끝에서 길이 셋으로 갈라져. 어디부터 갈지는 너희가 정해. 셋을 다 모으면, 그때 탑으로 가는 거야. 마을이 모은 금화 백 닢이 보수야."]
   ], prompt:"일행은 무엇을 할까?", choices:[
     {t:"check", label:"잿날개에 대해 더 캐묻는다", stat:"int", dc:10, pass:"lore_pass", fail:"lore_fail"},
     {t:"go", label:"여관 주인에게 회복 물약을 산다", cost:10, to:"buy"},
-    {t:"go", label:"곧장 탑으로 출발한다", to:"road"}
+    {t:"go", label:"숲길로 출발한다", to:"road"}
   ]},
   lore_pass:{bg:"tavern", show:["orna"], fx:{flag:"weakness"}, lines:[
     ["orna","눈썰미가 있구먼. 잘 들어."],
@@ -169,8 +173,8 @@ const NODES = {
   ], next:"road", nextLabel:"길을 나선다"},
   lore_fail:{bg:"tavern", show:["orna"], lines:[
     "오르나는 한참을 중얼거렸지만, 절반은 옛날이야기고 절반은 잠꼬대였다.",
-    ["orna","...용은 노래를 싫어하고... 트롤은 칭찬에 약하고... 어디까지 말했더라?"],
-    "별 도움은 안 될 것 같다. 그래도 트롤 이야기는 기억해 두자."
+    ["orna","...용은 노래를 싫어하고... 외눈박이는 해가 지면 깨고... 어디까지 말했더라?"],
+    "별 도움은 안 될 것 같다. 그래도 외눈박이 이야기는 기억해 두자."
   ], next:"road", nextLabel:"길을 나선다"},
   buy:{bg:"tavern", show:["orna"], fx:{potion:1}, lines:["여관 주인이 먼지 쌓인 붉은 병을 건넨다. 「유통기한은... 아마 괜찮을 거요.」"], next:"road", nextLabel:"길을 나선다"},
 
@@ -192,11 +196,13 @@ const NODES = {
   wolves_angry:{bg:"forest", show:["wolf","wolf"], lines:["늑대들이 으르렁거리며 털을 곤두세운다. 말이 통하지 않는다!"], choices:[{t:"battle", label:"싸운다", foe:"wolves", win:"wolves_win"}]},
   wolves_calm:{bg:"forest", fx:{xp:40}, lines:["손바닥을 펴고 천천히 숨을 고르자, 늑대들이 머뭇거리다 꼬리를 내리고 숲으로 사라진다.", "어디선가 길게 우는 소리. 고맙다는 인사였을까."], next:"fork_forest", nextLabel:"계속 걷는다"},
   wolves_win:{bg:"forest", fx:{gold:8}, lines:["늑대들이 깨갱거리며 달아났다. 쓰러진 덤불 사이에서 무언가 반짝인다."], next:"fork_forest", nextLabel:"계속 걷는다"},
-  fork_forest:{bg:"forest", cardView:true, lines:["숲 한가운데에서 길이 셋으로 갈라진다.", "왼쪽 오솔길 너머로 청록빛이 일렁이고, 오른쪽 큰길에서는 짐수레 바퀴 삐걱대는 소리가 들린다. 곧게 뻗은 길은 강으로 이어진다."],
-    again:["다시 숲의 갈림길이다. 강 쪽에서 물소리가 들린다."], prompt:"어느 길로 갈까?", choices:[
+  fork_forest:{bg:"forest", cardView:true, lines:["숲 한가운데, 이끼 낀 이정표 앞에서 길이 여러 갈래로 갈라진다.", "동쪽에서는 썩은 물 냄새가, 북쪽 산길에서는 쇠 냄새가 실려 온다. 서쪽의 짙은 숲에서는... 새소리 하나 들리지 않는다.", "세 유물이 각각 이 길 끝에 있다. 어디부터 갈까?"],
+    again:["다시 숲의 갈림길이다. 이정표 아래 누군가 새 표식을 새겨 두었다."], prompt:"어느 길로 갈까?", choices:[
     {t:"go", label:"빛이 새어 나오는 오솔길", to:"glade", hide:"seenGlade", desc:"버섯이 빛나는 숲속 빈터. 누군가 도움을 청하는 소리가 들린다.", img:{bg:"glade", u:[["fairy",176]], c:[110,70,132,99]}},
     {t:"go", label:"수레 소리가 나는 큰길", to:"merchant", hide:"seenMerchant", desc:"떠돌이 상인이 있을지도. 금화로 물건을 살 수 있다.", img:{bg:"forest", u:[["merchant",220]], c:[160,70,132,99]}},
-    {t:"go", label:"곧장 강가로 서두른다", to:"bridge", desc:"시간을 아낀다. 다리 위로 커다란 그림자가 보인다.", img:{bg:"bridge", u:[["troll",250]], c:[180,60,132,99]}}
+    {t:"go", label:"동쪽: 악취나는 늪", to:"bog_enter", desc:"재의 방패. 늪의 마녀 그레타가 지킨다. 머리와 팔과 숨을 시험한다던가.", img:{bg:"bog", u:[["leech",150],["leech",168]], c:[60,56,132,99]}},
+    {t:"go", label:"북쪽: 드워프 광산", to:"mine_road", desc:"용살의 검. 부러진 검을 다시 벼릴 수 있는 건 드워프 대장장이뿐이다.", img:{bg:"mtn", u:[["thorin",120]], c:[40,50,132,99]}},
+    {t:"go", label:"서쪽: 외눈박이 숲", to:"eye_totem", desc:"진실의 눈. 밤마다 나무꾼 마을을 습격하는 괴물이 삼켰다고 한다.", img:{bg:"eyewood", u:[["eyetroll",150]], c:[80,46,132,99]}}
   ]},
   glade:{bg:"glade", show:["fairy"], fx:{flag:"seenGlade"}, art:{bg:"glade", u:[["fairy",60]], o:"web", c:[10,40,200,112], cap:"거미줄에 걸린 요정"}, lines:[
     "숲속 빈터 한가운데, 버섯들이 둥글게 고리를 이루며 은은하게 빛난다.",
@@ -238,93 +244,24 @@ const NODES = {
   shop_ring:{bg:"forest", show:["merchant"], fx:{item:"str_ring", flag:"boughtRing"}, lines:[["merchant","트롤도 팔씨름에서 진다는 반지요. 아마도."]], next:"shop", nextLabel:"계속 둘러본다"},
   shop_staff:{bg:"forest", show:["merchant"], fx:{item:"star_staff", flag:"boughtStaff"}, lines:[["merchant","마법 학원 교수가 쓰던 거요. 진짜요."]], next:"shop", nextLabel:"계속 둘러본다"},
 
-  // ---------------- 2장 트롤의 다리 ----------------
-  bridge:{bg:"bridge", show:["troll"], art:{bg:"bridge", u:[["troll",250]], c:[150,50,200,112], cap:"다리를 막아선 트롤"}, lines:[
-    "숲이 끝나는 곳에 낡은 돌다리가 강을 가로지른다. 멀리 탑 꼭대기의 붉은 불빛이 보인다.",
-    "다리 위로 이끼 낀 거대한 그림자가 몸을 일으킨다.",
-    ["troll","크허허! 이 다리는 그룸 거다! 지나가려면 금화 스무 닢!"]
-  ], prompt:"트롤이 길을 막았다.", choices:[
-    {t:"go", label:"통행료를 낸다", cost:20, to:"bridge_pay"},
-    {t:"check", label:"그룸의 근육을 칭찬하며 구슬린다", stat:"cha", dc:13, pass:"bridge_charm", fail:"bridge_angry"},
-    {t:"check", label:"무기를 휘두르며 겁을 준다", stat:"str", dc:14, pass:"bridge_scare", fail:"bridge_angry"},
-    {t:"battle", label:"다짜고짜 싸운다", foe:"troll", win:"troll_win"}
-  ]},
-  bridge_pay:{bg:"bridge", show:["troll"], lines:[["troll","크헤헤, 착한 손님! 그룸은 착한 손님 좋아!"], "그룸이 금화를 깨물어 보더니 길을 비켜준다."], next:"swamp", nextLabel:"다리를 건넌다"},
-  bridge_charm:{bg:"bridge", show:["troll"], fx:{potion:1, xp:40}, lines:[["troll","...그룸 팔뚝... 멋지냐?"], "그룸은 귀까지 시퍼렇게 붉히더니, 다리 밑 둥지에서 뭔가를 꺼내 건넨다.", ["troll","친구한테 주는 선물. 썩은 생선 아니다. 진짜다."]], next:"swamp", nextLabel:"다리를 건넌다"},
-  bridge_scare:{bg:"bridge", fx:{xp:40}, lines:["그룸이 움찔하더니 「그룸 오늘 쉬는 날!」 하고 강물 속으로 첨벙 숨어버렸다."], next:"swamp", nextLabel:"다리를 건넌다"},
-  bridge_angry:{bg:"bridge", show:["troll"], lines:[["troll","말 많은 것들은 맛있지! 크허어!"]], choices:[{t:"battle", label:"싸운다", foe:"troll", win:"troll_win"}]},
-  troll_win:{bg:"bridge", fx:{gold:25}, art:{bg:"bridge", u:P2, o:"coins", c:[40,50,200,112], cap:"트롤의 둥지에 쌓인 금화"}, lines:["그룸이 비틀거리다 강물로 굴러떨어졌다. 다리 밑 둥지에 반짝이는 금화가 쌓여 있다."], next:"swamp", nextLabel:"다리를 건넌다"},
-  swamp:{bg:"swamp", art:{bg:"swamp", u:P2, o:"plank", c:[40,50,200,112], cap:"꺼지는 널빤지"}, lines:[
-    "다리를 건너자 길은 안개 낀 늪으로 이어진다. 썩은 나무 냄새가 코를 찌른다.",
-    "삐걱거리는 널빤지 길 너머, 장대 위에 지은 오두막에서 등불이 깜빡인다.",
-    "그때 발밑의 널빤지가 우지끈 소리를 내며 꺼진다!"
-  ], prompt:"어떻게 할까?", choices:[
-    {t:"check", label:"재빨리 옆 널빤지로 뛴다", stat:"dex", dc:12, pass:"swamp_safe", fail:"swamp_mud"},
-    {t:"check", label:"무너지는 널빤지를 붙잡고 버틴다", stat:"str", dc:13, pass:"swamp_safe", fail:"swamp_mud"}
-  ]},
-  swamp_safe:{bg:"swamp", fx:{xp:20}, lines:["아슬아슬하게 균형을 잡았다. 시커먼 물 아래로 무언가 꿈틀거리며 지나간다."], next:"swamp_leech", nextLabel:"조심스럽게 나아간다"},
-  swamp_mud:{bg:"swamp", fx:{dmg:"1d6", who:"roller"}, art:{bg:"swamp", u:[["wizard",118]], o:"mud", c:[40,50,200,112], cap:"늪에 빠졌다!"}, lines:["진흙탕에 허리까지 빠졌다! 겨우 기어 나왔지만, 다리에 무언가 달라붙어 있다..."], next:"swamp_leech", nextLabel:"서둘러 나아간다"},
-  swamp_leech:{bg:"swamp", show:["leech","leech","leech"], lines:["물속에서 손바닥만 한 거머리들이 줄지어 기어 올라온다. 피 냄새를 맡은 모양이다."], prompt:"거머리 떼가 다가온다!", choices:[
-    {t:"battle", label:"쳐낸다", foe:"leeches", win:"leech_win"},
-    {t:"check", label:"등불 기름을 뿌려 불을 붙인다", stat:"int", dc:12, pass:"leech_burn", fail:"leech_fight"}
-  ]},
-  leech_burn:{bg:"swamp", fx:{xp:50}, art:{bg:"swamp", u:[["leech",190],["leech",210]], o:"fire", c:[100,50,200,112], cap:"물 위로 번지는 불길"}, lines:["화르륵! 불길이 물 위로 번지자 거머리들이 쉭쉭 소리를 내며 물러난다."], next:"witch", nextLabel:"오두막으로"},
-  leech_fight:{bg:"swamp", show:["leech","leech","leech"], lines:["기름이 젖어서 불이 붙지 않는다! 거머리들이 달려든다."], choices:[{t:"battle", label:"싸운다", foe:"leeches", win:"leech_win"}]},
-  leech_win:{bg:"swamp", fx:{gold:6}, lines:["마지막 거머리를 떼어내고 숨을 고른다. 오두막의 등불이 일행을 부르는 것 같다."], next:"witch", nextLabel:"오두막으로"},
+  // ---------------- 늪의 마녀 그레타 (뿌리 굴 끝 오두막에서 거래) ----------------
   witch:{bg:"swamp", show:["witch"], noVote:true, art:{bg:"swamp", u:[["witch",250]], o:"cauldron", c:[150,50,200,112], cap:"늪의 마녀 그레타"}, lines:[
-    "오두막 문이 끼익 열리고, 녹색 두건을 쓴 노파가 지팡이를 짚고 나온다.",
-    ["witch","오호호, 오르나가 보낸 아이들이로구나. 그 노친네랑은 오래된 사이지."],
-    ["witch","바르쿠스를 잡으러 간다고? 이 늪의 마녀 그레타가 도와줄 수도 있지. 물론... 공짜는 없단다."]
+    ["witch","또 왔느냐? 방패 값은 이미 치렀으니, 이번엔 거래나 하자꾸나. 물론... 공짜는 없단다."]
   ], again:[["witch","또 왔느냐? 거래가 남았나 보지?"]], prompt:"마녀와 거래할까?", choices:[
     {t:"go", label:"금화로 물약 두 병을 산다", cost:15, to:"witch_potion", hide:"witchPotion"},
     {t:"go", label:"피를 조금 내주고 축복을 받는다 (모두 HP −4)", to:"witch_blood", hide:"witchBlood"},
     {t:"check", label:"용에 대해 묻는다", stat:"cha", dc:13, pass:"witch_lore", fail:"witch_cackle", hide:"witchAsked"},
-    {t:"go", label:"오두막을 떠나 북쪽으로", to:"cave"}
+    {t:"go", label:"오두막을 나선다", to:"hub"}
   ]},
   witch_potion:{bg:"swamp", show:["witch"], fx:{potion:2, flag:"witchPotion"}, lines:[["witch","잘 흔들어 마시렴. 맛은... 묻지 마라."]], next:"witch", nextLabel:"계속"},
   witch_blood:{bg:"swamp", show:["witch"], fx:{hpcost:4, luck:2, item:"witch_charm", flag:"witchBlood"}, art:{bg:"swamp", u:[["witch",250]], o:"greenfire", c:[150,50,200,112], cap:"녹색 불꽃으로 타오르는 핏방울"}, lines:["마녀가 은바늘로 일행의 손끝을 찌르자, 핏방울이 공중에서 녹색 불꽃으로 타오른다.", ["witch","좋아, 좋아. 운명이 너희 편으로 조금 기울었구나. 이 부적도 가져가렴."]], next:"witch", nextLabel:"계속"},
-  witch_lore:{bg:"swamp", show:["witch"], fx:{flag:"weakness", xp:30}, lines:[["witch","바르쿠스는 백 년 전 은빛 창에 왼쪽 가슴을 찔렸지. 그 상처엔 아직도 비늘이 안 났단다."], ["witch","그리고 탑으로 가는 지름길은 저 북쪽 폐광이야. 해골들이 우글거리지만."]], next:"witch", nextLabel:"계속"},
-  witch_cackle:{bg:"swamp", show:["witch"], lines:[["witch","오호호! 공짜로는 안 알려주지! 북쪽 폐광으로나 가 보렴!"]], next:"witch", nextLabel:"계속"},
-
-  // ---------------- 3장 버려진 광산 ----------------
-  cave:{bg:"cave", art:{bg:"cave", u:P2, o:"dust", c:[50,40,200,112], cap:"무너져 가는 갱도"}, lines:[
-    "늪을 지나 북쪽으로 오르자, 산허리에 버려진 광산 입구가 입을 벌리고 있다.",
-    "녹슨 수레 레일이 어둠 속으로 이어지고, 갱도 벽의 수정이 희미하게 빛난다.",
-    "갱도 안쪽에서 돌 떨어지는 소리가 우르르 울린다."
-  ], prompt:"어떻게 들어갈까?", choices:[
-    {t:"check", label:"천장을 살피며 안전한 길을 찾는다", stat:"wis", dc:12, pass:"cave_safe", fail:"cave_collapse"},
-    {t:"check", label:"버팀목을 받치며 빠르게 지나간다", stat:"str", dc:13, pass:"cave_safe", fail:"cave_collapse"}
-  ]},
-  cave_safe:{bg:"cave", fx:{xp:30}, lines:["흔들리는 구간을 피해 무사히 갱도 깊숙이 들어섰다."], next:"mine_skel", nextLabel:"더 깊이"},
-  cave_collapse:{bg:"cave", fx:{dmg:"1d6", who:"all"}, art:{bg:"cave", u:P2, o:"rocks", c:[50,40,200,112], cap:"천장이 무너진다!"}, lines:["우르릉! 천장에서 돌덩이가 쏟아진다! 먼지 속에서 겨우 빠져나왔다."], next:"mine_skel", nextLabel:"더 깊이"},
-  mine_skel:{bg:"cave", show:["skeleton","skeleton"], art:{bg:"cave", u:[["skeleton",200],["skeleton",230]], o:"eyes2", c:[110,40,200,112], cap:"아직 일하는 해골 광부들"}, lines:[
-    "갱도 깊은 곳, 녹슨 곡괭이를 든 해골들이 덜그럭거리며 레일 위를 오간다.",
-    "눈구멍에서 푸른 불빛이 깜빡인다. 아직 일이 끝나지 않았다고 믿는 모양이다."
-  ], prompt:"해골 광부들이 길을 막고 있다.", choices:[
-    {t:"battle", label:"싸운다", foe:"skeletons", win:"skel_win"},
-    {t:"check", label:"광차를 굴려 해골들을 쓸어버린다", stat:"str", dc:14, pass:"skel_cart", fail:"skel_fight"},
-    {t:"check", label:"그림자를 따라 몰래 지나간다", stat:"dex", dc:14, pass:"skel_sneak", fail:"skel_fight"}
-  ]},
-  skel_cart:{bg:"cave", fx:{xp:70}, art:{bg:"cave", u:[["skeleton",220]], o:"cart", c:[100,40,200,112], cap:"광차 돌진!"}, lines:["광차가 레일을 타고 굉음을 내며 내달린다! 해골들이 볼링 핀처럼 흩어졌다."], next:"dwarf", nextLabel:"갱도 끝으로"},
-  skel_sneak:{bg:"cave", fx:{xp:60}, lines:["해골들이 곡괭이질에 열중한 사이 그 뒤를 살금살금 지나쳤다."], next:"dwarf", nextLabel:"갱도 끝으로"},
-  skel_fight:{bg:"cave", show:["skeleton","skeleton"], lines:["덜그럭! 해골들이 일제히 고개를 돌린다."], choices:[{t:"battle", label:"싸운다", foe:"skeletons", win:"skel_win"}]},
-  skel_win:{bg:"cave", fx:{gold:10}, lines:["해골들이 뼈 무더기로 무너져 내렸다. 갱도 끝에서 누군가 끙끙대는 소리가 들린다."], next:"dwarf", nextLabel:"갱도 끝으로"},
-  dwarf:{bg:"cave", show:["dwarf"], art:{bg:"cave", u:[["dwarf",262]], o:"rubble", c:[150,40,200,112], cap:"바위에 깔린 드워프"}, lines:[
-    "갱도 끝 무너진 바위 더미 아래에서 굵은 목소리가 들린다.",
-    ["dwarf","거기 누구 있소?! 드워프 광부 브론이오! 바위에 다리가 끼었소, 좀 꺼내주시오!"]
-  ], prompt:"브론을 구할까?", choices:[
-    {t:"check", label:"바위를 들어 올린다", stat:"str", dc:13, pass:"dwarf_free", fail:"dwarf_hurt"},
-    {t:"check", label:"지렛대를 만들어 바위를 움직인다", stat:"int", dc:12, pass:"dwarf_free", fail:"dwarf_hurt"}
-  ]},
-  dwarf_free:{bg:"cave", show:["dwarf"], fx:{item:"dwarf_plate", flag:"secret", xp:50}, art:{bg:"cave", u:[["dwarf",250]], o:"chest", c:[150,40,200,112], cap:"브론의 보답"}, lines:[
-    ["dwarf","크하하! 살았다! 은혜를 갚아야지. 내가 직접 두드린 판금 갑옷이오."],
-    ["dwarf","그리고 탑에 간다고? 탑 아래층에 우리 광부들이 뚫은 비밀 통로가 있소. 함정 복도를 건너뛸 수 있을 거요."]
-  ], next:"camp", nextLabel:"광산을 빠져나간다"},
-  dwarf_hurt:{bg:"cave", show:["dwarf"], fx:{dmg:"1d4", who:"roller", item:"copper_ring", flag:"secret"}, lines:["바위가 미끄러지며 손을 짓찧었지만, 결국 브론을 끌어냈다.", ["dwarf","끙, 고맙소. 가진 게 이것뿐이라... 그리고 탑 아래층의 비밀 통로를 기억하시오."]], next:"camp", nextLabel:"광산을 빠져나간다"},
+  witch_lore:{bg:"swamp", show:["witch"], fx:{flag:"weakness", xp:30}, lines:[["witch","바르쿠스는 백 년 전 은빛 창에 왼쪽 가슴을 찔렸지. 그 상처엔 아직도 비늘이 안 났단다."], ["witch","그리고 탑 문은 수수께끼로 잠겼다더구나. 답은 늘 가까이 있지 — 모닥불 앞에서 생각해 보렴."]], next:"witch", nextLabel:"계속"},
+  witch_cackle:{bg:"swamp", show:["witch"], lines:[["witch","오호호! 공짜로는 안 알려주지! 시험을 한 번 더 치르고 싶은 게 아니라면!"]], next:"witch", nextLabel:"계속"},
 
   // ---------------- 4장 잿빛 탑 아래 ----------------
   camp:{bg:"camp", fx:{heal:"full"}, art:{bg:"camp", u:P2, c:[80,40,200,112], cap:"마지막 밤의 모닥불"}, lines:[
-    "광산을 빠져나오자 저 멀리 잿빛 탑이 보인다. 꼭대기 창문이 핏빛으로 깜빡인다.",
+    "세 유물을 품고 북쪽 언덕을 오르자, 잿빛 탑이 눈앞에 우뚝 솟아 있다. 꼭대기 창문이 핏빛으로 깜빡인다.",
+    "방패가 미지근하게 데워지고, 검이 낮게 울고, 초록 보석이 탑 꼭대기를 노려본다. 유물들이 옛 적을 알아보는 것이다.",
     "일행은 탑 아래 언덕에 모닥불을 피우고 마지막 밤을 보내기로 했다."
   ], prompt:"밤이 깊었다.", choices:[
     {t:"check", label:"교대로 보초를 선다", stat:"wis", dc:12, pass:"camp_quiet", fail:"camp_ambush"},
@@ -437,7 +374,7 @@ const DEF_NAMES = ["아린","도윤","세라","한결"], DEF_CLS = ["fighter","w
 const blankSetup = () => ({count:2, heroes:DEF_NAMES.map((n,i) => ({name:n, cls:DEF_CLS[i], stats:null, dice:null, raw:null, rerolls:1, sel:null}))});
 let S = {screen:"title", setup:blankSetup(), party:[], gold:0, potions:0, flags:{}, seenNodes:{}, nodeId:null, bg:"tavern", lines:[], li:0, mode:"story", pick:null, roller:0, battle:null, preBattle:null, xp:0, level:1};
 let busy = false;
-const KEY = "ashwing-tower-save-v2";
+const KEY = "ashwing-tower-save-v3";
 function save(){ netDirty(); if (isGuest()) return; try { if (S.screen === "game") localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 function loadSave(){ try { const s = localStorage.getItem(KEY); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
 function clearSave(){ try { localStorage.removeItem(KEY); } catch (e) {} }
@@ -470,6 +407,7 @@ function buildUnits(t){
     if (k === "drake") u.glow = [14, 30, 50, [1.0,0.5,0.2]];
     if (k === "shadow") u.glow = [12, 12, 34, [0.5,0.4,0.9]];
     if (k === "fairy") u.glow = [6, 4, 24, [0.6,1.0,0.8]];
+    if (SPR_GLOW[k]) u.glow = SPR_GLOW[k];
     units.push(u); if (!LAST.foe || u.x < LAST.foe.x) LAST.foe = {x:u.x, y:u.y, w:sp.w, h:sp.h}; });
   // party (left side, facing right)
   LAST.heroes = [];
@@ -738,7 +676,7 @@ function gainXp(n, out){
 }
 function applyFx(fx){
   const out = [];
-  if (fx.flag){ const had = S.flags[fx.flag]; S.flags[fx.flag] = true; if (!had && FLAG_TXT[fx.flag]) out.push(["sys", FLAG_TXT[fx.flag]]); }
+  if (fx.flag) [].concat(fx.flag).forEach(f => { const had = S.flags[f]; S.flags[f] = true; if (!had && FLAG_TXT[f]) out.push(["sys", FLAG_TXT[f]]); });
   if (fx.gold){ S.gold = Math.max(0, S.gold + fx.gold); out.push(["sys", fx.gold > 0 ? `금화 ${fx.gold}닢을 얻었다.` : `금화 ${-fx.gold}닢을 썼다.`]); }
   if (fx.potion){ S.potions += fx.potion; out.push(["sys", `회복 물약 ${fx.potion}개를 얻었다.`]); }
   if (fx.luck){ S.luck += fx.luck; out.push(["sys", `행운 토큰 +${fx.luck} — 실패한 굴림을 한 번 다시 던질 수 있다. (보유 ${S.luck}개)`]); }
@@ -754,6 +692,12 @@ function applyFx(fx){
   if (fx.door) sfx("door");
   if (fx.loot){ const got = rollLoot(fx.loot.filter(k => !ITEMS[k].cls || ITEMS[k].cls.some(c => S.party.some(h => h.cls === c))), 2); got.forEach(k => giveItem(k)); if (got.length){ out.push(["sys", `획득: ${got.map(itemName).join(", ")} — 가방(I)에서 장착하세요.`]); setTimeout(() => itemToast(got[0]), 400); } }
   if (fx.take){ Object.values(S.loot || {}).forEach(L => L.forEach(o => { if (o.k === fx.take) o.taken = true; })); }
+  if (fx.inc) S.flags[fx.inc] = (+S.flags[fx.inc] || 0) + 1;
+  // the encounter waiting on the road is done (the story goes on from where the party stands)
+  if (fx.stagePass && S.world){ const w = S.world; w.stage = w.stage || {}; w.stage[w.at] = (w.stage[w.at] || 0) + 1; }
+  // the whole area is done: no more encounters, its onward roads open
+  if (fx.clear && S.world){ const w = S.world, L = stageList(w.at); w.cleared[w.at] = true; w.stage = w.stage || {}; if (L) w.stage[w.at] = L.length; openFrom(w.at); }
+  if (fx.relic) out.push(...gainRelic(fx.relic));
   if (fx.qdone && S.quests && S.quests[fx.qdone] === "active"){ S.quests[fx.qdone] = "done"; out.push(["sys", `현상금 달성: ${QUESTS[fx.qdone].name} — 마을 게시판에서 보상을 받으세요.`]); }
   if (fx.xp) gainXp(fx.xp, out);
   return out;
@@ -770,7 +714,7 @@ function setBg(bg){
 function enterNode(id, extra=[]){
   const ai = AREA_BY_ENTRY[id];
   // the story walked into another area's first scene: either a new road opens, or (already open) the party is just back on the road
-  if (ai != null && S.world && ai !== S.world.at){ if (ai > S.world.unlocked) return arriveFrontier(ai, extra); return enterNode("hub", extra); }
+  if (ai != null && S.world && ai !== S.world.at){ if (!isOpen(ai) || !S.world.entered[ai]) return arriveFrontier(ai, extra); return enterNode("hub", extra); }
   if (stageBreak(id, extra)) return;
   const n = NODES[id];
   const again = S.seenNodes[id] && n.again; S.seenNodes[id] = true;
@@ -936,14 +880,26 @@ async function doCheck(hi){
 
 /* ---------- battle ---------- */
 function startBattle(key, win){
-  const f = FOES[key], n = S.party.length;
+  const f = FOES[key], n = S.party.length, pre = f.pre ? f.pre(S) : {}, rc = f.tier ? relicCount() : 0;
   S.preBattle = {snap:JSON.parse(JSON.stringify({party:S.party, gold:S.gold, potions:S.potions, flags:S.flags, nodeId:S.nodeId, bg:S.bg, xp:S.xp, level:S.level, items:S.items, inv:S.inv, itemSeq:S.itemSeq, luck:S.luck})), key, win};
-  let hp = Math.round(f.hp * HP_SCALE[n - 1]); const msg = [f.intro];
-  if (f.regen) msg.push(`재생 능력! 매 턴 주사위로 상처를 아물게 한다 — 파티가 주사위로 막을 수 있고, 불 공격(화염 화살 · 화염구 · 불꽃 무기)에 그을린 상처는 막기 쉽다.`);
+  let hp = Math.round(f.hp * HP_SCALE[n - 1] * (1 + 0.2*rc) * (pre.hpMul || 1)); const msg = [f.intro];
+  const maxHp = hp; if (pre.hpCut) hp = Math.max(1, Math.round(hp * (1 - pre.hpCut)));
+  if (rc) msg.push(`유물 ${rc}개를 모은 사이 이 땅의 괴물들도 사나워졌다. (체력 +${rc*20}% · 명중 +${rc})`);
+  const regen = pre.regen || f.regen;
+  if (regen) msg.push(`재생 능력! 매 턴 주사위로 상처를 아물게 한다 — 파티가 주사위로 막을 수 있고, 불 공격(화염 화살 · 화염구 · 불꽃 무기)에 그을린 상처는 막기 쉽다.`);
+  if (f.aoe) msg.push(`${f.aoe.every}라운드마다 「${f.aoe.name}」 — 모두 ${STAT_KO[f.aoe.st]} 내성 DC ${f.aoe.dc}.`);
+  msg.push(...(pre.msg || []));
+  let acMinus = pre.acMinus || 0;
+  if (key === "drake"){ const who = k => S.party.find(h => eqItems(h).some(it => it === ITEMS[k]));
+    const sw = who("relic_sword"), ey = who("relic_eye"), sh = who("relic_shield");
+    if (sw) msg.push(`용살의 검이 울부짖는다! ${eun(sw.name)} 용에게 명중할 때마다 +2d6 피해.`);
+    if (ey){ acMinus += 2; msg.push(`진실의 눈이 비늘의 틈을 비춘다. 용의 방어도 −2.`); }
+    if (sh) msg.push(`재의 방패가 달아오른다. ${eun(sh.name)} 화염 숨결 피해를 절반만 받는다.`); }
   if (key === "drake" && S.flags.weakness) msg.push("약점을 알고 있다! 용의 방어도 −2.");
   if (key === "drake" && S.flags.spear) msg.push("은빛 창이 용을 향해 떨린다. 명중 +2.");
   if (key === "drake" && S.flags.ambush){ hp -= 10; msg.push("선제 공격으로 이미 피해 10!"); }
-  S.battle = {suses:S.party.map(h => Object.fromEntries((h.skills || []).map(k => [k, SKILLS[k].uses]))), key, name:f.name, hp, maxHp:hp, ac:f.ac - (key === "drake" && S.flags.weakness ? 2 : 0), cur:-1, phase:"hero", round:1, uses:S.party.map(h => CLASSES[h.cls].uses), win, msg, picking:null};
+  S.battle = {suses:S.party.map(h => Object.fromEntries((h.skills || []).map(k => [k, SKILLS[k].uses]))), key, name:f.name, hp, maxHp, ac:f.ac - (key === "drake" && S.flags.weakness ? 2 : 0) - acMinus, atk:f.atk + rc + (pre.atkPlus || 0),
+    regen, burn:!!pre.burn, burnAlways:!!pre.burnAlways, stun:!!pre.stun, cur:-1, phase:"hero", round:1, uses:S.party.map(h => CLASSES[h.cls].uses), win, msg, picking:null};
   S.mode = "battle"; Audio8.music(key === "drake" ? "boss" : "battle"); banner(key === "drake" ? "BOSS BATTLE" : "BATTLE!", "red"); sfx("hit");
   showArt(null); hideCards(); setTimeout(() => bark(0, pickLine(key === "drake" ? BARK.boss : BARK.battle)), 600);
   advanceTurn();
@@ -1003,7 +959,7 @@ async function heroAct(kind){
     if (!skipWait) await trayWait("계속"); trayClose(); busy = false; return endHeroTurn(); }
   if (crit){ banner("CRITICAL!", "gold"); sfx("crit"); bark(i, pickLine(BARK.crit)); } else sfx("good");
   trayResult(verdictHTML(calc, crit ? "치명타! 피해 주사위가 두 배" : "명중!", crit ? "crit" : "good"));
-  const dl = [...C.dmg]; if (special && h.cls === "fighter") dl.push(8); if (special && h.cls === "rogue") dl.push(6, 6);
+  const dl = [...C.dmg]; if (special && h.cls === "fighter") dl.push(8); if (special && h.cls === "rogue") dl.push(6, 6); dl.push(...slayerDice(h));
   const all = crit ? dl.concat(dl) : dl, dbonus = dmgMod(h);
   await trayWait("피해 굴리기"); setTarget(null);
   const dv = await throwDice(all.map(s => ({sides:s, scheme:h.cls})), {hint:"피해 주사위를 던지세요"}); showLabels(dv, dv.map(() => "keep"));
@@ -1028,7 +984,7 @@ function endHeroTurn(){ refreshStatus(); if (S.battle.hp <= 0) return winBattle(
    if that fails, the foe rolls how much it heals. A fire hit since its last turn makes stopping it easier (advantage). */
 const REGEN_DC = 10, STOP_DC = 12;
 async function regenPhase(f, b){
-  const adv = !!b.burn; b.burn = false;
+  const adv = !!b.burn || !!b.burnAlways; b.burn = false;
   trayOpen({who:f.sprite, title:`${f.name} — 재생 시도`, sub:`적이 d20에서 <b>${REGEN_DC}</b> 이상이면 상처가 아물기 시작해요`, foe:true});
   setTarget({lead:"적이 d20에서", target:REGEN_DC, mod:0, word:"나오면 재생 시작", foe:true, subject:"재생할"});
   const [r1] = await throwDice(dice(20, 1, "foe"), {auto:true}); markTarget([r1]); showLabels([r1], [r1 === 20 ? "crit" : r1 === 1 ? "fumble" : "keep"]);
@@ -1053,8 +1009,8 @@ async function regenPhase(f, b){
   sfx("bad"); await trayWait("재생량 굴리기", 2600);
   // how much it heals
   trayActor = null; setTarget(null); trayResult("");
-  trayHead(f.sprite, `${f.name} — 재생`, `재생량 ${f.regen.map(d => "d" + d).join("+")}`);
-  const dv = await throwDice(f.regen.map(s => ({sides:s, scheme:"foe"})), {auto:true}); showLabels(dv, dv.map(() => "keep"));
+  trayHead(f.sprite, `${f.name} — 재생`, `재생량 ${b.regen.map(d => "d" + d).join("+")}`);
+  const dv = await throwDice(b.regen.map(s => ({sides:s, scheme:"foe"})), {auto:true}); showLabels(dv, dv.map(() => "keep"));
   const amt = Math.min(dv.reduce((a, c) => a + c, 0), b.maxHp - b.hp); b.hp += amt;
   floatFoe("+" + amt, "#7aa35a"); bmsg(`${f.name}의 상처가 꿈틀거리며 아문다. HP +${amt}.`);
   trayResult(verdictHTML(`${dv.join(" + ")} = <strong>${amt}</strong>`, `${f.name} HP +${amt}`, "bad")); refreshStatus(); renderBattle();
@@ -1064,27 +1020,30 @@ async function foeTurn(){
   const b = S.battle; if (!b || S.mode !== "battle" || busy) return; busy = true;
   const f = FOES[b.key];
   if (await foeStatus()) return;
-  if (f.regen && b.hp > 0 && b.hp < b.maxHp) await regenPhase(f, b);
+  if (b.regen && b.hp > 0 && b.hp < b.maxHp) await regenPhase(f, b);
   const alive = S.party.map((h, i) => [h, i]).filter(([h]) => h.hp > 0);
-  if (f.breath && b.round % 3 === 0){
-    trayOpen({who:f.sprite, title:"화염 숨결!", sub:"모두 민첩 내성 DC 13 · 성공하면 피해 절반", foe:true});
-    FX.foeLunge(); setTimeout(FX.breath, 200);
-    const vals = await throwDice(dice(6, 3, "foe"), {auto:true}); showLabels(vals, vals.map(() => "keep"));
+  // area attacks: the dragon's fire, the bog-keeper's rotten breath… everyone saves for half
+  const aoe = f.breath ? {every:3, name:"화염 숨결", dice:[6,6,6], st:"dex", dc:13, fire:true} : f.aoe;
+  if (aoe && b.round % aoe.every === 0){
+    trayOpen({who:f.sprite, title:`${aoe.name}!`, sub:`모두 ${STAT_KO[aoe.st]} 내성 DC ${aoe.dc} · 성공하면 피해 절반`, foe:true});
+    FX.foeLunge(); setTimeout(aoe.fire ? FX.breath : FX.gas, 200);
+    const vals = await throwDice(aoe.dice.map(s => ({sides:s, scheme:"foe"})), {auto:true}); showLabels(vals, vals.map(() => "keep"));
     const tot = vals.reduce((a,c) => a+c, 0);
-    const lines = alive.map(([h, i]) => { const roll = rnd(20), sv = roll + checkMod(h, "dex"), ok = roll !== 1 && (roll === 20 || sv >= 13), d0 = ok ? Math.floor(tot/2) : tot, d = bonus(h, "fireRes") ? Math.floor(d0/2) : d0;
-      h.hp = Math.max(0, h.hp - d); setTimeout(() => FX.hitHero(i, d), 300 + i*120); return `${esc(h.name)}: 내성 ${sv} ${ok ? "성공" : "실패"}${d !== d0 ? " · 잿비늘 목걸이" : ""} → −${d}${h.hp === 0 ? " (쓰러짐)" : ""}`; });
-    bmsg(`바르쿠스의 화염 숨결! 모두 ${tot} 피해(내성 성공 시 절반).`);
+    const lines = alive.map(([h, i]) => { const roll = rnd(20), sv = roll + checkMod(h, aoe.st), ok = roll !== 1 && (roll === 20 || sv >= aoe.dc), d0 = ok ? Math.floor(tot/2) : tot, d = aoe.fire && bonus(h, "fireRes") ? Math.floor(d0/2) : d0;
+      h.hp = Math.max(0, h.hp - d); setTimeout(() => FX.hitHero(i, d), 300 + i*120); return `${esc(h.name)}: 내성 ${sv} ${ok ? "성공" : "실패"}${d !== d0 ? " · 화염 저항" : ""} → −${d}${h.hp === 0 ? " (쓰러짐)" : ""}`; });
+    bmsg(`${f.name}의 ${aoe.name}! 모두 ${tot} 피해(내성 성공 시 절반).`);
     trayResult(`<div class="calc">${vals.join(" + ")} = <strong>${tot}</strong></div><div class="verdict bad small">${lines.join("<br>")}</div>`); refreshStatus();
     await trayWait("계속", 4200); trayClose(); busy = false; return endFoeTurn();
   }
   const [h, hi] = alive[Math.floor(Math.random() * alive.length)];
   const hac = acOf(h);
-  trayOpen({who:f.sprite, title:`${f.name} — ${f.verb}`, sub:`대상: <b>${esc(h.name)}</b> · 방어도 ${hac}${hac !== h.ac ? " (진형)" : ""} · 명중 ${sgn(f.atk)}`, foe:true});
-  setTarget({lead:"적이 d20에서", target:hac, mod:f.atk, word:"나오면 맞아요", foe:true, subject:"맞을"});
+  const fa = b.atk ?? f.atk;
+  trayOpen({who:f.sprite, title:`${f.name} — ${f.verb}`, sub:`대상: <b>${esc(h.name)}</b> · 방어도 ${hac}${hac !== h.ac ? " (진형)" : ""} · 명중 ${sgn(fa)}`, foe:true});
+  setTarget({lead:"적이 d20에서", target:hac, mod:fa, word:"나오면 맞아요", foe:true, subject:"맞을"});
   const [raw] = await throwDice(dice(20, 1, "foe"), {auto:true}); markTarget([raw]);
-  const crit = raw === 20, hit = crit || (raw !== 1 && raw + f.atk >= hac);
+  const crit = raw === 20, hit = crit || (raw !== 1 && raw + fa >= hac);
   showLabels([raw], [crit ? "crit" : raw === 1 ? "fumble" : "keep"]);
-  const calc = `${raw} ${sgn(f.atk)} = <strong>${raw + f.atk}</strong> <em>vs AC ${hac}</em>`;
+  const calc = `${raw} ${sgn(fa)} = <strong>${raw + fa}</strong> <em>vs AC ${hac}</em>`;
   const fstyle = FOE_STYLE[b.key] || "claw";
   if (!hit){ FX.foeStrike(hi, fstyle, 0, false, true); bmsg(`${f.name}의 ${f.verb}! ${eun(h.name)} 가볍게 피했다.`); trayResult(verdictHTML(calc, `${eun(h.name)} 피했다!`, "good")); sfx("good");
     await trayWait("계속", 2600); trayClose(); busy = false; return endFoeTurn(); }
@@ -1145,7 +1104,7 @@ const artOverlay = () => ART_FX && !S.battle && scene.bgKey === ART_FX.bg ? (fb,
 function showCards(n, vis){
   const L = $("#cards");
   const wait = vote && curVoter() < 0;
-  L.innerHTML = `<p class="cards-title">${vote ? voteHead() + " — " : ""}${esc(n.prompt || "어디로 갈까?")}</p><div class="cards-row">` + vis.map(([c, i], k) => { const {tag, dis} = choiceTag(c);
+  L.innerHTML = `<p class="cards-title">${vote ? voteHead() + " — " : ""}${esc(n.prompt || "어디로 갈까?")}</p><div class="cards-row ${vis.length > 3 ? "many" : ""}">` + vis.map(([c, i], k) => { const {tag, dis} = choiceTag(c);
     return `<button class="card win" data-act="choice" data-i="${i}" ${dis || wait ? "disabled" : ""}><span class="card-key">${k + 1}</span><span class="card-voters">${voterChips(i)}</span><canvas class="px card-img" data-ci="${i}"></canvas><span class="card-title">${esc(c.label)}</span><span class="card-tags">${tag}</span><span class="card-desc">${esc(c.desc || "")}</span></button>`; }).join("") + `</div>`;
   vis.forEach(([c, i]) => { const cv = L.querySelector(`[data-ci="${i}"]`); if (c.img) VIG.draw(cv, c.img); }); paintAll(L);
   showArt(null); L.hidden = false; $("#sGame").classList.add("cardsopen"); }
@@ -1185,7 +1144,7 @@ function barkRaw(i, text){
 let invSel = {m:0, uid:null};
 const invOpen = () => !$("#inv").hidden;
 function openInv(){ if (S.screen !== "game") return; $("#inv").hidden = false; S.newItems = 0; invSel.m = Math.min(invSel.m, S.party.length - 1); renderInv(); refreshStatus(); sfx("select"); }
-function closeInv(){ $("#inv").hidden = true; refreshStatus(); if (S.mode === "story" && !busy && tw.done && S.lines[S.li]) renderChoices(); }
+function closeInv(){ hideTip(); $("#inv").hidden = true; refreshStatus(); if (S.mode === "story" && !busy && tw.done && S.lines[S.li]) renderChoices(); }
 function renderInv(){
   const m = invSel.m, h = S.party[m]; if (!h) return;
   $("#invTabs").innerHTML = S.party.map((p, i) => `<button class="inv-tab ${i === m ? "on" : ""}" data-act="invTab" data-i="${i}"><canvas class="px" data-spr="${heroKey(p)}"></canvas><span>${esc(p.name)}<small>${CLASSES[p.cls].ko}</small></span></button>`).join("");
@@ -1195,23 +1154,50 @@ function renderInv(){
   $("#invStats").innerHTML = `<div class="kv"><span>HP</span><b>${h.hp}/${h.maxHp}</b></div><div class="kv"><span>방어도</span><b>${h.ac}</b></div><div class="kv"><span>명중</span><b>${sgn(atkMod(h))}</b></div><div class="kv"><span>피해</span><b>${sgn(dmgMod(h))}</b></div><div class="kv"><span>판정</span><b>${sgn(bonus(h, "check"))}</b></div>
     <div class="abil">${STATS.map(k => { const b = bonus(h, k); return `<span>${STAT_KO[k]}<b>${statOf(h, k)}</b>${b ? `<em>+${b}</em>` : ""}</span>`; }).join("")}</div>`;
   // bag first, then everything the party is wearing (marked with the wearer)
-  const worn = wornList(), cells = S.inv.filter(u => S.items[u]).map(u => ({uid:u, m:-1})).concat(worn), n = Math.max(32, Math.ceil(cells.length/8)*8);
+  // the bag holds only what nobody is wearing: equipping moves an item out to its slot, taking it off puts it back
+  const cells = S.inv.filter(u => S.items[u]).map(u => ({uid:u, m:-1})), n = Math.max(32, Math.ceil(cells.length/8)*8);
   $("#bag").innerHTML = Array.from({length:n}, (_, k) => { const c = cells[k]; if (!c) return `<div class="cell"></div>`; const uid = c.uid;
     const key = S.items[uid].key, it = ITEMS[key], can = !it.cls || it.cls.includes(h.cls), w = c.m >= 0 ? S.party[c.m] : null;
     return `<button class="cell item ${invSel.uid === uid ? "sel" : ""} ${can || w ? "" : "no"} ${w ? "worn" : ""}" data-act="invItem" data-u="${uid}" ${w ? `data-w="${c.m}"` : ""} style="--rc:${RARITY[it.r].c}" aria-label="${esc(it.name)}${w ? ` (${esc(w.name)} 착용 중)` : ""}"><canvas class="px" data-spr="it_${key}"></canvas>${w ? `<canvas class="px wearer" data-spr="${heroKey(w)}" title="${esc(w.name)} 착용 중"></canvas><i class="eq-mark">E</i>` : ""}</button>`; }).join("");
   $("#invMeta").innerHTML = `<span><canvas class="px" data-spr="coin"></canvas>${S.gold}</span><span><canvas class="px" data-spr="potion"></canvas>${S.potions}</span><span class="luck-ic">♣</span><span>${S.luck}</span>`;
-  paintAll($("#inv")); renderDetail(h);
+  paintAll($("#inv")); renderDetail(h); hideTip();
 }
+// effect lines for an item, compared against what the hero wears in that slot now
+function itemFxHTML(it, cur, equipped){
+  const keys = [...new Set([...Object.keys(it.fx), ...Object.keys(cur ? cur.fx : {})])];
+  return keys.map(k => { const v = it.fx[k] || 0, c0 = cur ? (cur.fx[k] || 0) : 0, diff = equipped ? 0 : v - c0;
+    if (k === "fireRes") return `<li class="${diff > 0 ? "up" : diff < 0 ? "down" : ""}">${v ? "용의 숨결 피해 절반" : "<s>용의 숨결 피해 절반</s>"}</li>`;
+    return `<li class="${diff > 0 ? "up" : diff < 0 ? "down" : ""}">${v ? `${FX_KO[k]} ${sgn(v)}` : `<s>${FX_KO[k]} ${sgn(c0)}</s>`}${diff ? ` <em>${diff > 0 ? "▲" : "▼"}${Math.abs(diff)}</em>` : ""}</li>`; }).join(""); }
+/* hover tooltip: point at an item in the bag or a slot and its card pops up beside it */
+let tipFor = null;
+function hideTip(){ const t = $("#itemTip"); if (t) t.hidden = true; tipFor = null; }
+function showTip(el){
+  const uid = el.dataset.u || (el.dataset.s && S.party[invSel.m] && S.party[invSel.m].eq[el.dataset.s]);
+  if (!uid || !S.items[uid]){ hideTip(); return; }
+  if (tipFor === el) return; tipFor = el;
+  const h = S.party[invSel.m], key = S.items[uid].key, it = ITEMS[key], equipped = SLOTS.some(sl => h.eq[sl] === uid);
+  const curUid = !equipped && h.eq[it.slot], cur = curUid && S.items[curUid] ? ITEMS[S.items[curUid].key] : null, can = !it.cls || it.cls.includes(h.cls);
+  const t = $("#itemTip");
+  t.style.setProperty("--rc", RARITY[it.r].c);
+  t.innerHTML = `<div class="tip-head"><canvas class="px" data-spr="it_${key}"></canvas><div><b style="color:${RARITY[it.r].c}">${esc(it.name)}</b><small>${RARITY[it.r].ko} · ${SLOT_KO[it.slot]} · ${it.cls ? it.cls.map(c => CLASSES[c].ko).join("/") + " 전용" : "누구나"}</small></div></div>
+    <ul class="det-fx">${itemFxHTML(it, cur, equipped) || "<li>특별한 효과 없음</li>"}</ul><p class="tip-desc">${esc(it.desc)}</p>
+    ${equipped ? `<p class="tip-foot">${esc(h.name)} 착용 중 · 두 번 눌러 해제</p>` : !can ? `<p class="tip-foot no">${it.cls.map(c => CLASSES[c].ko).join("/")}만 쓸 수 있어요</p>` : `<p class="tip-foot">${cur ? `지금 ${SLOT_KO[it.slot]}: <b style="color:${RARITY[cur.r].c}">${esc(cur.name)}</b> · ` : ""}두 번 눌러 ${esc(h.name)}에게 장착</p>`}`;
+  paintAll(t); t.hidden = false;
+  // place it beside the hovered box, in the window's own 1920-wide coordinates
+  const win = t.offsetParent, wr = win.getBoundingClientRect(), k = wr.width / win.offsetWidth, r = el.getBoundingClientRect();
+  const x0 = (r.left - wr.left)/k, x1 = (r.right - wr.left)/k, y0 = (r.top - wr.top)/k, tw = t.offsetWidth, th = t.offsetHeight;
+  let x = x1 + 14; if (x + tw > win.offsetWidth - 10) x = x0 - tw - 14;
+  const y = Math.max(10, Math.min(y0, win.offsetHeight - th - 10));
+  t.style.left = Math.round(x) + "px"; t.style.top = Math.round(y) + "px"; }
+document.addEventListener("pointerover", e => { if (!invOpen() || e.pointerType === "touch") return; const el = e.target.closest("#bag .cell.item, #eqSlots .slot"); if (el) showTip(el); else if (tipFor && !e.target.closest("#itemTip")) hideTip(); });
+document.addEventListener("pointerout", e => { if (!tipFor) return; const to = e.relatedTarget; if (!to || !tipFor.contains(to)) hideTip(); });
 function renderDetail(h){
   const d = $("#itemDetail"), uid = invSel.uid;
-  if (!uid || !S.items[uid]){ d.innerHTML = `<p class="det-hint">아이템을 누르면 정보가 보여요. 두 번 누르거나 E를 누르면 바로 장착해요.<br>파티원 탭을 바꿔 다른 동료에게 입힐 수 있어요.</p>`; return; }
+  if (!uid || !S.items[uid]){ d.innerHTML = `<p class="det-hint">아이템에 마우스를 올리면 정보가 떠요. 두 번 누르거나 E를 누르면 장착하고, 장착 칸을 두 번 누르면 해제해 가방으로 돌아가요.<br>파티원 탭을 바꿔 다른 동료에게 입힐 수 있어요.</p>`; return; }
   const key = S.items[uid].key, it = ITEMS[key], equipped = SLOTS.some(sl => h.eq[sl] === uid);
   const curUid = !equipped && h.eq[it.slot], cur = curUid ? ITEMS[S.items[curUid].key] : null;
   const can = !it.cls || it.cls.includes(h.cls), other = !mine(invSel.m), lock = !!S.battle || busy || other;
-  const keys = [...new Set([...Object.keys(it.fx), ...Object.keys(cur ? cur.fx : {})])];
-  const lines = keys.map(k => { const v = it.fx[k] || 0, c0 = cur ? (cur.fx[k] || 0) : 0, diff = equipped ? 0 : v - c0;
-    if (k === "fireRes") return `<li class="${diff > 0 ? "up" : diff < 0 ? "down" : ""}">${v ? "용의 숨결 피해 절반" : "<s>용의 숨결 피해 절반</s>"}</li>`;
-    return `<li class="${diff > 0 ? "up" : diff < 0 ? "down" : ""}">${v ? `${FX_KO[k]} ${sgn(v)}` : `<s>${FX_KO[k]} ${sgn(c0)}</s>`}${diff ? ` <em>${diff > 0 ? "▲" : "▼"}${Math.abs(diff)}</em>` : ""}</li>`; }).join("");
+  const lines = itemFxHTML(it, cur, equipped);
   d.innerHTML = `<div class="det-head"><canvas class="px" data-spr="it_${key}"></canvas><div><h3 style="color:${RARITY[it.r].c}">${esc(it.name)}</h3><p>${RARITY[it.r].ko} · ${SLOT_KO[it.slot]} · ${it.cls ? it.cls.map(c => CLASSES[c].ko).join("/") + " 전용" : "누구나"}</p></div></div>
     <ul class="det-fx">${lines || "<li>특별한 효과 없음</li>"}</ul><p class="det-desc">${esc(it.desc)}</p>
     ${cur ? `<p class="det-cmp">${esc(h.name)}의 현재 ${SLOT_KO[it.slot]}: <b style="color:${RARITY[cur.r].c}">${esc(cur.name)}</b></p>` : ""}
@@ -1227,8 +1213,9 @@ function equip(){ if (!mine(invSel.m)) return; if (isGuest()) return sendInput("
 function unequip(){ if (!mine(invSel.m)) return; if (isGuest()) return sendInput("unequip", {m:invSel.m, u:invSel.uid}); unequipU(invSel.m, invSel.uid); }
 // older saves: give everyone their starter kit and the new resources
 function migrate(){ S.quests = S.quests || {}; if (S.world){ S.world.stage = S.world.stage || {}; } if (!S.loot) S.loot = genLoot(); S.chat = S.chat || []; S.freeBooks = S.freeBooks || 0;
-  if (!S.world){ const BG_AREA = {tavern:0, forest:1, glade:1, bridge:2, swamp:3, cave:4, camp:5, gate:6, hall:6, mirror:6, library:6, shrine:6, lair:7, dawn:7}, k = BG_AREA[S.bg] ?? 0;
-    S.world = {at:k, unlocked:k, entered:{}, cleared:{}, stage:{}}; for (let j=0;j<=k;j++){ S.world.entered[j] = true; if (j < k) S.world.cleared[j] = true; } }
+  if (!S.world) S.world = newWorld();
+  if (!S.world.open){ S.world.open = {0:true}; Object.keys(S.world.entered || {}).forEach(k => { S.world.open[k] = true; }); }
+  if (S.loot && !S.loot.tunnels) S.loot.tunnels = ["grak", "nest", "collapse"].sort(() => Math.random() - 0.5);
   S.items = S.items || {}; S.inv = S.inv || []; S.luck = S.luck ?? 1; S.chapSeen = S.chapSeen || {}; S.itemSeq = S.itemSeq || 0;
   S.party.forEach(h => { h.skills = h.skills || []; if (!h.eq){ h.eq = {}; STARTER[h.cls].forEach(k => { h.eq[ITEMS[k].slot] = newItem(k); }); } if (h.hpBase == null) h.hpBase = h.maxHp; refreshHero(h); }); }
 
@@ -1242,7 +1229,7 @@ function refreshStatus(){
   $("#lvl").textContent = `LV ${S.level}`; const lo = XP_T[S.level-1] || 0, hi = XP_T[S.level]; $("#xpFill").style.width = hi ? Math.min(100, (S.xp - lo) / (hi - lo) * 100) + "%" : "100%"; $("#xpBox").title = hi ? `경험치 ${S.xp}/${hi}` : `경험치 ${S.xp} (최고 레벨)`;
   const b = S.battle; $("#sGame").classList.toggle("battle", !!b);
   $("#foeBar").hidden = !b; $("#turnStrip").hidden = !b;
-  if (b){ $("#foeName").textContent = b.name; $("#foeHp").style.width = (100 * b.hp / b.maxHp) + "%"; $("#foeHpn").textContent = `HP ${b.hp}/${b.maxHp} · AC ${b.ac}${FOES[b.key].regen ? (b.burn ? " · 불에 그을림" : ` · 재생 ${FOES[b.key].regen.map(d => "d" + d).join("+")}`) : ""}`;
+  if (b){ $("#foeName").textContent = b.name; $("#foeHp").style.width = (100 * b.hp / b.maxHp) + "%"; $("#foeHpn").textContent = `HP ${b.hp}/${b.maxHp} · AC ${b.ac}${b.regen ? (b.burn || b.burnAlways ? " · 불에 그을림" : ` · 재생 ${b.regen.map(d => "d" + d).join("+")}`) : ""}`;
     $("#turnStrip").innerHTML = `<span class="rnd">R${b.round}</span>` + S.party.map((h, i) => `<canvas class="px ${b.phase === "hero" && b.cur === i ? "cur" : ""} ${h.hp <= 0 ? "down" : ""}" data-spr="${h.cls}" title="${esc(h.name)}"></canvas>`).join("") + `<canvas class="px foe ${b.phase === "foe" ? "cur" : ""}" data-spr="${FOES[b.key].sprite}"></canvas>`;
     paintAll($("#turnStrip")); }
   $("#party").innerHTML = S.party.map((h, i) => {
@@ -1324,7 +1311,9 @@ document.addEventListener("click", e => {
     case "shopBuy": case "shopSell": case "shopLearn": case "shopSupply": { const d2 = {s:SHOP.id, k:a.dataset.k, u:a.dataset.u, m:i}; if (isGuest()) { sendInput(act, {sh:SHOP.id, k:d2.k, u:d2.u, i}); sfx("select"); } else shopAct(NET.me, act, d2); break; }
     case "chatSend": sendChat(); break;
     case "chatToggle": { const w = $("#chatWin"); w.classList.toggle("min"); renderChat(true); break; }
-    case "invSlot": { const h = S.party[invSel.m]; invSel.uid = h.eq[a.dataset.s] || null; sfx("blip"); renderInv(); break; }
+    case "invSlot": { const h = S.party[invSel.m], u = h.eq[a.dataset.s] || null;
+      if (u && invSel.uid === u && performance.now() - (invSel.t || 0) < 450){ invSel.t = 0; unequip(); break; }   // a second quick press takes it off
+      invSel.t = performance.now(); invSel.uid = u; sfx("blip"); renderInv(); break; }
     case "equip": equip(); break;
     case "unequip": unequip(); break;
     case "closeArt": $("#artWin").hidden = true; break;

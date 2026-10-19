@@ -3,7 +3,7 @@ import os
 here = os.path.dirname(os.path.abspath(__file__)); R = lambda f: open(os.path.join(here, f), encoding="utf-8").read()
 game = R("game.js"); mark = "/* ================= BOOT ================= */"
 assert mark in game
-game = game.replace(mark, R("world.js") + "\n" + R("walk.js") + "\n" + R("splash.js") + "\n" + R("net.js") + "\n" + mark)
+game = game.replace(mark, R("world.js") + "\n" + R("walk.js") + "\n" + R("regions.js") + "\n" + R("splash.js") + "\n" + R("net.js") + "\n" + mark)
 js = "\n".join([R(f) for f in ["common.js", "dice3d.js", "pixel.js", "audio.js"]] + [game])
 pub_js = R("p2p.js") + "\n" + js
 pub = R("page.html").replace("__CURSOR__", R("cursor.b64")).replace("<!--SCRIPTS-->",

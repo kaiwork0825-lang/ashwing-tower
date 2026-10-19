@@ -137,7 +137,9 @@ function guestRender(){
   if (!S.party || !S.party.length) return;
   guestBg(S.bg);
   Audio8.music(S.battle ? (S.battle.key === "drake" ? "boss" : "battle") : MUSIC[S.bg] || "ashen");
-  refreshStatus(); if (invOpen()) renderInv();
+  refreshStatus();
+  // re-draw the bag only when something in it changed, so a hover card is not torn down by every snapshot
+  if (invOpen()){ const ik = JSON.stringify([S.inv, S.party.map(h => [h.eq, h.hp, h.maxHp, h.ac]), S.gold, S.potions, S.luck, !!S.battle]); if (ik !== NET.gik){ NET.gik = ik; renderInv(); } } else NET.gik = "";
   const k = [S.enterSeq, S.mode, S.li, S.pick].join("|"), [pe, , pl] = NET.gk.split("|"), vj = JSON.stringify(vote);
   if (S.mode === "battle" && S.battle) renderBattle();
   else if (S.mode === "busy"){ if (k !== NET.gk) $("#choices").innerHTML = ""; }
@@ -222,6 +224,7 @@ function remoteStats(i, raw){
 
 /* ---------- dice over the network ---------- */
 async function throwDice(list, opts = {}){
+  if (window.__dbg && __dbg.fakeDice) return __dbg.fakeDice(list, opts);   // test hook
   if (!isHost() || !NET.room) return throwLocal(list, opts);
   const seat = opts.auto ? null : trayActor, drv = opts.auto ? NET.me : ownerPeer(seat), id = ++NET.rollId;
   NET.lastLabels = null; netView("roll", [id, list, opts, drv]); netFlush();
