@@ -528,6 +528,8 @@ const tray = window.__tray = new DiceTray(trayCv, {
   onImpact:s => sfx("clack", s),
   onShake:e => sfx("clack", 0.15 + e*0.35),
   onGrab:() => { $("#trayHint").hidden = true; sfx("shake"); },
+  onHot:() => sfx("magic"),                       // the dice are glowing hot
+  onHotThrow:() => sfx("fire"),
   onCancel:() => { const h = $("#trayHint"); h.textContent = "트레이 위에서 놓아야 던져져요"; h.hidden = false; },
   onPower:(s, z, over) => showPower(s, z, over),
   onThrow:(s, z) => { $("#trayHint").hidden = true; trayLabels.innerHTML = ""; document.querySelectorAll(".tray-throw").forEach(b => b.disabled = true); showPower(s, z, true, true); sfx(z.key === "over" ? "fire" : "swing"); },

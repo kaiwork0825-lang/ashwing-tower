@@ -251,7 +251,7 @@ const powerZone = s => POWER.zones.find(z => s < z.to);
 class DiceTray {
   constructor(canvas, opts={}){
     this.cv = canvas; this.opts = opts; this.dice = []; this.state = "idle"; this.lastOut = [];
-    this.gl = null; this.hand = [BOWL.OUT + 2.2, BOWL.HOLD_Y - 1.5, 3.2]; this.shakeE = 0; this.t = 0;
+    this.gl = null; this.hand = [BOWL.OUT + 2.2, BOWL.HOLD_Y - 1.5, 3.2]; this.shakeE = 0; this.t = 0; this.heat = 0; this.orb = 0; this.sparks = [];
     try { this.gl = canvas.getContext("webgl", {antialias:false, preserveDrawingBuffer:false, alpha:false}); } catch (e) {}
     if (this.gl) this._initGL();
     this._bindPointer();
@@ -424,7 +424,7 @@ class DiceTray {
   /* ----- rolling ----- */
   roll(specs, {auto=false} = {}){
     this.dice = specs.map((sp, i) => { const b = makeBody(sp.sides); b.scheme = sp.scheme || "bone"; b.held = true; b.i = i; b.ph = i/specs.length*Math.PI*2; b.pos = null; return b; });
-    this.hand = [BOWL.OUT + 2.3, BOWL.HOLD_Y - 1.6, 3.4]; this.state = "ready"; this.t = 0; this.nudges = 0; this.shakeE = 0; this.lastOut = [];
+    this.hand = [BOWL.OUT + 2.3, BOWL.HOLD_Y - 1.6, 3.4]; this.state = "ready"; this.t = 0; this.nudges = 0; this.shakeE = 0; this.lastOut = []; this.heat = 0; this.orb = 0; this.sparks = []; this.hotSaid = false;
     this._arrange(0, true);
     this._start();
     return new Promise(res => { this._resolve = res; if (auto) setTimeout(() => this.throwAuto(), 420); if (!this.gl) this._fallback(); });
@@ -432,11 +432,11 @@ class DiceTray {
   _arrange(dt, snap){
     const n = this.dice.length, E = this.shakeE, t = this.t;
     this.dice.forEach((b, i) => {
-      const a = b.ph + t*(1.4 + 10*E), r = (n > 1 ? 0.55 + n*0.1 : 0) + 0.45*E*Math.sin(t*9 + i*2.1);
+      const a = b.ph + this.orb, r = (n > 1 ? 0.55 + n*0.1 : 0) + 0.45*E*Math.sin(t*9 + i*2.1);
       const jit = this.state === "holding" ? E*0.7 : 0;
       const tgt = [this.hand[0] + Math.cos(a)*r + (Math.random()-0.5)*jit, this.hand[1] + (i%2)*0.45 + Math.sin(t*3 + i)*0.15 + (Math.random()-0.5)*jit, this.hand[2] + Math.sin(a)*r*0.8 + (Math.random()-0.5)*jit];
       if (snap || !b.pos) b.pos = tgt; else b.pos = V3.add(b.pos, V3.mul(V3.sub(tgt, b.pos), Math.min(1, dt*16)));
-      const spin = 1.6 + 26*E; if (!b.spinAx || Math.random() < E*0.25) b.spinAx = V3.norm([Math.random()-0.5, Math.random()-0.5, Math.random()-0.5]);
+      const spin = (1.6 + 26*E)*(1 + 1.8*this.heat); if (!b.spinAx || Math.random() < E*0.25) b.spinAx = V3.norm([Math.random()-0.5, Math.random()-0.5, Math.random()-0.5]);
       b.w = V3.mul(b.spinAx, spin);
     });
   }
@@ -451,6 +451,8 @@ class DiceTray {
     const s = Math.hypot(v[0], v[2]);
     this._arrange(0, true); // dice leave from the hand, even on a very quick grab-and-flick
     releaseBodies(this.dice, this.hand, v);
+    if (this.heat > 0.35){ for (let k=0;k<Math.round(40*this.heat);k++){ const a = Math.random()*Math.PI*2, sp = 1.5 + Math.random()*3.5*this.heat;
+      this._spark(this.hand, [Math.cos(a)*sp, 1 + Math.random()*3, Math.sin(a)*sp], 0.5 + Math.random()*0.5); } this.opts.onHotThrow && this.opts.onHotThrow(this.heat); }
     this.state = "rolling"; this.t = 0; this.lastPower = s;
     this.opts.onThrow && this.opts.onThrow(s, powerZone(s));
   }
@@ -485,13 +487,13 @@ class DiceTray {
   setMark(i, m){ const b = this.dice[i]; if (b) b.mark = m; }
   /* ----- online: stream this tray's pose, or replay someone else's ----- */
   pose(){ const r = v => Math.round(v*100)/100, rq = v => Math.round(v*1000)/1000;
-    return {st:this.state, h:this.hand.map(r), d:this.dice.map(b => b.pos ? [r(b.pos[0]), r(b.pos[1]), r(b.pos[2]), rq(b.q[0]), rq(b.q[1]), rq(b.q[2]), rq(b.q[3]), b.out ? 1 : 0] : 0)}; }
+    return {st:this.state, ht:Math.round(this.heat*100)/100, h:this.hand.map(r), d:this.dice.map(b => b.pos ? [r(b.pos[0]), r(b.pos[1]), r(b.pos[2]), rq(b.q[0]), rq(b.q[1]), rq(b.q[2]), rq(b.q[3]), b.out ? 1 : 0] : 0)}; }
   puppet(specs){
     this.dice = specs.map((sp, i) => { const b = makeBody(sp.sides); b.scheme = sp.scheme || "bone"; b.i = i; b.pos = null; return b; });
-    this.state = "puppet"; this.pst = "ready"; this.phand = [BOWL.OUT + 2.3, BOWL.HOLD_Y - 1.6, 3.4]; this.hand = this.phand.slice(); this.lastOut = []; this._resolve = null; this._start(); }
+    this.state = "puppet"; this.pst = "ready"; this.heat = 0; this.sparks = []; this.phand = [BOWL.OUT + 2.3, BOWL.HOLD_Y - 1.6, 3.4]; this.hand = this.phand.slice(); this.lastOut = []; this._resolve = null; this._start(); }
   setPose(p, snap){
     if (this.state !== "puppet" || !p || !Array.isArray(p.d)) return;
-    this.pst = p.st; if (Array.isArray(p.h) && p.h.length === 3) this.phand = p.h.map(Number);
+    this.pst = p.st; if (Array.isArray(p.h) && p.h.length === 3) this.phand = p.h.map(Number); if (Number.isFinite(p.ht)) this.heat = Math.max(0, Math.min(1, p.ht));
     const tn = performance.now();
     p.d.forEach((d, i) => { const b = this.dice[i]; if (!b || !Array.isArray(d) || d.length < 7) return;
       const tp = d.slice(0, 3).map(Number), tq = d.slice(3, 7).map(Number); if (![...tp, ...tq].every(Number.isFinite)) return;
@@ -521,6 +523,11 @@ class DiceTray {
       this.shakeE *= Math.exp(-dt*(this.state === "holding" ? 2.2 : 6));
       if (this.state === "ready"){ this.hand = V3.add(this.hand, V3.mul(V3.sub([BOWL.OUT + 2.3, BOWL.HOLD_Y - 1.6, 3.4], this.hand), Math.min(1, dt*5))); this.liveSpeed = 0; }
       else { const last = this.hist[this.hist.length-1]; if (last && now - last.t > 60){ this.liveSpeed = (this.liveSpeed||0)*Math.exp(-dt*10); this.opts.onPower && this.opts.onPower(this.liveSpeed, powerZone(this.liveSpeed), octR(this.hand[0], this.hand[2])[0] < BOWL.R); } }
+      if (this.state === "holding"){ const drive = Math.max(0, this.shakeE - 0.3);
+        if (drive > 0) this.heat = Math.min(1, this.heat + dt*drive*(0.32 + 1.25*this.heat)); else this.heat = Math.max(0, this.heat - dt*0.3);
+        if (this.heat > 0.8 && !this.hotSaid){ this.hotSaid = true; this.opts.onHot && this.opts.onHot(); } }
+      else this.heat = Math.max(0, this.heat - dt*1.5);
+      this.orb += dt*(1.4 + 10*this.shakeE)*(1 + 2.2*this.heat);
       this._arrange(dt);
       for (const b of this.dice) integrateQ(b, b.w, dt);
       if (this.state === "holding"){ this.rattle = (this.rattle || 0) - dt; if (this.shakeE > 0.06 && this.rattle < 0){ this.rattle = 0.17 - 0.12*Math.min(1, this.shakeE); this.opts.onShake && this.opts.onShake(Math.min(1, this.shakeE)); } }
@@ -531,6 +538,15 @@ class DiceTray {
         const q = b.tq, sg = q[0]*b.q[0] + q[1]*b.q[1] + q[2]*b.q[2] + q[3]*b.q[3] < 0 ? -1 : 1;
         b.q = Q.norm(b.q.map((v, j) => v + (sg*q[j] - v)*k)); }
     }
+    if (this.state === "rolling") this.heat = Math.max(0, this.heat - dt*0.45);
+    // embers: hot dice shed sparks while shaken and while they tumble
+    { const hs = this.state === "puppet" ? this.pst : this.state;
+      if (this.heat > 0.18 && (hs === "holding" || hs === "rolling")){
+        this.sparkAcc = (this.sparkAcc || 0) + dt*this.heat*this.heat*240;
+        while (this.sparkAcc >= 1){ this.sparkAcc--; const b = this.dice[Math.floor(Math.random()*this.dice.length)]; if (!b || !b.pos || b.out) continue;
+          this._spark(V3.add(b.pos, [(Math.random()-0.5)*0.7, (Math.random()-0.5)*0.5, (Math.random()-0.5)*0.7]), [(Math.random()-0.5)*2.2, 1.8 + Math.random()*3.4*this.heat, (Math.random()-0.5)*2.2], 0.35 + Math.random()*0.5); } }
+      this.sparks = this.sparks.filter(sp => (sp.life -= dt) > 0);
+      for (const sp of this.sparks){ sp.p = V3.add(sp.p, V3.mul(sp.v, dt)); sp.v = [sp.v[0]*(1 - dt*1.5), sp.v[1] - dt*2.2, sp.v[2]*(1 - dt*1.5)]; } }
     if (this.state === "rolling" && this.gl){
       this.acc += dt; let lastImp = 0;
       while (this.acc >= PHYS.dt){
@@ -543,6 +559,7 @@ class DiceTray {
     this._draw(now);
     requestAnimationFrame(this._loop);
   }
+  _spark(p, v, life){ if (this.sparks.length < 260) this.sparks.push({p:p.slice(), v, life, max:life, c:Math.floor(Math.random()*4)}); }
   _draw(now = performance.now()){
     const gl = this.gl, cv = this.cv;
     if (!gl){ const c = cv.getContext("2d"); if (!c) return; c.fillStyle = "#121a29"; c.fillRect(0,0,cv.width,cv.height);
@@ -562,7 +579,7 @@ class DiceTray {
       gl.uniform3fv(u.uTint, o.tint || [1,1,1]); gl.uniform1f(u.uEmis, o.emis || 0); gl.uniform3fv(u.uColor, o.color || [0,0,0]); };
     gl.disable(gl.CULL_FACE);
     bind(this.table); gl.bindTexture(gl.TEXTURE_2D, this.table.tex); set(0, I); gl.drawArrays(gl.TRIANGLES, 0, this.table.n);
-    bind(this.bowl); gl.bindTexture(gl.TEXTURE_2D, this.bowlTex); set(0, I, {emis:0.06}); gl.drawArrays(gl.TRIANGLES, 0, this.bowl.n);
+    bind(this.bowl); gl.bindTexture(gl.TEXTURE_2D, this.bowlTex); set(0, I, {emis:0.06 + 0.14*this.heat}); gl.drawArrays(gl.TRIANGLES, 0, this.bowl.n);
     bind(this.lip); set(0, I, {emis:0.14}); gl.drawArrays(gl.TRIANGLES, 0, this.lip.n);
     bind(this.wax); gl.bindTexture(gl.TEXTURE_2D, this.wax.tex); set(0, I); gl.drawArrays(gl.TRIANGLES, 0, this.wax.n);
     const fl = []; this.candleSpots.forEach(([x,z,h], k) => fl.push(...this.flameBox(x, z, h, 0.5 + 0.5*Math.sin(now/90 + k*1.7))));
@@ -570,11 +587,11 @@ class DiceTray {
     // drop marker under the hand: gold over the bowl, red over the table
     const hs = this.state === "puppet" ? this.pst : this.state;
     if (hs === "ready" || hs === "holding"){
-      const hx = this.hand[0], hz = this.hand[2], S = surfaceAt(hx, hz), inB = S.r < BOWL.R, rr = 1.25 + 0.1*Math.sin(now/160), y = S.h + 0.06, ring = [];
+      const hx = this.hand[0], hz = this.hand[2], S = surfaceAt(hx, hz), inB = S.r < BOWL.R, rr = 1.25 + 0.1*Math.sin(now/160) + 0.35*this.heat*(0.7 + 0.3*Math.sin(now/60)), y = S.h + 0.06, ring = [];
       for (let k=0;k<8;k++){ const a0 = (k+0.5)*Math.PI/4, a1 = (k+1.5)*Math.PI/4, R0 = rr, R1 = rr*0.78;
         const p = (a, r) => [hx + Math.cos(a)*r, y + (inB ? surfaceAt(hx + Math.cos(a)*r, hz + Math.sin(a)*r).h - S.h : 0), hz + Math.sin(a)*r];
         for (const q of [p(a0,R0), p(a1,R0), p(a1,R1), p(a0,R0), p(a1,R1), p(a0,R1)]) ring.push(q[0], q[1], q[2], 0,1,0, 0,0); }
-      const rb = this._buf(ring); bind(rb); gl.depthMask(false); set(2, I, {color: inB ? [0.98,0.73,0.33] : [0.88,0.29,0.24]}); gl.drawArrays(gl.TRIANGLES, 0, rb.n); gl.depthMask(true); gl.deleteBuffer(rb.b);
+      const rb = this._buf(ring); bind(rb); gl.depthMask(false); set(2, I, {color: inB ? [0.98, 0.73 + 0.25*this.heat, 0.33 + 0.5*this.heat] : [0.88,0.29,0.24]}); gl.drawArrays(gl.TRIANGLES, 0, rb.n); gl.depthMask(true); gl.deleteBuffer(rb.b);
       this.overBowl = inB;
     }
     // dice: shadows (dithered, cast onto the bowl surface under each die), outline, body
@@ -582,14 +599,32 @@ class DiceTray {
     gl.depthMask(false);
     this.dice.forEach((b,i) => { if (!b.pos || b.frozen && b.out) return; const m = meshes[i]; bind(m); const S = surfaceAt(b.pos[0], b.pos[2]);
       set(2, M4.fromQT(b.q, b.pos), {shadow:1, sy:S.h, color:[0.027,0.035,0.06]}); gl.drawArrays(gl.TRIANGLES, 0, m.n); });
+    if (this.heat > 0.15){ const H = this.heat, wob = 0.08*Math.sin(now/50);
+      [[1.05 + 0.5*H + wob, [0.88,0.36,0.14]], [0.75 + 0.3*H + wob, [0.98,0.6,0.24]], [0.45 + 0.15*H, [1,0.84,0.47]]].forEach(([R, col], ring) => { if (ring === 2 && H < 0.6) return;
+        const tri = []; this.dice.forEach(b => { if (!b.pos || b.out) return; const c = b.pos, r = R*Math.min(1, H*1.4);
+          for (let k=0;k<12;k++){ const a0 = k/12*Math.PI*2, a1 = (k+1)/12*Math.PI*2;
+            tri.push(c[0], c[1], c[2], 0,1,0, 0,0, c[0] + Math.cos(a0)*r, c[1] + Math.sin(a0)*r, c[2], 0,1,0, 0,0, c[0] + Math.cos(a1)*r, c[1] + Math.sin(a1)*r, c[2], 0,1,0, 0,0); } });
+        if (!tri.length) return; const hb = this._buf(tri); bind(hb); set(2, I, {color:col}); gl.drawArrays(gl.TRIANGLES, 0, hb.n); gl.deleteBuffer(hb.b); }); }
     gl.depthMask(true); gl.enable(gl.CULL_FACE);
     this.dice.forEach((b,i) => { if (!b.pos) return;
       const m = meshes[i], M = M4.fromQT(b.q, b.pos); bind(m);
-      gl.cullFace(gl.FRONT); set(1, M, {grow:1.09, color:b.mark === "crit" ? [1,0.84,0.47] : [0.027,0.035,0.06]}); gl.drawArrays(gl.TRIANGLES, 0, m.n);
+      const h = b.out ? 0 : this.heat, flick = 0.5 + 0.5*Math.sin(now/45 + i*1.3);
+      const hotLine = h < 0.3 ? null : h < 0.75 ? [0.69 + 0.2*flick, 0.18 + 0.1*flick, 0.12] : [1, 0.7 + 0.2*flick, 0.3 + 0.2*flick];
+      gl.cullFace(gl.FRONT); set(1, M, {grow:1.09 + 0.05*h, color:b.mark === "crit" ? [1,0.84,0.47] : hotLine || [0.027,0.035,0.06]}); gl.drawArrays(gl.TRIANGLES, 0, m.n);
       gl.cullFace(gl.BACK); gl.bindTexture(gl.TEXTURE_2D, m.tex);
       const pulse = 0.5 + 0.5*Math.sin(now/140);
-      set(0, M, {tint:b.mark === "drop" || b.out ? [0.45,0.5,0.6] : [1,1,1], emis:b.mark === "crit" ? 0.25 + 0.35*pulse : b.mark === "keep" ? 0.12 : 0}); gl.drawArrays(gl.TRIANGLES, 0, m.n);
+      set(0, M, {tint:b.mark === "drop" || b.out ? [0.45,0.5,0.6] : [1 + 0.5*h, 1 + 0.15*h, 1 - 0.45*h], emis:(b.mark === "crit" ? 0.25 + 0.35*pulse : b.mark === "keep" ? 0.12 : 0) + h*(0.55 + 0.35*flick)}); gl.drawArrays(gl.TRIANGLES, 0, m.n);
     });
     gl.disable(gl.CULL_FACE);
+    // sparks: little diamonds, white-hot to deep orange, drawn over everything
+    if (this.sparks.length){
+      const COLS = [[1,0.94,0.69],[1,0.84,0.47],[0.98,0.6,0.24],[0.88,0.36,0.14]], by = [[],[],[],[]];
+      for (const sp of this.sparks){ const f = sp.life/sp.max, s = 0.05 + 0.11*f, p = sp.p, c = Math.min(3, sp.c + (f < 0.4 ? 1 : 0)), L = by[c];
+        const v = [[p[0]+s,p[1],p[2]], [p[0],p[1]+s*1.4,p[2]], [p[0]-s,p[1],p[2]], [p[0],p[1]-s*1.4,p[2]]];
+        for (const q of [v[0], v[1], v[2], v[0], v[2], v[3]]) L.push(q[0], q[1], q[2], 0,1,0, 0,0); }
+      gl.disable(gl.DEPTH_TEST);
+      by.forEach((L, c) => { if (!L.length) return; const sb = this._buf(L); bind(sb); set(1, I, {color:COLS[c]}); gl.drawArrays(gl.TRIANGLES, 0, sb.n); gl.deleteBuffer(sb.b); });
+      gl.enable(gl.DEPTH_TEST);
+    }
   }
 }
